@@ -1,0 +1,14 @@
+# ビルドの出力
+bin/
+obj/
+
+# 実行版（依頼者の設定・Twitch のログイン・PresentMon・WebView2 のデータが入っている）
+publish/
+
+# 配布用 zip と古い exe
+dist/
+old/
+
+# エディタ
+.vs/
+*.user

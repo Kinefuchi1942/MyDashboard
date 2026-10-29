@@ -1,0 +1,251 @@
+<UserControl x:Class="MyDashboard.Views.ClassicView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:MyDashboard.Controls">
+    <!-- 標準レイアウト：情報量重視のパネル型 -->
+    <Grid Width="1920" Height="1080">
+        <Grid Margin="28">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="64"/>
+                <RowDefinition Height="14"/>
+                <RowDefinition Height="546"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ============================== ヘッダー -->
+            <Grid Grid.ColumnSpan="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse x:Name="LiveDot" Width="14" Height="14" Fill="{StaticResource Dim}" Margin="4,4,16,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="GameTitle" Text="ゲームの描画を待っています" FontFamily="{StaticResource UiFont}"
+                               FontSize="30" FontWeight="SemiBold" Foreground="{StaticResource Text}" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="Notice" Margin="28,4,0,0" FontFamily="{StaticResource UiFont}" FontSize="19"
+                               Foreground="{StaticResource Warn}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="DateText" FontFamily="{StaticResource UiFont}" FontSize="20"
+                               Foreground="{StaticResource Dim}" VerticalAlignment="Bottom" Margin="0,0,18,8"/>
+                    <TextBlock x:Name="ClockText" Text="00:00" FontFamily="{StaticResource NumFont}" FontStretch="SemiCondensed"
+                               FontWeight="SemiBold" FontSize="52" Foreground="{StaticResource Text}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ============================== CPU（主役） -->
+            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource PanelBorder}">
+                <Grid>
+                    <c:HistoryChart x:Name="CpuChart" Stroke="{StaticResource CpuColor}" Max="100"
+                                    Height="230" VerticalAlignment="Bottom"/>
+                    <Grid Margin="32,26,32,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Width="6" Height="26" RadiusX="2" RadiusY="2" Fill="{StaticResource Cpu}" Margin="0,2,12,0"/>
+                                <TextBlock Text="CPU" Style="{StaticResource Heading}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="CpuName" Style="{StaticResource Sub}" Margin="18,2,0,0" Text="—"/>
+                            <StackPanel Orientation="Horizontal" Margin="-8,0,0,0">
+                                <TextBlock x:Name="CpuLoad" Style="{StaticResource Hero}" Text="--"/>
+                                <TextBlock Text="%" Style="{StaticResource HeroUnit}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="0,4,0,0">
+                            <TextBlock Text="温度" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="CpuTemp" Style="{StaticResource StatValue}" Text="--"/>
+                            <TextBlock Text="平均クロック" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="CpuClock" Style="{StaticResource StatValue}" Text="--"/>
+                            <TextBlock Text="消費電力" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="CpuPower" Style="{StaticResource StatValue}" Text="--"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- ============================== GPU（主役） -->
+            <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource PanelBorder}">
+                <Grid>
+                    <c:HistoryChart x:Name="GpuChart" Stroke="{StaticResource GpuColor}" Max="100"
+                                    Height="230" VerticalAlignment="Bottom"/>
+                    <Grid Margin="32,26,32,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Width="6" Height="26" RadiusX="2" RadiusY="2" Fill="{StaticResource Gpu}" Margin="0,2,12,0"/>
+                                <TextBlock Text="GPU" Style="{StaticResource Heading}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="GpuName" Style="{StaticResource Sub}" Margin="18,2,0,0" Text="—"/>
+                            <StackPanel Orientation="Horizontal" Margin="-8,0,0,0">
+                                <TextBlock x:Name="GpuLoad" Style="{StaticResource Hero}" Text="--"/>
+                                <TextBlock Text="%" Style="{StaticResource HeroUnit}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="0,4,0,0">
+                            <TextBlock Text="温度" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="GpuTemp" Style="{StaticResource StatValue}" Text="--"/>
+                            <TextBlock Text="コアクロック" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="GpuClock" Style="{StaticResource StatValue}" Text="--"/>
+                            <TextBlock Text="消費電力" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="GpuPower" Style="{StaticResource StatValue}" Text="--"/>
+                            <TextBlock Text="ファン" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="GpuFan" Style="{StaticResource StatValue}" Text="--"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- ============================== FPS（主役） -->
+            <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource PanelBorder}">
+                <Grid>
+                    <c:HistoryChart x:Name="FpsChart" Stroke="{StaticResource FpsColor}" Max="0" FillOpacity="0.16"
+                                    Height="230" VerticalAlignment="Bottom"/>
+                    <TextBlock x:Name="FpsScale" FontFamily="{StaticResource NumFont}" FontSize="16" Foreground="{StaticResource Dim}"
+                               HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,14,206"/>
+                    <Grid Margin="32,26,32,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Width="6" Height="26" RadiusX="2" RadiusY="2" Fill="{StaticResource Text}" Margin="0,2,12,0"/>
+                                <TextBlock Text="FPS" Style="{StaticResource Heading}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="FpsApp" Style="{StaticResource Sub}" Margin="18,2,0,0" Text="—"/>
+                            <TextBlock x:Name="FpsValue" Style="{StaticResource Hero}" Text="--" Margin="-8,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="0,4,0,0">
+                            <TextBlock Text="1% Low" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="FpsLow" Style="{StaticResource StatValue}" Text="--"/>
+                            <TextBlock Text="フレーム時間" Style="{StaticResource StatLabel}"/>
+                            <TextBlock x:Name="FpsFrameTime" Style="{StaticResource StatValue}" Text="--"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock x:Name="FpsHint" Margin="32,0,32,32" VerticalAlignment="Bottom" TextWrapping="Wrap"
+                               FontFamily="{StaticResource UiFont}" FontSize="20" Foreground="{StaticResource Dim}"/>
+                </Grid>
+            </Border>
+
+            <!-- ============================== CPU スレッド別 -->
+            <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource PanelBorder}">
+                <Grid Margin="32,24,32,28">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="スレッド別の負荷" FontFamily="{StaticResource UiFont}" FontSize="24" FontWeight="SemiBold"
+                                   Foreground="{StaticResource Text}"/>
+                        <TextBlock x:Name="ThreadInfo" Style="{StaticResource Sub}" Margin="16,5,0,0"/>
+                    </StackPanel>
+                    <c:CoreBars x:Name="Threads" Grid.Row="1" Margin="0,20,0,0"/>
+                </Grid>
+            </Border>
+
+            <!-- ============================== メモリ / VRAM -->
+            <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource PanelBorder}">
+                <Grid Margin="32,24,32,26">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="22"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <TextBlock Text="メモリ" FontFamily="{StaticResource UiFont}" FontSize="24" FontWeight="SemiBold"
+                                       Foreground="{StaticResource Text}" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <TextBlock x:Name="MemValue" Style="{StaticResource MidValue}" Text="--"/>
+                                <TextBlock x:Name="MemPct" Style="{StaticResource MidValue}" Foreground="{StaticResource Mem}" Margin="18,0,0,0" MinWidth="80" TextAlignment="Right"/>
+                            </StackPanel>
+                        </Grid>
+                        <c:BarMeter x:Name="MemBar" Grid.Row="1" Height="10" Fill="{StaticResource Mem}" Margin="0,8,0,8"/>
+                        <c:HistoryChart x:Name="MemChart" Grid.Row="2" Stroke="{StaticResource MemColor}" Max="100"
+                                        LineThickness="2" FillOpacity="0.22" ShowGrid="False"/>
+                    </Grid>
+
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <TextBlock Text="VRAM" FontFamily="{StaticResource UiFont}" FontSize="24" FontWeight="SemiBold"
+                                       Foreground="{StaticResource Text}" VerticalAlignment="Bottom" Margin="0,0,0,4"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <TextBlock x:Name="VramValue" Style="{StaticResource MidValue}" Text="--"/>
+                                <TextBlock x:Name="VramPct" Style="{StaticResource MidValue}" Foreground="{StaticResource Gpu}" Margin="18,0,0,0" MinWidth="80" TextAlignment="Right"/>
+                            </StackPanel>
+                        </Grid>
+                        <c:BarMeter x:Name="VramBar" Grid.Row="1" Height="10" Fill="{StaticResource Gpu}" Margin="0,8,0,8"/>
+                        <c:HistoryChart x:Name="VramChart" Grid.Row="2" Stroke="{StaticResource GpuColor}" Max="100"
+                                        LineThickness="2" FillOpacity="0.22" ShowGrid="False"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- ============================== ネットワーク / ディスク -->
+            <Grid Grid.Row="4" Grid.Column="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="150"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Style="{StaticResource PanelBorder}">
+                    <Grid>
+                        <c:HistoryChart x:Name="NetChart" Stroke="{StaticResource NetColor}" SecondStroke="{StaticResource NetUpColor}"
+                                        Max="0" LineThickness="2" FillOpacity="0.25" Height="80" VerticalAlignment="Bottom"/>
+                        <Grid Margin="32,20,32,0">
+                            <TextBlock Text="ネットワーク" FontFamily="{StaticResource UiFont}" FontSize="24" FontWeight="SemiBold"
+                                       Foreground="{StaticResource Text}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" ToolTip="↓ 受信 / ↑ 送信">
+                                <TextBlock Text="↓" Style="{StaticResource MidValue}" FontSize="28" Foreground="{StaticResource Net}" Margin="0,2,6,0"/>
+                                <TextBlock x:Name="NetDown" Style="{StaticResource MidValue}" FontSize="30" Foreground="{StaticResource Net}" Text="--" MinWidth="130" TextAlignment="Right"/>
+                                <TextBlock Text="↑" Style="{StaticResource MidValue}" FontSize="28" Foreground="{StaticResource Dim}" Margin="22,2,6,0"/>
+                                <TextBlock x:Name="NetUp" Style="{StaticResource MidValue}" FontSize="30" Text="--" MinWidth="120" TextAlignment="Right"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2" Style="{StaticResource PanelBorder}">
+                    <Grid Margin="32,18,32,14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <TextBlock Text="ディスク" FontFamily="{StaticResource UiFont}" FontSize="24" FontWeight="SemiBold"
+                                       Foreground="{StaticResource Text}"/>
+                            <TextBlock Text="読み込み / 書き込み・使用率" Style="{StaticResource Sub}" HorizontalAlignment="Right" Margin="0,6,0,0"/>
+                        </Grid>
+                        <UniformGrid x:Name="DiskList" Grid.Row="1" Columns="1" Margin="0,8,0,0"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,115 @@
+<Application x:Class="MyDashboard.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnMainWindowClose">
+    <Application.Resources>
+        <!-- 下地：わずかに青みのある石板色。夜の暗い部屋でもまぶしくない -->
+        <Color x:Key="GroundColor">#0F141B</Color>
+        <Color x:Key="PanelColor">#161D26</Color>
+        <Color x:Key="RuleColor">#243040</Color>
+        <Color x:Key="TextColor">#E8ECF2</Color>
+        <Color x:Key="DimColor">#8592A5</Color>
+
+        <!-- 資源ごとの色。周辺視野でも「どこが動いたか」が分かるよう寒色系で揃える -->
+        <Color x:Key="CpuColor">#5CC8D7</Color>
+        <Color x:Key="GpuColor">#8E9CFF</Color>
+        <Color x:Key="FpsColor">#E8ECF2</Color>
+        <Color x:Key="MemColor">#6FD3A8</Color>
+        <Color x:Key="DiskColor">#C9A7F0</Color>
+        <Color x:Key="NetColor">#7FB2F0</Color>
+        <Color x:Key="NetUpColor">#4E6E97</Color>
+
+        <!-- 状態色：注意＝琥珀、危険＝赤 -->
+        <Color x:Key="WarnColor">#FFB547</Color>
+        <Color x:Key="CritColor">#FF5D5D</Color>
+
+        <SolidColorBrush x:Key="Ground" Color="{StaticResource GroundColor}"/>
+        <SolidColorBrush x:Key="Panel" Color="{StaticResource PanelColor}"/>
+        <SolidColorBrush x:Key="Rule" Color="{StaticResource RuleColor}"/>
+        <SolidColorBrush x:Key="Text" Color="{StaticResource TextColor}"/>
+        <SolidColorBrush x:Key="Dim" Color="{StaticResource DimColor}"/>
+        <SolidColorBrush x:Key="Cpu" Color="{StaticResource CpuColor}"/>
+        <SolidColorBrush x:Key="Gpu" Color="{StaticResource GpuColor}"/>
+        <SolidColorBrush x:Key="Mem" Color="{StaticResource MemColor}"/>
+        <SolidColorBrush x:Key="Disk" Color="{StaticResource DiskColor}"/>
+        <SolidColorBrush x:Key="Net" Color="{StaticResource NetColor}"/>
+        <SolidColorBrush x:Key="NetUp" Color="{StaticResource NetUpColor}"/>
+        <SolidColorBrush x:Key="Warn" Color="{StaticResource WarnColor}"/>
+        <SolidColorBrush x:Key="Crit" Color="{StaticResource CritColor}"/>
+
+        <!-- 数字は Windows 標準の Bahnschrift（DIN系・計器的）。日本語は Yu Gothic UI -->
+        <FontFamily x:Key="NumFont">Bahnschrift, Segoe UI</FontFamily>
+        <FontFamily x:Key="UiFont">Yu Gothic UI, Meiryo UI, Segoe UI</FontFamily>
+
+        <Style x:Key="PanelBorder" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource Panel}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="ClipToBounds" Value="True"/>
+        </Style>
+
+        <!-- パネル見出し：資源名 -->
+        <Style x:Key="Heading" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource NumFont}"/>
+            <Setter Property="FontStretch" Value="SemiCondensed"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+        </Style>
+
+        <!-- 見出し横の機種名など -->
+        <Style x:Key="Sub" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="Foreground" Value="{StaticResource Dim}"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+
+        <!-- 主役の巨大数字 -->
+        <Style x:Key="Hero" TargetType="TextBlock">
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
+            <Setter Property="FontFamily" Value="{StaticResource NumFont}"/>
+            <Setter Property="FontStretch" Value="Condensed"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="210"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
+        </Style>
+
+        <Style x:Key="HeroUnit" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource NumFont}"/>
+            <Setter Property="FontStretch" Value="Condensed"/>
+            <Setter Property="FontSize" Value="64"/>
+            <Setter Property="Foreground" Value="{StaticResource Dim}"/>
+            <Setter Property="Margin" Value="8,0,0,34"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+        </Style>
+
+        <!-- 副数値（温度・クロックなど） -->
+        <Style x:Key="StatLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="{StaticResource Dim}"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+        <Style x:Key="StatValue" TargetType="TextBlock">
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
+            <Setter Property="FontFamily" Value="{StaticResource NumFont}"/>
+            <Setter Property="FontStretch" Value="SemiCondensed"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="40"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,-4,0,8"/>
+        </Style>
+
+        <!-- 下段の中くらいの数値 -->
+        <Style x:Key="MidValue" TargetType="TextBlock">
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
+            <Setter Property="FontFamily" Value="{StaticResource NumFont}"/>
+            <Setter Property="FontStretch" Value="SemiCondensed"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="34"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+        </Style>
+    </Application.Resources>
+</Application>

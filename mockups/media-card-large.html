@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;background:#070A12;font-family:"Yu Gothic UI",sans-serif;color:#F4F7FB;position:relative}
+.num{font-family:Bahnschrift,sans-serif}
+.glow{position:absolute;border-radius:50%;filter:blur(10px)}
+.card{position:absolute;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:24px}
+.old{position:absolute;left:1064px;top:150px;width:760px;height:702px;border:3px dashed rgba(255,93,93,.75);border-radius:24px;pointer-events:none}
+.oldlabel{position:absolute;left:1076px;top:858px;color:#FF5D5D;font-size:20px}
+.t70{color:rgba(244,247,251,.7)}.t60{color:rgba(244,247,251,.6)}.t50{color:rgba(244,247,251,.5)}.t40{color:rgba(244,247,251,.4)}
+.seg{display:inline-flex;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:3px}
+.seg span{padding:4px 16px 5px;border-radius:15px;font-size:17px}
+.chip{display:inline-flex;align-items:center;gap:10px;height:58px;padding:0 18px 0 9px;border:1px solid rgba(255,255,255,.12);border-radius:29px;margin-right:10px;font-size:19px}
+.av{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.18)}
+.bar{position:absolute;left:96px;right:96px;bottom:84px;height:120px;display:grid;grid-template-columns:repeat(5,1fr)}
+.bar div{padding:26px;border-left:1px solid rgba(255,255,255,.12)}.bar div:first-child{border:0}
+.btn{width:42px;height:42px;border-radius:21px;border:1.5px solid rgba(244,247,251,.4);display:inline-flex;align-items:center;justify-content:center;font-size:22px}
+</style></head><body>
+<div class="glow" style="left:-380px;top:300px;width:1300px;height:1100px;background:radial-gradient(rgba(29,143,166,.4),transparent 70%)"></div>
+<div class="glow" style="left:680px;top:-420px;width:1550px;height:1350px;background:radial-gradient(rgba(106,75,216,.4),transparent 70%)"></div>
+
+<!-- 時計・天気・Spotify（現状のまま） -->
+<div class="num" style="position:absolute;left:90px;top:150px;font-size:300px;font-weight:300;line-height:1">21:48</div>
+<div class="t80" style="position:absolute;left:112px;top:470px;font-size:34px;color:rgba(244,247,251,.8)">10月27日（火）</div>
+<div class="card" style="left:96px;top:556px;width:860px;height:200px;padding:22px 30px;display:flex;align-items:center;gap:30px">
+  <div style="font-size:80px">☁</div><div><div class="num" style="font-size:66px;font-weight:300">16°</div><div class="t70" style="font-size:20px">くもり　19° / 12°</div></div>
+  <div style="flex:1;display:flex;justify-content:space-around;border-left:1px solid rgba(255,255,255,.12);padding-left:24px" class="t60">
+   <span>22時</span><span>1時</span><span>4時</span><span>7時</span><span>10時</span><span>13時</span></div>
+</div>
+<div class="card" style="left:96px;top:726px;width:860px;height:126px;padding:15px;display:flex;gap:22px;align-items:center">
+  <div style="width:96px;height:96px;border-radius:12px;background:rgba(255,255,255,.15)"></div>
+  <div><div class="t60" style="font-size:19px">● Spotify</div><div style="font-size:29px;font-weight:600">曲名 <span class="t70" style="font-size:20px;font-weight:400">アーティスト</span></div></div>
+</div>
+
+<!-- メディアカード（新しい大きさ） -->
+<div class="card" id="media" style="left:980px;top:48px;width:844px;height:804px;padding:%PAD%">
+%BODY%
+</div>
+<div class="old"></div><div class="oldlabel">赤い点線＝今の大きさ（幅760×高さ702）　新：幅844×高さ804</div>
+
+<div class="card bar">
+  <div><div class="t60" style="font-size:18px">CPU</div><div class="num" style="font-size:34px;color:#7FE3F0">12%</div></div>
+  <div><div class="t60" style="font-size:18px">GPU</div><div class="num" style="font-size:34px;color:#B7A6FF">8%</div></div>
+  <div><div class="t60" style="font-size:18px">メモリ</div><div class="num" style="font-size:34px">41%</div></div>
+  <div><div class="t60" style="font-size:18px">VRAM</div><div class="num" style="font-size:34px">2.1 GB</div></div>
+  <div><div class="t60" style="font-size:18px">ネット</div><div class="num" style="font-size:34px">1.2 MB/s</div></div>
+</div>
+</body></html>

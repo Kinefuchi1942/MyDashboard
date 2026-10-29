@@ -1,0 +1,1022 @@
+<Window x:Class="MyDashboard.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ダッシュボードの設定"
+        Icon="pack://application:,,,/app.ico"
+        Width="1100" Height="760"
+        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource Ground}" BorderBrush="#2A3646" BorderThickness="1"
+        FontFamily="{StaticResource UiFont}" FontSize="15" Foreground="{StaticResource Text}"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="Accent" Color="#5CC8D7"/>
+        <SolidColorBrush x:Key="AccentSoft" Color="#1F5CC8D7"/>
+        <SolidColorBrush x:Key="Field" Color="#0B1016"/>
+        <SolidColorBrush x:Key="Off" Color="#2B3646"/>
+        <SolidColorBrush x:Key="Soft" Color="#C6CFDB"/>
+
+        <!-- 左の一覧 -->
+        <Style x:Key="NavItem" TargetType="RadioButton">
+            <Setter Property="GroupName" Value="Nav"/>
+            <Setter Property="Foreground" Value="{StaticResource Dim}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bg" Background="Transparent" CornerRadius="8" Padding="16,10">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="Dot" Width="8" Height="8" Fill="{StaticResource Dim}" Opacity="0.6"
+                                         VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#1C2633"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#223042"/>
+                                <Setter TargetName="Dot" Property="Fill" Value="{StaticResource Accent}"/>
+                                <Setter TargetName="Dot" Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="{StaticResource Text}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 選択肢のチップ（色テーマ・モニターなど） -->
+        <Style x:Key="Chip" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{StaticResource Soft}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Background="{StaticResource Panel}" BorderBrush="{StaticResource Rule}"
+                                BorderThickness="1" CornerRadius="8" Padding="14,7">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#3A4A5E"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentSoft}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Text}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- レイアウトの見本カード -->
+        <Style x:Key="LayoutCard" TargetType="RadioButton" BasedOn="{StaticResource Chip}">
+            <Setter Property="Margin" Value="0,0,14,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Width="170" Background="{StaticResource Panel}" BorderBrush="{StaticResource Rule}"
+                                BorderThickness="1" CornerRadius="10" Padding="10">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#3A4A5E"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#1A5CC8D7"/>
+                                <Setter Property="Foreground" Value="{StaticResource Text}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- オン／オフのスイッチ -->
+        <Style x:Key="Switch" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="Track" Width="52" Height="28" CornerRadius="14" Background="{StaticResource Off}">
+                            <Ellipse x:Name="Knob" Width="20" Height="20" Fill="#9AA6B6"
+                                     HorizontalAlignment="Left" Margin="4,0,0,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="{StaticResource Accent}"/>
+                                <Setter TargetName="Knob" Property="Fill" Value="{StaticResource Ground}"/>
+                                <Setter TargetName="Knob" Property="Margin" Value="28,0,0,0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- スライダー -->
+        <Style x:Key="TrackFill" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Height="6" CornerRadius="3" Background="{StaticResource Accent}" VerticalAlignment="Center"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="TrackEmpty" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="Knob" TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Grid Width="28" Height="28" Background="Transparent">
+                            <Ellipse Width="28" Height="28" Fill="#405CC8D7"/>
+                            <Ellipse Width="20" Height="20" Fill="{StaticResource Text}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="DashSlider" TargetType="Slider">
+            <Setter Property="Width" Value="380"/>
+            <Setter Property="IsMoveToPointEnabled" Value="True"/>
+            <Setter Property="IsSnapToTickEnabled" Value="True"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid Height="28" Background="Transparent">
+                            <Border Height="6" CornerRadius="3" Background="{StaticResource Off}" VerticalAlignment="Center"/>
+                            <Track x:Name="PART_Track">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="Slider.DecreaseLarge" Style="{StaticResource TrackFill}"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="Slider.IncreaseLarge" Style="{StaticResource TrackEmpty}"/>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource Knob}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 入力欄 -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource Field}"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource Text}"/>
+            <Setter Property="SelectionBrush" Value="{StaticResource Accent}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Rule}"/>
+            <Setter Property="Padding" Value="12,7"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="NumBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="FontFamily" Value="{StaticResource NumFont}"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Width" Value="96"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+        </Style>
+
+        <!-- ボタン -->
+        <Style x:Key="Btn" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Soft}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Rule}"/>
+            <Setter Property="Padding" Value="22,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#3A4A5E"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PrimaryBtn" TargetType="Button" BasedOn="{StaticResource Btn}">
+            <Setter Property="Background" Value="{StaticResource Accent}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+            <Setter Property="Foreground" Value="#0B1117"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <!-- 一覧の小さなボタン（▲▼✕） -->
+        <Style x:Key="IconBtn" TargetType="Button" BasedOn="{StaticResource Btn}">
+            <Setter Property="Foreground" Value="{StaticResource Dim}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- 細いスクロールバー -->
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="MinWidth" Value="8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True" Orientation="{TemplateBinding Orientation}"
+                               ViewportSize="{TemplateBinding ViewportSize}">
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border CornerRadius="4" Background="{StaticResource Off}"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ページの見出し・項目名 -->
+        <Style x:Key="PageTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+        <Style x:Key="Lead" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{StaticResource Dim}"/>
+            <Setter Property="Margin" Value="0,4,0,18"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource Dim}"/>
+            <Setter Property="Margin" Value="0,3,0,0"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="19"/>
+        </Style>
+        <Style x:Key="SliderValue" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource NumFont}"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="Margin" Value="18,0,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="MinWidth" Value="80"/>
+        </Style>
+        <!-- 項目1行：左に名前、右に操作。上に区切り線 -->
+        <Style x:Key="RowLine" TargetType="Border">
+            <Setter Property="BorderBrush" Value="{StaticResource Rule}"/>
+            <Setter Property="BorderThickness" Value="0,1,0,0"/>
+            <Setter Property="Padding" Value="0,15"/>
+        </Style>
+        <Style x:Key="Swatch" TargetType="Border">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="BorderBrush" Value="#40FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="76"/>
+        </Grid.RowDefinitions>
+
+        <!-- タイトルバー（ドラッグで移動） -->
+        <Border Grid.Row="0" Background="{StaticResource Ground}" BorderBrush="{StaticResource Rule}" BorderThickness="0,0,0,1"
+                MouseLeftButtonDown="OnTitleDrag">
+            <Grid>
+                <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
+                    <Image Source="pack://application:,,,/app.ico" Width="22" Height="22" Margin="0,0,12,0"/>
+                    <TextBlock Text="ダッシュボードの設定" FontSize="15" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button Style="{StaticResource IconBtn}" Content="✕" FontSize="16" Width="46" Height="36"
+                        HorizontalAlignment="Right" Margin="0,0,8,0" Click="OnCancel" ToolTip="閉じる（Esc）"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左の一覧 -->
+            <Border Grid.Column="0" Background="{StaticResource Panel}" BorderBrush="{StaticResource Rule}" BorderThickness="0,0,1,0"
+                    Padding="12,18">
+                <StackPanel>
+                    <RadioButton x:Name="NavDisplay" Style="{StaticResource NavItem}" Content="表示" Tag="PageDisplay" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="オーロラ" Tag="PageAurora" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="警告の目安" Tag="PageThresholds" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="ニュース" Tag="PageNews" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="天気" Tag="PageWeather" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="再生中の音楽" Tag="PageMedia" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="Twitch" Tag="PageTwitch" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="YouTube" Tag="PageYouTube" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="FPS" Tag="PageFps" Checked="OnNav"/>
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer Grid.Column="1" x:Name="PageScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          Focusable="False">
+                <Grid Margin="40,30,40,30">
+
+                    <!-- ========================================================= 表示 -->
+                    <StackPanel x:Name="PageDisplay">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="表示"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="レイアウトと表示するモニター"/>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="レイアウト"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <RadioButton x:Name="LayoutClassic" Style="{StaticResource LayoutCard}" GroupName="Layout">
+                                        <StackPanel>
+                                            <Border Height="80" CornerRadius="6" Background="#0B0F15" Margin="0,0,0,8" Padding="8">
+                                                <UniformGrid Rows="2" Columns="2">
+                                                    <Border Background="#1B2430" CornerRadius="2" Margin="2"/>
+                                                    <Border Background="#1B2430" CornerRadius="2" Margin="2"/>
+                                                    <Border Background="#1B2430" CornerRadius="2" Margin="2"/>
+                                                    <Border Background="#1B2430" CornerRadius="2" Margin="2"/>
+                                                </UniformGrid>
+                                            </Border>
+                                            <TextBlock Text="標準" HorizontalAlignment="Center" FontSize="14"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton x:Name="LayoutGauge" Style="{StaticResource LayoutCard}" GroupName="Layout">
+                                        <StackPanel>
+                                            <Border Height="80" CornerRadius="6" Background="#0B0F15" Margin="0,0,0,8">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M 3,30 A 17,17 0 1 1 33,30" Stroke="{StaticResource Cpu}" StrokeThickness="4" Margin="4,0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                                    <Path Data="M 3,30 A 17,17 0 1 1 33,30" Stroke="{StaticResource Text}" StrokeThickness="4" Margin="4,0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                                    <Path Data="M 3,30 A 17,17 0 1 1 33,30" Stroke="{StaticResource Gpu}" StrokeThickness="4" Margin="4,0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Text="計器盤" HorizontalAlignment="Center" FontSize="14"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton x:Name="LayoutAurora" Style="{StaticResource LayoutCard}" GroupName="Layout">
+                                        <StackPanel>
+                                            <Border Height="80" CornerRadius="6" Margin="0,0,0,8" ClipToBounds="True">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
+                                                        <GradientStop Color="#1D5A63" Offset="0"/>
+                                                        <GradientStop Color="#070A12" Offset="0.5"/>
+                                                        <GradientStop Color="#3B2D7A" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <TextBlock Text="15:41" FontFamily="{StaticResource NumFont}" FontSize="30" Margin="10,8,0,0"/>
+                                            </Border>
+                                            <TextBlock Text="オーロラ" HorizontalAlignment="Center" FontSize="14"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="表示するモニター"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="M キーでも順に移動できます"/>
+                                </StackPanel>
+                                <WrapPanel Grid.Column="1" x:Name="MonitorPanel" Margin="0,0,0,-10"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="常に背後に表示"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="壁紙のように、クリックしても他の画面の後ろのまま"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" x:Name="BehindBox" Style="{StaticResource Switch}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="更新間隔"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="センサーを読み取る間隔"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Slider x:Name="IntervalSlider" Style="{StaticResource DashSlider}" Minimum="250" Maximum="5000"
+                                            TickFrequency="250" SmallChange="250" LargeChange="250" ValueChanged="OnSliderChanged"/>
+                                    <TextBlock x:Name="IntervalText" Style="{StaticResource SliderValue}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="グラフの長さ"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="履歴グラフに残す時間"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Slider x:Name="HistorySlider" Style="{StaticResource DashSlider}" Minimum="20" Maximum="600"
+                                            TickFrequency="10" SmallChange="10" LargeChange="10" ValueChanged="OnSliderChanged"/>
+                                    <TextBlock x:Name="HistoryText" Style="{StaticResource SliderValue}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= オーロラ -->
+                    <StackPanel x:Name="PageAurora" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="オーロラ"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="オーロラ レイアウトの色と動き"/>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Top" Margin="0,4,16,0">
+                                    <TextBlock Style="{StaticResource Label}" Text="色テーマ"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="「自動」は日の出・日の入りに合わせて朝・昼・夕方・夜を切り替えます"/>
+                                </StackPanel>
+                                <WrapPanel Grid.Column="1" x:Name="ThemePanel" Margin="0,0,0,-10">
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Theme" Tag="auto">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Grid Width="16" Height="16" Margin="0,0,8,0">
+                                                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                                <Border Background="#FAD9BE"/>
+                                                <Border Grid.Column="1" Background="#6FB8EE"/>
+                                                <Border Grid.Row="1" Background="#06080F"/>
+                                                <Border Grid.Row="1" Grid.Column="1" Background="#3A1D3E"/>
+                                            </Grid>
+                                            <TextBlock Text="自動（時間帯）"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Theme" Tag="morning">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Style="{StaticResource Swatch}">
+                                                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#C9DDF2"/><GradientStop Color="#FAD9BE" Offset="1"/></LinearGradientBrush></Border.Background>
+                                            </Border>
+                                            <TextBlock Text="朝"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Theme" Tag="day">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Style="{StaticResource Swatch}">
+                                                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#6FB8EE"/><GradientStop Color="#E4F3FC" Offset="1"/></LinearGradientBrush></Border.Background>
+                                            </Border>
+                                            <TextBlock Text="昼"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Theme" Tag="evening">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Style="{StaticResource Swatch}">
+                                                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#2A1A44"/><GradientStop Color="#F07A3A" Offset="1"/></LinearGradientBrush></Border.Background>
+                                            </Border>
+                                            <TextBlock Text="夕方"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Theme" Tag="night">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Style="{StaticResource Swatch}" Background="#06080F"/>
+                                            <TextBlock Text="夜"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Theme" Tag="classic">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Style="{StaticResource Swatch}" Background="#070A12"/>
+                                            <TextBlock Text="クラシック（暗い配色で固定）"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                </WrapPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="朝・昼の明るさ"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="明るいテーマがまぶしいときに下げます"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Slider x:Name="BrightnessSlider" Style="{StaticResource DashSlider}" Minimum="50" Maximum="100"
+                                            TickFrequency="5" SmallChange="5" LargeChange="5" ValueChanged="OnSliderChanged"/>
+                                    <TextBlock x:Name="BrightnessText" Style="{StaticResource SliderValue}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Style="{StaticResource Label}" Text="背景のアニメーション"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="オフにすると光の動きを止めます（負荷に合わせた色の変化は残ります）"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" x:Name="MotionBox" Style="{StaticResource Switch}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= 警告の目安 -->
+                    <StackPanel x:Name="PageThresholds" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="警告の目安"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="この値を超えると、数字やグラフが琥珀色（注意）・赤（危険）になります"/>
+
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition Width="200"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Ellipse Width="10" Height="10" Fill="{StaticResource Warn}" Margin="0,0,10,0"/>
+                                <TextBlock Text="注意" Foreground="{StaticResource Dim}" FontSize="13"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Ellipse Width="10" Height="10" Fill="{StaticResource Crit}" Margin="0,0,10,0"/>
+                                <TextBlock Text="危険" Foreground="{StaticResource Dim}" FontSize="13"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition Width="200"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="CPU 温度"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="CpuWarnBox" Style="{StaticResource NumBox}" BorderBrush="#80FFB547"/>
+                                    <TextBlock Text="°C" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <TextBox x:Name="CpuCritBox" Style="{StaticResource NumBox}" BorderBrush="#80FF5D5D"/>
+                                    <TextBlock Text="°C" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition Width="200"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="GPU 温度"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="GpuWarnBox" Style="{StaticResource NumBox}" BorderBrush="#80FFB547"/>
+                                    <TextBlock Text="°C" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <TextBox x:Name="GpuCritBox" Style="{StaticResource NumBox}" BorderBrush="#80FF5D5D"/>
+                                    <TextBlock Text="°C" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition Width="200"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="CPU・GPU 使用率"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="スレッドごとの負荷も含む"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="LoadWarnBox" Style="{StaticResource NumBox}" BorderBrush="#80FFB547"/>
+                                    <TextBlock Text="%" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <TextBox x:Name="LoadCritBox" Style="{StaticResource NumBox}" BorderBrush="#80FF5D5D"/>
+                                    <TextBlock Text="%" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition Width="200"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="メモリ・VRAM 使用率"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="容量のうち使っている割合"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="MemWarnBox" Style="{StaticResource NumBox}" BorderBrush="#80FFB547"/>
+                                    <TextBlock Text="%" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <TextBox x:Name="MemCritBox" Style="{StaticResource NumBox}" BorderBrush="#80FF5D5D"/>
+                                    <TextBlock Text="%" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= ニュース -->
+                    <StackPanel x:Name="PageNews" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="ニュース"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="表示する配信元（RSS）と切り替えの速さ"/>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="ニュースを表示"/>
+                                <CheckBox Grid.Column="1" x:Name="NewsBox" Style="{StaticResource Switch}"/>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="見出しの切り替え"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Slider x:Name="RotateSlider" Style="{StaticResource DashSlider}" Minimum="3" Maximum="60"
+                                            TickFrequency="1" SmallChange="1" LargeChange="1" ValueChanged="OnSliderChanged"/>
+                                    <TextBlock x:Name="RotateText" Style="{StaticResource SliderValue}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="取り込み直す間隔"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="新しい記事を読み込む間隔"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Slider x:Name="RefreshSlider" Style="{StaticResource DashSlider}" Minimum="3" Maximum="60"
+                                            TickFrequency="1" SmallChange="1" LargeChange="1" ValueChanged="OnSliderChanged"/>
+                                    <TextBlock x:Name="RefreshText" Style="{StaticResource SliderValue}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource RowLine}" Padding="0,15,0,10">
+                            <TextBlock Style="{StaticResource Label}" Text="配信元"/>
+                        </Border>
+                        <Border BorderBrush="{StaticResource Rule}" BorderThickness="1" CornerRadius="10">
+                            <StackPanel>
+                                <ItemsControl x:Name="FeedList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{StaticResource Rule}" BorderThickness="0,0,0,1" Padding="8,8,10,8">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="170"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,8,0">
+                                                        <Button Style="{StaticResource IconBtn}" Content="▲" Tag="{Binding}" Click="OnFeedUp" ToolTip="上へ"/>
+                                                        <Button Style="{StaticResource IconBtn}" Content="▼" Tag="{Binding}" Click="OnFeedDown" ToolTip="下へ"/>
+                                                    </StackPanel>
+                                                    <TextBox Grid.Column="1" Margin="0,0,10,0" Padding="10,5" FontSize="14"
+                                                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <TextBox Grid.Column="2" Padding="10,5" FontSize="13" Foreground="{StaticResource Soft}"
+                                                             Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    <Button Grid.Column="3" Style="{StaticResource IconBtn}" Content="✕" Margin="8,0,0,0"
+                                                            Tag="{Binding}" Click="OnFeedRemove" ToolTip="削除"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button Style="{StaticResource Btn}" BorderBrush="Transparent" Background="#0D5CC8D7"
+                                        Foreground="{StaticResource Accent}" HorizontalContentAlignment="Left" Padding="14,10"
+                                        Click="OnFeedAdd">
+                                    <TextBlock Text="＋ 配信元を追加（名前と RSS の URL）" FontSize="14"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= 天気 -->
+                    <StackPanel x:Name="PageWeather" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="天気"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="地名で検索して地点を選びます（緯度・経度は自動で入ります）"/>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="天気を表示"/>
+                                <CheckBox Grid.Column="1" x:Name="WeatherBox" Style="{StaticResource Switch}"/>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="地点を検索" VerticalAlignment="Top" Margin="0,8,0,0"/>
+                                <StackPanel Grid.Column="1">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="SearchBox" Width="400" KeyDown="OnSearchKey"/>
+                                        <Button x:Name="SearchButton" Style="{StaticResource Btn}" Content="検索" Padding="18,8" Margin="10,0,0,0"
+                                                Click="OnSearch"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="SearchStatus" Style="{StaticResource Hint}" Visibility="Collapsed" Margin="0,8,0,0"/>
+                                    <Border x:Name="ResultBorder" Visibility="Collapsed" Margin="0,8,0,0" Width="520" HorizontalAlignment="Left"
+                                            BorderBrush="{StaticResource Rule}" BorderThickness="1" CornerRadius="8" Background="{StaticResource Panel}">
+                                        <ItemsControl x:Name="ResultList">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Tag="{Binding}" Click="OnPickPlace" Cursor="Hand">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="Bd" Background="Transparent" Padding="14,9"
+                                                                        BorderBrush="{StaticResource Rule}" BorderThickness="0,0,0,1">
+                                                                    <Grid>
+                                                                        <TextBlock Text="{Binding Name}" FontSize="14" Foreground="{StaticResource Text}"/>
+                                                                        <TextBlock Text="{Binding Region}" FontSize="13" Foreground="{StaticResource Dim}"
+                                                                                   HorizontalAlignment="Right"/>
+                                                                    </Grid>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentSoft}"/>
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="表示名"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="天気カードに出る地名"/>
+                                </StackPanel>
+                                <TextBox Grid.Column="1" x:Name="PlaceBox" Width="300" HorizontalAlignment="Left"/>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="緯度・経度"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="検索で選ぶと自動で入ります"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="LatBox" Style="{StaticResource NumBox}" Width="130" FontSize="17"/>
+                                    <TextBlock Text="," Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0"/>
+                                    <TextBox x:Name="LonBox" Style="{StaticResource NumBox}" Width="130" FontSize="17"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= 再生中の音楽 -->
+                    <StackPanel x:Name="PageMedia" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="再生中の音楽"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="オーロラ レイアウトの天気カードの下に、再生中の曲を表示します"/>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="再生中の曲を表示"/>
+                                <CheckBox Grid.Column="1" x:Name="MediaBox" Style="{StaticResource Switch}"/>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Style="{StaticResource Label}" Text="Spotify だけを表示"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="オフにするとブラウザの動画なども表示します"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" x:Name="SpotifyOnlyBox" Style="{StaticResource Switch}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= Twitch -->
+                    <StackPanel x:Name="PageTwitch" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="Twitch"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="オーロラのニュースカードを、フォロー中の Twitch 配信に切り替えられます"/>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Style="{StaticResource Label}" Text="Twitch を使う"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="ニュースカードに「ニュース｜Twitch」の切り替えを出します"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" x:Name="TwitchBox" Style="{StaticResource Switch}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Top" Margin="0,6,16,0">
+                                    <TextBlock Style="{StaticResource Label}" Text="Client ID"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="dev.twitch.tv で登録したアプリの ID" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="TwitchClientBox" Width="360" FontFamily="Consolas"/>
+                                        <Button Style="{StaticResource Btn}" Content="登録ページを開く" Padding="16,8" Margin="10,0,0,0" Click="OnTwitchRegister"/>
+                                    </StackPanel>
+                                    <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,0" TextWrapping="Wrap"
+                                               Text="登録するときは OAuth Redirect URLs に http://localhost、Client Type は「Public」を選びます（README に手順があります）"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Style="{StaticResource Label}" Text="ログイン"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="フォロー中の配信一覧とチャットに使います"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock x:Name="TwitchLoginText" VerticalAlignment="Center" Foreground="{StaticResource Soft}" FontSize="15" Margin="0,0,16,0"/>
+                                    <Button x:Name="TwitchLoginButton" Style="{StaticResource Btn}" Content="ログイン" Padding="18,8" Click="OnTwitchLogin"/>
+                                    <Button x:Name="TwitchLogoutButton" Style="{StaticResource Btn}" Content="ログアウト" Padding="18,8" Margin="10,0,0,0" Click="OnTwitchLogout"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Style="{StaticResource Label}" Text="ゲーム中は低画質"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="ゲームが続いている間、配信を 360p 程度に下げます（初期値はオフ）"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" x:Name="TwitchLowBox" Style="{StaticResource Switch}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= YouTube -->
+                    <StackPanel x:Name="PageYouTube" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="YouTube"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="オーロラのニュースカードを、登録したチャンネルの配信と新着動画に切り替えられます（登録やキーは不要）"/>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Style="{StaticResource Label}" Text="YouTube を使う"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="ニュースカードに「YouTube」の切り替えを出します"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" x:Name="YouTubeBox" Style="{StaticResource Switch}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Label}" Text="チャンネル"/>
+                                <TextBlock Style="{StaticResource Hint}" TextWrapping="Wrap" Margin="0,3,0,14"
+                                           Text="チャンネルの URL（youtube.com/@〇〇）、@ハンドル、その人の動画の URL のどれかを入れて「追加」を押します"/>
+                                <ItemsControl x:Name="YouTubeList">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Rule}" BorderThickness="1"
+                                                    CornerRadius="8" Padding="14,4,4,4" Margin="0,0,10,10">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Foreground="{StaticResource Soft}" ToolTip="{Binding Id}"/>
+                                                    <Button Style="{StaticResource IconBtn}" Content="✕" Tag="{Binding}" Click="OnYouTubeRemove"
+                                                            Margin="4,0,0,0" ToolTip="登録をやめる"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBox x:Name="YouTubeInput" Width="360" KeyDown="OnYouTubeKey"/>
+                                    <Button x:Name="YouTubeAddButton" Style="{StaticResource Btn}" Content="＋ 追加" Padding="18,8" Margin="10,0,0,0"
+                                            Foreground="{StaticResource Accent}" Click="OnYouTubeAdd"/>
+                                </StackPanel>
+                                <TextBlock x:Name="YouTubeStatus" Style="{StaticResource Hint}" Margin="0,8,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Label}" Text="使い方"/>
+                                <TextBlock Style="{StaticResource Hint}" TextWrapping="Wrap" Margin="0,3,0,0"
+                                           Text="配信中のチャンネルが一覧の先頭に、そのあとに新着動画が並びます。カード右上の「＋ URL」を押すと、コピーしておいた YouTube の動画の URL を再生します。動画が終わったら止まります"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= FPS -->
+                    <StackPanel x:Name="PageFps" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="FPS"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="Intel PresentMon で計測します（publish フォルダに PresentMon.exe が必要）"/>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="FPS を計測"/>
+                                <CheckBox Grid.Column="1" x:Name="FpsBox" Style="{StaticResource Switch}"/>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Label}" Text="計測しないアプリ"/>
+                                <TextBlock Style="{StaticResource Hint}" Text="ゲーム以外で FPS が出てしまうアプリを除外します（例：chrome.exe）"
+                                           Margin="0,3,0,14"/>
+                                <ItemsControl x:Name="ExcludeList">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Rule}" BorderThickness="1"
+                                                    CornerRadius="8" Padding="14,4,4,4" Margin="0,0,10,10">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" Foreground="{StaticResource Soft}"/>
+                                                    <Button Style="{StaticResource IconBtn}" Content="✕" Tag="{Binding}" Click="OnExcludeRemove"
+                                                            Margin="4,0,0,0" ToolTip="除外をやめる"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBox x:Name="ExcludeBox" Width="260" KeyDown="OnExcludeKey"/>
+                                    <Button Style="{StaticResource Btn}" Content="＋ 追加" Padding="18,8" Margin="10,0,0,0"
+                                            Foreground="{StaticResource Accent}" Click="OnExcludeAdd"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- 下のボタン -->
+        <Border Grid.Row="2" Background="{StaticResource Panel}" BorderBrush="{StaticResource Rule}" BorderThickness="0,1,0,0"
+                Padding="24,0">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Style="{StaticResource Btn}" Content="初期値に戻す" Click="OnDefaults"
+                        ToolTip="画面の値を初期値に戻します（保存するまで反映されません）"/>
+                <TextBlock Grid.Column="1" x:Name="FootNote" Text="保存すると画面にすぐ反映されます" FontSize="13"
+                           Foreground="{StaticResource Dim}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           TextWrapping="Wrap" TextAlignment="Right" Margin="16,0,16,0"/>
+                <Button Grid.Column="2" Style="{StaticResource Btn}" Content="キャンセル" Margin="0,0,12,0" Click="OnCancel"/>
+                <Button Grid.Column="3" Style="{StaticResource PrimaryBtn}" Content="保存" Padding="28,10" Click="OnSave"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

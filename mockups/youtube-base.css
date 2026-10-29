@@ -1,0 +1,26 @@
+﻿*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;background:#070A12;font-family:"Yu Gothic UI",sans-serif;color:#F4F7FB;position:relative}
+.num{font-family:Bahnschrift,sans-serif}
+.glow{position:absolute;border-radius:50%;filter:blur(10px)}
+.card{position:absolute;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:24px}
+.t70{color:rgba(244,247,251,.7)}.t60{color:rgba(244,247,251,.6)}.t50{color:rgba(244,247,251,.5)}.t40{color:rgba(244,247,251,.4)}
+.seg{display:inline-flex;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:3px}
+.seg span{padding:4px 16px 5px;border-radius:15px;font-size:17px;color:rgba(244,247,251,.6)}
+.seg span.on{background:#C4302B;color:#fff}
+.pill{height:36px;padding:0 14px;border:1px solid rgba(255,255,255,.18);border-radius:18px;display:inline-flex;align-items:center;font-size:17px;color:rgba(244,247,251,.85)}
+.live{background:#E5322D;color:#fff;font-size:13px;font-weight:700;padding:1px 6px;border-radius:4px;font-family:Bahnschrift,sans-serif}
+.video{border-radius:6px;background:linear-gradient(135deg,#3a1414,#1b0d10 55%,#2a0f0f);display:flex;align-items:center;justify-content:center;color:rgba(244,247,251,.45);font-size:26px}
+.row{display:flex;gap:10px;overflow:hidden;white-space:nowrap;align-items:center}
+.chip{flex:none;display:inline-flex;align-items:center;height:64px;padding:0 18px 0 8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:32px}
+.chip.on{background:rgba(229,50,45,.18);border-color:rgba(229,50,45,.8)}
+.av{flex:none;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);position:relative}
+.dot{position:absolute;right:-2px;bottom:-2px;width:14px;height:14px;border-radius:7px;background:#E5322D;border:2px solid #1a1620}
+.vid{flex:none;display:inline-flex;align-items:center;gap:10px;height:64px;padding:4px 16px 4px 5px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:12px}
+.th{width:96px;height:54px;border-radius:8px;background:linear-gradient(135deg,#4b4f63,#24263a);position:relative}
+.len{position:absolute;right:3px;bottom:3px;background:rgba(0,0,0,.75);font-size:11px;padding:0 4px;border-radius:3px;font-family:Bahnschrift,sans-serif}
+.l1{font-size:17px;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+.l2{font-size:13px;color:rgba(244,247,251,.5)}
+.arrow{flex:none;width:28px;text-align:center;color:rgba(244,247,251,.6);font-size:26px}
+.lbl{font-size:16px;color:rgba(244,247,251,.5);margin-bottom:8px}
+.bar{position:absolute;left:96px;right:96px;bottom:84px;height:120px;display:grid;grid-template-columns:repeat(5,1fr)}
+.bar>div{padding:26px;border-left:1px solid rgba(255,255,255,.12)}.bar>div:first-child{border:0}

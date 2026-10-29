@@ -1,0 +1,2 @@
+# 改行は保存したまま変えない（.bat は Shift_JIS・CRLF でないと壊れる）
+* -text

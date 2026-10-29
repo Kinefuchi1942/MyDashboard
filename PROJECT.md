@@ -1,0 +1,78 @@
+# MyDashboard プロジェクト概要
+
+## 目的
+自作の Windows アプリ。サブモニターに全画面で常時表示する「動的な壁紙」兼 PC モニター。
+ゲーム中は CPU・GPU・FPS などの負荷を、普段は時計・天気・ニュースを見せる。見た目の良さも重視する。
+
+## 依頼者と環境
+- 依頼者は C# を書かない。成果物はそのままビルドできる形で渡し、手順は短く具体的に伝える
+- PC：日本語 Windows、Intel Core i7-14700K（20スレッド）、NVIDIA GeForce RTX 系、サブモニターあり
+- 開発：C# / .NET 8 / WPF。build.bat で単一 exe（publish フォルダ）を作る
+- 配布：make-dist.ps1 で dist\ に配布用 zip を作る（個人の設定・ログイン情報は含めない。同梱の説明書は dist-readme.txt）
+- ソースは Program Files 以外に置く（Program Files の下ではビルドできない）
+
+## 構成
+- `MainWindow`：ウィンドウ本体。モニター配置、レイアウト切り替え、右クリックメニュー、キー操作
+- `SettingsWindow`：設定画面（右クリック「設定…」または S キー）。左の一覧で 表示 / オーロラ / 警告の目安 / ニュース / 天気 / 再生中の音楽 / Twitch / YouTube / FPS を切り替え。「保存」で settings.json に書き、MainWindow.ApplySettings が再起動なしで反映（変わった部分のサービスだけ作り直し、レイアウトは作り直す）。天気は Open-Meteo の地名検索（geocoding-api.open-meteo.com）で地点を選ぶ
+- `Monitoring/`：センサー収集（1秒ごと）
+  - HardwareMonitor：LibreHardwareMonitorLib 0.9.6（CPU / GPU / ストレージ）、メモリは GlobalMemoryStatusEx
+  - CpuTopology：GetLogicalProcessorInformationEx の EfficiencyClass で P/E コアを判定し、センサー名「CPU Core #N」の N をコア順に当てる（取れなければ HT なしのコア＝E コアで推定）。CoreBars は E コアを淡色・グループ分け・ラベル付きで描く
+  - FpsMonitor：Intel PresentMon（コンソール版）を子プロセスで起動し CSV を読む。診断を publish\fps-diagnostics.txt に出力
+  - DlssDetector：ゲームが読み込んでいる nvngx_dlss / dlssg / dlssd の DLL（ドライバー差し替え時は ProgramData\NVIDIA\NGX\models 以下の .bin）から DLSS の SR・FG・RR を推定。診断を publish\dlss-diagnostics.txt に出力
+  - NetworkMonitor：NetworkInterface の送受信量
+  - Collector：上記を1秒ごと（updateIntervalMs）にまとめて Snapshot にして画面へ渡す
+- `Info/`：ニュースと天気（センサーとは別ループ）
+  - InfoService：RSS を10分ごと、天気（Open-Meteo、API キー不要）を15分ごとに取得
+  - FeedParser：RSS 2.0 / RSS 1.0 (RDF) / Atom を要素名で読む。配信元を交互に並べる
+  - MediaService：Windows の再生中メディア情報（GlobalSystemMediaTransportControls）から Spotify などの曲名・ジャケット・再生位置を読む。通知方式で負荷ほぼゼロ。診断を publish\media-diagnostics.txt に出力。このため TargetFramework は net8.0-windows10.0.19041.0
+- `Views/`：差し替え可能なレイアウト（IDashboardView：Render / UpdateClock / SetNotice / ShowNews / ShowWeather / ShowMedia）
+  - ClassicView「標準」：情報量重視のパネル型（スレッド別負荷、ディスクごとの速度まで表示）
+  - GaugeView「計器盤」：CPU・FPS・GPU の円弧メーター3連。外側＝使用率、内側＝温度。FPS の満点はメインモニターのリフレッシュレート。CPU メーターの下にスレッド別負荷（CoreBars、P/E コア別・スレッド数と最大スレッドの %。2026-10-28 追加、モックアップ `mockups/gauge-threads.png`）。FPS メーターの下に直近10秒のフレームタイムのグラフ（FrameTimeChart）と 1% Low、左上に Present Mode のチップ（Hardware＝緑、Composed＝琥珀で「DWM 合成あり」）、右下に DLSS のチップ（SR / FG / RR。DlssDetector が読み込み済み DLL から推定。保護されたゲームは「unavailable」）。最下段にメモリ・VRAM・ディスク・ネットの細い帯。ニュースは表示しない（2026-10-26 に帯を削除）。Present Mode と DLSS は計器盤だけの表示（標準・オーロラには出ない）
+  - AuroraView「オーロラ」：日常使い向け。大きな時計・天気（現在＋3時間ごと6コマ）・ニュースカードが主役。FPS は表示しない（2026-10-27 に左上のバッジを削除。ゲーム中の判定は Twitch の低画質切り替え用に残す）。PC 状態は下段の細いバー（x96・下端から84px・高さ120、CPU / GPU / メモリ / VRAM / ネットの5区画と推移グラフ）。背景の光が負荷に連動（CPU 青緑・GPU 紫・高温で赤）。
+    - 左列（1920×1080 基準）：時計（y150・文字300）、日付（y470）、天気カード（x96・y556・幅860・高さ200）。曲の再生中は天気の下に再生中カード（x96・y726〜852・幅860・高さ126）を出し、そのあいだ時計・日付・天気を 50px 上げる（MediaLift）。背景にジャケット色の光。再生なし／一時停止5分でカードを隠す
+    - 右列：メディアカード（ニュース⇄Twitch⇄YouTube）。右端から96px・上端 y48・幅844×高さ804で、天気・再生中カードの右24px、下段バーの手前まで。ニュースは見出し（46px）＋要約（空き高さに合わせて最大5行）＋次の記事4件、前へ／次へのボタンと件数表示。ダブルクリックで記事を開く
+    - 「ニュース｜Twitch」で Twitch に手動で切り替え（AuroraView.Twitch.cs。起動時はニュース）。通常表示＝同じ位置・寸法のカードに映像 760×428（TwitchSlot）＋配信者名・視聴者数・経過時間・タイトル＋フォロー中で配信中の全員を丸いチップで並べる（入りきらない分は矢印／ホイールで横送り）。「拡張」で x96・y124・幅1728・高さ734 に広げ、映像（16:9・高さいっぱい）の右にチャット。拡張中は右上に時計と気温を出し、時計・天気・再生中カードは DailyLayer / MediaLayer ごと隠す
+  - TwitchPlayer（Views/TwitchPlayer.cs）：WebView2 で Twitch 公式の埋め込みプレーヤーとチャットを出す。親ページは仮ドメイン https://mydashboard.local/（SetVirtualHostNameToFolderMapping。Twitch の parent 指定に必要）。WebView2 は HWND なので WPF の上に重ねられない・Viewbox の拡大は ZoomFactor で合わせる（1秒ごとにも確認）。映像は消音で始まる。チャットは拡張表示のときだけ iframe で読み込む。ゲーム中の低画質（設定でオン、360p 以上）は、ゲームが30秒続いてから下げ、終わって1分たってから戻す。WebView2 のデータ（ログインの Cookie）は publish\webview2。ニュースに戻すと Dispose
+  - YouTube（AuroraView.YouTube.cs、2026-10-28 追加）：Twitch と同じカード・同じ拡張表示・同じ要素（TwitchSlot、TwitchName、TwitchChips など）を使い、AuroraView.Twitch.cs の _source（Twitch / YouTube）で見分ける。カードの「ニュース｜Twitch｜YouTube」のタブは選んでいる方にコードで色を付ける（Twitch 紫・YouTube 赤）。一覧は登録チャンネルの配信中（丸いチップ＋LIVE、視聴者の多い順）→新着動画（サムネイル付きの角丸チップ、新しい順に最大30本）。「＋ URL」はクリップボードの動画 URL を再生（文字入力欄を出さないため。WebView2 の上に入力欄を重ねられない）。表示中だけ1分ごとのタイマーで、配信中は3分・新着は15分たったものを取り直す（同時に4件まで）。動画が終わったら止める。埋め込み禁止（エラー 101/150）はメッセージを出し、選び直すまで再生し直さない。ゲーム中の低画質はなし（IFrame API で画質を変えられない）
+  - WebPlayer（Views/WebPlayer.cs）：TwitchPlayer と YouTubePlayer の共通部分（WebView2 の初期化、仮ドメイン、ページへの命令の順番待ち、拡張表示の幅）。どちらのページも TwitchWeb.PageFolder が publish\webview2\page に書き出す
+  - YouTubePlayer（Views/YouTubePlayer.cs）：YouTube IFrame Player API（youtube.html）。動画 ID 指定なら仮ドメインで再生できる（2026-10-28 に試作で確認）。チャンネル指定の配信（listType=live）はエラー 150 になるので使わない。拡張表示の右は、配信なら live_chat?v=…&embed_domain=mydashboard.local&dark_theme=1、動画ならページ内に新着の一覧（押すと pick:ID を送る）
+  - YouTubeService（Info/YouTubeService.cs）：キー不要。/channel/ID/videos の ytInitialData（lockupViewModel）から新着（ショートと配信は入らない）、/channel/ID/live の ytInitialPlayerResponse（videoDetails.isLive）で配信中を判定。RSS（feeds/videos.xml）はチャンネルによって 404 になるので使わない。日本語のページ（Accept-Language: ja）の「8 時間前」から投稿時刻を逆算。配信の開始時刻は取れないことが多い（そのときは経過時間を出さない）
+  - TwitchService（Info/TwitchService.cs）：Helix API（streams/followed、users）。Client ID は設定、トークンは publish\twitch-auth.json（Implicit grant。ログイン画面は TwitchLoginWindow が http://localhost への移動を横取り）
+  - AuroraTheme：オーロラの時間帯テーマ（朝・昼は明るい背景＋濃い文字、夕方は紫と橙、夜はほぼ黒で約1割暗く）。境目は日の出／10時／日の入り1時間前／日の入り1時間後で、前後15分で背景を混ぜ、文字色は中間で3秒かけて切り替える。オーロラの文字・カードの色は DynamicResource（AText・AT85〜AT40・AGlass・ALine など）で、コードがブラシの色を変える。明るいテーマでは CPU #0B8494、GPU #5A52D0 の濃い版を使う
+  - テーマ切替（AuroraView の ThemePicker）：メディアカードの右、画面右端に朝・昼・夕方・夜の四角を縦に並べる（中は各テーマの空の色を XAML に直書き）。クリックで settings.json の auroraTheme をそのテーマに固定して保存、固定中のものを再クリックで auto に戻す。いまの配色の四角を文字色の枠で囲む。モックアップは `mockups/aurora-theme-icons.png`
+  - ViewSupport：共通の色・書式（Fmt）、ニュースの順送り（NewsRotator / NewsTicker）、演出（Fx）
+- `Controls/`：自前描画の部品（HistoryChart、ArcGauge、FrameTimeChart、WeatherIcon、Meters.cs の BarMeter・CoreBars）
+- `settings.json`：monitor、更新間隔、alwaysBehind、しきい値、layout（classic / gauge / aurora）、auroraMotion、auroraTheme（auto / morning / day / evening / night / classic）、auroraDayBrightness、enableMedia、mediaSpotifyOnly、enableTwitch / twitchClientId / twitchLowQualityInGame / twitchLastChannel、enableYouTube / youTubeChannels / youTubeLastVideo、memWarn / memCrit（メモリ・VRAM 使用率）、newsFeeds、天気の地点（緯度経度）、FPS 除外プロセス
+- `app.ico`：アプリのアイコン（紺の角丸＋オーロラの光＋計器の弧。16〜40px は簡略版の絵）
+- 操作：右クリックメニュー（レイアウト / 次のモニター / 常に背後 / 設定… / 設定ファイルを開く / 終了）、S＝設定画面、L＝レイアウト切替、M＝モニター移動、B＝常に背後（壁紙のように後ろのまま）、Ctrl+Q＝終了、ニュースはダブルクリックで記事を開く
+
+## これまでに分かった注意点（再発させないこと）
+- .bat は Shift_JIS（CP932）・CRLF で保存し、chcp 65001 は使わない（UTF-8 だと行が壊れて誤実行される）
+- PresentMon の CSV 列名は版によって大文字小文字が違う（msBetweenPresents）→ 大文字小文字を区別せずに照合する
+- Twitch・YouTube の映像（msedgewebview2.exe）も PresentMon に描画として出るので、FpsMonitor で常に除外する（ゲームと間違えないため）
+- LibreHardwareMonitorLib 0.9.6 では VRAM が SensorType.SmallData（MB単位）。開発版とは種別や単位が違うため、容量系のセンサーは名前で探して単位をそろえる
+- CPU 温度の取得には PawnIO ドライバ（pawnio.eu）が必要。アプリは管理者権限で動く
+- 管理者権限のアプリから記事を開くときは explorer.exe 経由にする（ブラウザを管理者権限で起動しないため）
+- ゲームの邪魔をしない：フォーカスを奪わない（ShowActivated=False）、アニメーションは1秒20コマ程度に抑え、表示中のレイアウトでだけ動かす
+
+## デザイン方針
+- 暗い部屋で目に優しい暗色が基調。数字は Bahnschrift、日本語は Yu Gothic UI
+- 資源ごとの色：CPU #5CC8D7、GPU #8E9CFF、メモリ #6FD3A8、ディスク #C9A7F0、ネット #7FB2F0
+- 状態色：注意 #FFB547（琥珀）、危険 #FF5D5D（赤）。しきい値は settings.json で変更できる
+- 各レイアウトは 1920×1080 で設計し、Viewbox でモニターに合わせて拡大縮小する
+- 新しいデザインは、まずモックアップ画像を作って確認してもらってから実装する
+
+## 今後の候補
+- 今日の予定（Google カレンダーなどの非公開 iCal URL）
+- カウントダウン（任意の日付まであと何日か）
+
+## 進め方
+- 変更後は XAML とコードの対応や構文を静的にチェックし、変更点と更新手順を短く伝える
+- 実機で未確認の部分は正直に伝え、エラー画面・写真・fps-diagnostics.txt をもらって直す
+- 更新手順：ダッシュボードを終了 → 新しいソースで build.bat → publish に PresentMon.exe を置く → 起動
+
+## ソース管理（git）
+- `D:\MyDashboard` は git リポジトリ（ブランチ main）。GitHub の非公開リポジトリを正本にして、クラウドの Claude Code セッションでも作業する
+- `publish/`・`bin/`・`obj/`・`dist/`・`old/` は `.gitignore` で除外（設定・Twitch のログイン・PresentMon を GitHub に上げない）
+- `.gitattributes` で改行変換を止めている（.bat の Shift_JIS・CRLF を守るため）
+- クラウド（Linux）ではコンパイル確認まで（csproj の `EnableWindowsTargeting`）。起動・画面・センサーの確認はこの PC で、取り込み（git pull）→ publish → 起動

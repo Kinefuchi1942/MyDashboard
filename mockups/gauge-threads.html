@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;font-family:"Yu Gothic UI",sans-serif;color:#EEF2F8;position:relative;
+ background:radial-gradient(ellipse 70% 80% at 50% 45%,#16202C,#0A0E14)}
+.num{font-family:Bahnschrift,sans-serif;font-variant-numeric:tabular-nums}
+.abs{position:absolute}
+.dim{color:#7F8DA3}
+.chip{display:inline-flex;align-items:center;height:42px;padding:0 20px;border-radius:21px;border:1px solid rgba(184,224,106,.7);background:rgba(118,185,0,.16);color:#B8E06A;font-size:22px;margin-right:12px}
+.new{position:absolute;left:112px;top:652px;width:516px;height:156px;border:3px dashed rgba(255,181,71,.8);border-radius:14px}
+.newlabel{position:absolute;left:112px;top:812px;color:#FFB547;font-size:18px}
+#threads{position:absolute;left:130px;top:666px;width:480px}
+.bars{display:flex;align-items:flex-end;height:64px;margin-top:10px}
+.b{width:13px;height:64px;background:rgba(255,255,255,.1);margin-right:3px;position:relative}
+.b i{position:absolute;left:0;right:0;bottom:0;display:block}
+.grp{display:flex}
+.lab{display:flex;margin-top:6px;font-size:15px;color:#8592A5;font-weight:600}
+.lab div{border-top:1.5px solid #8592A5;text-align:center;padding-top:2px}
+</style></head><body>
+<svg class="abs" style="left:0;top:0" width="1920" height="1080">
+ <defs><filter id="g"><feGaussianBlur stdDeviation="7"/></filter></defs>
+ <!-- CPU r=225 c=370,448 -->
+ <g fill="none" stroke-linecap="round">
+  <path d="M211,607 A225,225 0 1 1 529,607" stroke="rgba(255,255,255,.08)" stroke-width="14"/>
+  <path d="M233,585 A194,194 0 1 1 507,585" stroke="rgba(255,255,255,.06)" stroke-width="5"/>
+  <path d="M233,585 A194,194 0 0 1 336,257" stroke="#8FA0B8" stroke-width="5"/>
+  <path d="M211,607 A225,225 0 0 1 370,223" stroke="#5CC8D7" stroke-width="14" filter="url(#g)" opacity=".7"/>
+  <path d="M211,607 A225,225 0 0 1 370,223" stroke="#5CC8D7" stroke-width="14"/>
+  <!-- FPS r=295 c=960,424 -->
+  <path d="M751,633 A295,295 0 1 1 1169,633" stroke="rgba(255,255,255,.08)" stroke-width="16"/>
+  <path d="M751,633 A295,295 0 1 1 1240,333" stroke="#F2F5FA" stroke-width="16" filter="url(#g)" opacity=".6"/>
+  <path d="M751,633 A295,295 0 1 1 1240,333" stroke="#F2F5FA" stroke-width="16"/>
+  <!-- GPU c=1550,448 -->
+  <path d="M1391,607 A225,225 0 1 1 1709,607" stroke="rgba(255,255,255,.08)" stroke-width="14"/>
+  <path d="M1391,607 A225,225 0 1 1 1764,380" stroke="#8E9CFF" stroke-width="14" filter="url(#g)" opacity=".7"/>
+  <path d="M1391,607 A225,225 0 1 1 1764,380" stroke="#8E9CFF" stroke-width="14"/>
+ </g>
+</svg>
+<div class="abs num" style="right:120px;top:40px;font-size:48px;font-weight:600">21:48</div>
+<div class="abs" style="left:120px;top:51px"><span class="chip num">Hardware: Independent Flip</span><span class="dim" style="font-size:18px">Present Mode · 合成をバイパス</span></div>
+
+<div class="abs" style="left:115px;top:330px;width:510px;text-align:center"><div class="dim" style="font-size:29px">CPU</div>
+ <div class="num" style="font-size:150px;font-weight:700;line-height:1">38<span class="dim" style="font-size:46px">%</span></div>
+ <div class="num" style="font-size:29px;color:#AEB9CA">68°C · 5.3 GHz</div></div>
+<div class="abs" style="left:635px;top:270px;width:650px;text-align:center"><div class="dim" style="font-size:38px">GameTitle</div>
+ <div class="num" style="font-size:200px;font-weight:700;line-height:1">142<span class="dim" style="font-size:60px">fps</span></div>
+ <div class="num" style="font-size:38px;color:#AEB9CA">1% Low 118 · 7.0 ms</div></div>
+<div class="abs" style="left:1295px;top:330px;width:510px;text-align:center"><div class="dim" style="font-size:29px">GPU</div>
+ <div class="num" style="font-size:150px;font-weight:700;line-height:1">91<span class="dim" style="font-size:46px">%</span></div>
+ <div class="num" style="font-size:29px;color:#AEB9CA">71°C · 284 W</div></div>
+
+<div class="abs" style="left:690px;top:660px;width:540px"><div class="dim" style="font-size:20px">フレームタイム <span class="num" style="font-size:26px;color:#EEF2F8">7.0</span> ms<span style="float:right">1% Low <span class="num" style="font-size:26px;color:#EEF2F8">118</span> fps</span></div>
+ <svg width="540" height="80" style="margin-top:6px"><polyline fill="none" stroke="#EEF2F8" stroke-width="2" points="0,50 40,48 80,52 120,47 160,51 200,30 240,49 280,50 320,48 360,52 400,47 440,50 480,49 540,50"/><line x1="0" x2="540" y1="56" y2="56" stroke="#5A6578" stroke-dasharray="4 4"/></svg>
+ <div style="font-size:15px;color:#5A6578">直近10秒 · 点線＝144Hz</div></div>
+<div class="abs" style="left:1295px;top:658px;width:510px;text-align:center"><span class="chip num">DLSS SR</span><span class="chip num">DLSS FG</span><span class="chip num" style="border-color:rgba(255,255,255,.12);background:none;color:#4F5B6D">DLSS RR</span>
+ <div class="num dim" style="font-size:18px;margin-top:10px">DLSS 310.2 · detected from loaded DLLs</div></div>
+
+<!-- 新しく追加：スレッド負荷 -->
+<div id="threads">
+ <div class="dim" style="font-size:20px">スレッド <span class="num" style="font-size:22px;color:#EEF2F8">28</span><span style="float:right">最大 <span class="num" style="font-size:22px;color:#FFB547">92</span> %</span></div>
+ <div class="bars" id="bars"></div>
+ <div class="lab" id="lab"></div>
+</div>
+<div class="new"></div><div class="newlabel" style="top:812px">点線の中が新しく追加する部分（CPU メーターの下）</div>
+
+<div class="abs" style="left:120px;top:842px;width:1680px;height:1px;background:rgba(255,255,255,.08)"></div>
+<div class="abs" style="left:120px;top:866px;width:1680px;display:grid;grid-template-columns:1fr 56px 1fr 56px 1fr 56px 1fr">
+ <div><span class="dim" style="font-size:20px">メモリ</span><span class="num" style="float:right;font-size:30px">14.2 / 31.8 GB</span><div style="height:78px;margin-top:12px;background:linear-gradient(transparent,rgba(111,211,168,.22));border-top:2px solid #6FD3A8;transform:scaleY(.6);transform-origin:bottom"></div></div><div></div>
+ <div><span class="dim" style="font-size:20px">VRAM</span><span class="num" style="float:right;font-size:30px">9.8 / 16.0 GB</span><div style="height:78px;margin-top:12px;background:linear-gradient(transparent,rgba(142,156,255,.22));border-top:2px solid #8E9CFF;transform:scaleY(.7);transform-origin:bottom"></div></div><div></div>
+ <div><span class="dim" style="font-size:20px">ディスク</span><span class="num" style="float:right;font-size:30px">読 12 · 書 3 MB/s</span></div><div></div>
+ <div><span class="dim" style="font-size:20px">ネット</span><span class="num" style="float:right;font-size:30px">↓2.1  ↑0.3 Mbps</span></div>
+</div>
+<script>
+const loads=[72,40,92,18,64,30,55,22,48,12,70,35,60,15,44,20, 25,30,18,22,10,35,28,15,12,20,8,16];
+const bars=document.getElementById('bars'),lab=document.getElementById('lab');
+// P 16本 + 隙間 + E 12本、幅480に収める
+const gap=3,gg=22,n=28,bw=(480-gg-gap*(n-2))/n;
+loads.forEach((v,i)=>{const d=document.createElement('div');d.className='b';d.style.width=bw+'px';
+ d.style.marginRight=(i==15?gg:(i==n-1?0:gap))+'px';
+ const c=v>=85?'#FFB547':(i>=16?'rgba(92,200,215,.55)':'#5CC8D7');
+ d.innerHTML=`<i style="height:${v}%;background:${c}"></i>`;bars.appendChild(d);});
+lab.innerHTML=`<div style="width:${16*bw+15*gap}px">P-Core</div><div style="width:${12*bw+11*gap}px;margin-left:${gg}px">E-Core</div>`;
+</script>
+</body></html>
