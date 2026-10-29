@@ -96,34 +96,6 @@ RSS 2.0・RSS 1.0（RDF）・Atom のどれでも読めます。サイトの RSS
 
 数字は通常は白で、しきい値を超えると琥珀色（注意）、さらに超えると赤（危険）に変わります。しきい値は `settings.json` で変えられます。
 
-## 作り方（初回だけ）
-
-1. **.NET 8 SDK を入れる**（入っていれば不要）
-   PowerShell かコマンドプロンプトで：
-   ```
-   winget install Microsoft.DotNet.SDK.8
-   ```
-2. **ソースのフォルダを書き込みできる場所に置く**
-   `C:\Program Files` や `D:\Program Files` の下はビルドできません。`D:\Dev\MyDashboard` のような場所に置いてください。
-3. **`build.bat` をダブルクリック**
-   `publish` フォルダに `MyDashboard.exe` ができます。途中で「PresentMon をダウンロードしますか」と聞かれたら **Y** を押すと FPS 表示が使えるようになります。
-4. `publish` フォルダを好きな場所（例：`C:\Tools\MyDashboard`）に移して、`MyDashboard.exe` を起動します。
-
-起動時に管理者権限の確認（UAC）が出ます。CPU 温度とクロックの読み取り、FPS の計測に必要なためです。
-
-### 友人に配る zip を作る
-
-PowerShell で次を実行すると `dist\MyDashboard-<版>.zip` ができます（動いているダッシュボードは止めなくて大丈夫です）。
-
-```
-powershell -NoProfile -ExecutionPolicy Bypass -File D:\MyDashboard\make-dist.ps1
-```
-
-- 中身は `MyDashboard.exe`・`PresentMon.exe`・初期値の `settings.json`・自動起動の .bat・`はじめにお読みください.txt`（元は `dist-readme.txt`）
-- 自分の設定・Twitch のログイン（`twitch-auth.json`）・`webview2` フォルダ・診断ファイルは入りません
-- 相手の PC に .NET を入れる必要はありません。CPU 温度を出すには相手側でも PawnIO が必要です
-- 署名のない exe なので、初回は「Windows によって PC が保護されました」→「詳細情報」→「実行」が必要です（説明書に記載済み）
-
 ## CPU 温度を表示するには（PawnIO）
 
 CPU の温度・クロック・電力の読み取りには、LibreHardwareMonitor が使う **PawnIO** ドライバが必要です。

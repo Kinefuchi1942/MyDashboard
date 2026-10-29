@@ -76,3 +76,31 @@
 - `publish/`・`bin/`・`obj/`・`dist/`・`old/` は `.gitignore` で除外（設定・Twitch のログイン・PresentMon を GitHub に上げない）
 - `.gitattributes` で改行変換を止めている（.bat の Shift_JIS・CRLF を守るため）
 - クラウド（Linux）ではコンパイル確認まで（csproj の `EnableWindowsTargeting`）。起動・画面・センサーの確認はこの PC で、取り込み（git pull）→ publish → 起動
+
+### 友人に配る zip を作る
+
+PowerShell で次を実行すると `dist\MyDashboard-<版>.zip` ができます（動いているダッシュボードは止めなくて大丈夫です）。
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File D:\MyDashboard\make-dist.ps1
+```
+
+- 中身は `MyDashboard.exe`・`PresentMon.exe`・初期値の `settings.json`・自動起動の .bat・`はじめにお読みください.txt`（元は `dist-readme.txt`）
+- 自分の設定・Twitch のログイン（`twitch-auth.json`）・`webview2` フォルダ・診断ファイルは入りません
+- 相手の PC に .NET を入れる必要はありません。CPU 温度を出すには相手側でも PawnIO が必要です
+- 署名のない exe なので、初回は「Windows によって PC が保護されました」→「詳細情報」→「実行」が必要です（説明書に記載済み）
+
+## 作り方（初回だけ）
+
+1. **.NET 8 SDK を入れる**（入っていれば不要）
+   PowerShell かコマンドプロンプトで：
+   ```
+   winget install Microsoft.DotNet.SDK.8
+   ```
+2. **ソースのフォルダを書き込みできる場所に置く**
+   `C:\Program Files` や `D:\Program Files` の下はビルドできません。`D:\Dev\MyDashboard` のような場所に置いてください。
+3. **`build.bat` をダブルクリック**
+   `publish` フォルダに `MyDashboard.exe` ができます。途中で「PresentMon をダウンロードしますか」と聞かれたら **Y** を押すと FPS 表示が使えるようになります。
+4. `publish` フォルダを好きな場所（例：`C:\Tools\MyDashboard`）に移して、`MyDashboard.exe` を起動します。
+
+起動時に管理者権限の確認（UAC）が出ます。CPU 温度とクロックの読み取り、FPS の計測に必要なためです。
