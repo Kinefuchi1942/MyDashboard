@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<!-- 消費電力（推定）：標準レイアウト。ヘッダーの時計の左に追加 -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;background:#0F141B;font-family:"Yu Gothic UI","IPAPGothic",sans-serif;color:#E8ECF2;position:relative}
+.num{font-family:Bahnschrift,"DejaVu Sans Condensed",sans-serif}
+.dim{color:#8592A5}
+.panel{position:absolute;background:#161D26;border:1px solid #243040;border-radius:18px}
+.h{font-size:24px;font-weight:600}
+.new{position:absolute;border:3px dashed rgba(255,181,71,.85);border-radius:16px;pointer-events:none}
+.newlabel{position:absolute;color:#FFB547;font-size:20px}
+.stat{font-size:16px;color:#8592A5;margin-top:10px}.statv{font-size:30px}
+</style></head><body>
+
+<!-- ヘッダー -->
+<div style="position:absolute;left:32px;top:28px;height:64px;display:flex;align-items:center">
+  <div style="width:14px;height:14px;border-radius:7px;background:#6FD3A8;margin-right:16px"></div>
+  <div style="font-size:30px;font-weight:600">Cyberpunk 2077</div>
+</div>
+
+<!-- ★追加：PC 全体の消費電力（推定） -->
+<div style="position:absolute;right:340px;top:30px;height:60px;display:flex;align-items:center;gap:18px">
+  <div>
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:17px" class="dim">PC 全体（推定）</span>
+      <span class="num" style="font-size:40px;font-weight:600;line-height:1">507</span><span class="num dim" style="font-size:22px">W</span>
+    </div>
+    <!-- 内訳：CPU / GPU / その他 -->
+    <div style="display:flex;width:250px;height:6px;border-radius:3px;overflow:hidden;margin-top:6px">
+      <div style="width:23%;background:#5CC8D7"></div><div style="width:57%;background:#8E9CFF"></div><div style="width:20%;background:#4A5668"></div>
+    </div>
+  </div>
+  <div style="border-left:1px solid #243040;padding-left:18px;line-height:1.35">
+    <div class="num" style="font-size:20px">今日 2.31 kWh</div>
+    <div class="dim" style="font-size:17px">約 <span class="num">72</span> 円</div>
+  </div>
+</div>
+<div class="new" style="right:326px;top:22px;width:490px;height:78px"></div>
+<div class="newlabel" style="right:326px;top:104px">追加：PC 全体の消費電力（推定）・内訳・今日の電力量と電気代</div>
+
+<div style="position:absolute;right:32px;top:28px;height:64px;display:flex;align-items:flex-end">
+  <span class="dim" style="font-size:20px;margin:0 18px 8px 0">10/30（木）</span>
+  <span class="num" style="font-size:52px;font-weight:600;line-height:1">21:48</span>
+</div>
+
+<!-- 上段 -->
+<div class="panel" style="left:28px;top:134px;width:608px;height:546px;padding:26px 32px">
+  <div style="display:flex;justify-content:space-between">
+    <div><div class="h"><span style="display:inline-block;width:6px;height:26px;background:#5CC8D7;border-radius:2px;margin-right:12px;vertical-align:-4px"></span>CPU</div>
+      <div class="dim" style="font-size:18px;margin-left:18px">Intel Core i7-14700K</div>
+      <div class="num" style="font-size:150px;font-weight:600;line-height:1.05">41<span style="font-size:48px" class="dim">%</span></div></div>
+    <div><div class="stat">温度</div><div class="num statv">68°C</div><div class="stat">平均クロック</div><div class="num statv">5.1 GHz</div><div class="stat">消費電力</div><div class="num statv">118 W</div></div>
+  </div>
+</div>
+<div class="panel" style="left:656px;top:134px;width:608px;height:546px;padding:26px 32px">
+  <div style="display:flex;justify-content:space-between">
+    <div><div class="h"><span style="display:inline-block;width:6px;height:26px;background:#8E9CFF;border-radius:2px;margin-right:12px;vertical-align:-4px"></span>GPU</div>
+      <div class="dim" style="font-size:18px;margin-left:18px">NVIDIA GeForce RTX</div>
+      <div class="num" style="font-size:150px;font-weight:600;line-height:1.05">97<span style="font-size:48px" class="dim">%</span></div></div>
+    <div><div class="stat">温度</div><div class="num statv">71°C</div><div class="stat">コアクロック</div><div class="num statv">2.7 GHz</div><div class="stat">消費電力</div><div class="num statv">286 W</div><div class="stat">ファン</div><div class="num statv">1,650 rpm</div></div>
+  </div>
+</div>
+<div class="panel" style="left:1284px;top:134px;width:608px;height:546px;padding:26px 32px">
+  <div class="h">FPS</div><div class="num" style="font-size:150px;font-weight:600;line-height:1.05">118</div>
+</div>
+<!-- 下段（今のまま） -->
+<div class="panel" style="left:28px;top:700px;width:608px;height:352px;padding:24px 32px"><div class="h">スレッド別の負荷</div></div>
+<div class="panel" style="left:656px;top:700px;width:608px;height:352px;padding:24px 32px"><div class="h">メモリ</div><div class="h" style="margin-top:140px">VRAM</div></div>
+<div class="panel" style="left:1284px;top:700px;width:608px;height:150px;padding:20px 32px"><div class="h">ネットワーク</div></div>
+<div class="panel" style="left:1284px;top:870px;width:608px;height:182px;padding:18px 32px"><div class="h">ディスク</div></div>
+</body></html>
