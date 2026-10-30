@@ -455,14 +455,8 @@ public partial class SettingsWindow : Window
 
     private void OnTwitchLogin(object sender, RoutedEventArgs e)
     {
-        var id = TwitchClientBox.Text.Trim();
-        if (id.Length == 0)
-        {
-            ShowNote("先に Client ID を入れてください（dev.twitch.tv でアプリを登録すると表示されます）", error: true);
-            TwitchClientBox.Focus();
-            return;
-        }
-        var w = new TwitchLoginWindow(id) { Owner = this };
+        // 空欄なら組み込みの ID でログインする
+        var w = new TwitchLoginWindow(TwitchService.ResolveClientId(TwitchClientBox.Text)) { Owner = this };
         if (w.ShowDialog() == true && w.Result != null)
         {
             ShowTwitchLogin(w.Result);

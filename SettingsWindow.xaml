@@ -961,7 +961,7 @@
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
                                 <StackPanel VerticalAlignment="Top" Margin="0,6,16,0">
                                     <TextBlock Style="{StaticResource Label}" Text="Client ID"/>
-                                    <TextBlock Style="{StaticResource Hint}" Text="dev.twitch.tv で登録したアプリの ID" TextWrapping="Wrap"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="ふつうは空欄のままで使えます" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
                                     <StackPanel Orientation="Horizontal">
@@ -969,7 +969,7 @@
                                         <Button Style="{StaticResource Btn}" Content="登録ページを開く" Padding="16,8" Margin="10,0,0,0" Click="OnTwitchRegister"/>
                                     </StackPanel>
                                     <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,0" TextWrapping="Wrap"
-                                               Text="登録するときは OAuth Redirect URLs に http://localhost、Client Type は「Public」を選びます（README に手順があります）"/>
+                                               Text="空欄なら組み込みの ID を使います。自分で dev.twitch.tv に登録したアプリを使うときだけ入れてください（OAuth Redirect URLs に http://localhost、Client Type は「Public」。README に手順があります）"/>
                                 </StackPanel>
                             </Grid>
                         </Border>

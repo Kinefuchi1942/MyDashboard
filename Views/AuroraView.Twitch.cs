@@ -203,7 +203,7 @@ public partial class AuroraView
         _twitchAuth ??= TwitchService.LoadAuth(); // 設定画面でログインし直した分も読む
         if (_streams.Count == 0 && _twitchError == null) SetTwitchMessage("フォロー中の配信を確かめています…");
 
-        var r = await TwitchService.GetFollowedLiveAsync(s.TwitchClientId, _twitchAuth);
+        var r = await TwitchService.GetFollowedLiveAsync(TwitchService.ResolveClientId(s.TwitchClientId), _twitchAuth);
         if (seq != _refreshSeq || _twitchMode == TwitchMode.Off || _source != StreamSource.Twitch) return;
 
         if (r.NeedLogin)

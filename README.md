@@ -199,9 +199,17 @@ Spotify で曲を流していると、天気カードの下に「再生中」カ
 - 設定画面「Twitch」の「ゲーム中は低画質」をオンにすると、ゲームが30秒続いたあと 360p 程度に下げ、ゲームが終わって1分たつと戻します（初期値はオフ）
 - ニュースに戻すと映像の部品ごと片付けるので、メモリも戻ります
 
-### 最初に1回だけ：Client ID の登録とログイン
+### 最初に1回だけ：ログイン
 
-フォロー中の一覧は Twitch 公式の仕組みで読むため、無料の「アプリ登録」が1回だけ必要です（Twitch アカウントの二段階認証を有効にしておく必要があります）。
+1. ダッシュボードの設定画面（`S`）→「Twitch」で「ログイン」→ Twitch で「許可」
+2. 「保存」
+
+Client ID（Twitch のアプリ登録）は組み込み済みなので、自分で登録する必要はありません。
+
+<details>
+<summary>自分で登録したアプリの Client ID を使いたいとき（ふつうは不要）</summary>
+
+Twitch アカウントの二段階認証を有効にしておく必要があります。
 
 1. <https://dev.twitch.tv/console/apps/create> を開き、Twitch アカウントでログイン
 2. 次のとおり入れて「作成」
@@ -210,8 +218,12 @@ Spotify で曲を流していると、天気カードの下に「再生中」カ
    - カテゴリー：Application Integration
    - クライアントのタイプ：**公開（Public）**
 3. 一覧の「管理」を開き、「クライアント ID」をコピー
-4. ダッシュボードの設定画面（`S`）→「Twitch」に Client ID を貼り付け、「ログイン」→ Twitch で「許可」
+4. ダッシュボードの設定画面（`S`）→「Twitch」の Client ID 欄に貼り付け、「ログイン」→ Twitch で「許可」
 5. 「保存」
+
+欄を空にすると、組み込みの Client ID に戻ります（そのときはログインし直してください）。
+
+</details>
 
 ログインは数十日で切れることがあります。切れたらカードに表示されるので、同じ画面で「ログイン」し直してください。
 
@@ -345,7 +357,7 @@ FPS は Intel の公式ツール **PresentMon** を裏で動かして計測し�
 | `mediaSpotifyOnly` | `true` | `true` は Spotify だけ、`false` はブラウザなど他のアプリの再生も表示 |
 | **Twitch** | | |
 | `enableTwitch` | `true` | メディアカードに Twitch への切り替えを出すか |
-| `twitchClientId` | `""` | dev.twitch.tv で登録したアプリの Client ID |
+| `twitchClientId` | `""` | 自分で登録したアプリの Client ID。空なら組み込みの ID を使う |
 | `twitchLowQualityInGame` | `false` | ゲーム中は 360p 程度に下げる |
 | `twitchLastChannel` | `""` | 最後に見ていたチャンネル（自動で保存） |
 | **YouTube** | | |

@@ -70,7 +70,7 @@ public sealed class AppSettings
 
     // ---- Twitch（オーロラのニュースカードと切り替え。フォロー中の配信を Twitch 公式 API で取る）
     public bool EnableTwitch { get; set; } = true;
-    /// <summary>dev.twitch.tv で登録したアプリの Client ID。ログイン情報は別ファイル（twitch-auth.json）に保存する。</summary>
+    /// <summary>dev.twitch.tv で登録したアプリの Client ID。空なら組み込みの ID（TwitchService.DefaultClientId）を使う。ログイン情報は別ファイル（twitch-auth.json）に保存する。</summary>
     public string TwitchClientId { get; set; } = "";
     /// <summary>ゲーム中は Twitch の画質を下げる（360p 以上）。既定はオフ。</summary>
     public bool TwitchLowQualityInGame { get; set; } = false;

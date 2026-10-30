@@ -23,7 +23,7 @@ public sealed record TwitchStream(string UserId, string Login, string Name, stri
 public sealed record TwitchFollowed(IReadOnlyList<TwitchStream> Streams, string? Error, bool NeedLogin);
 
 /// <summary>
-/// Twitch 公式 API（Helix）。依頼者が dev.twitch.tv で登録したアプリの Client ID と、
+/// Twitch 公式 API（Helix）。dev.twitch.tv で登録したアプリの Client ID（既定は依頼者のアプリ。設定で自分の ID に変えられる）と、
 /// ログインで受け取ったアクセストークン（Implicit grant、scope=user:read:follows）で呼ぶ。
 /// </summary>
 public static class TwitchService
@@ -31,6 +31,15 @@ public static class TwitchService
     /// <summary>dev.twitch.tv のアプリ登録で「OAuth Redirect URLs」に入れる値。ログイン画面はここへの移動を横取りしてトークンを受け取る。</summary>
     public const string RedirectUri = "http://localhost";
     public const string RegisterUrl = "https://dev.twitch.tv/console/apps/create";
+    /// <summary>
+    /// 組み込みの Client ID（依頼者が登録したアプリ。利用者が自分でアプリを登録しなくて済むように）。
+    /// Implicit grant なので Client Secret は使わず、Client ID は公開してよい値。API の回数制限はログインした利用者ごとに数えられる。
+    /// </summary>
+    public const string DefaultClientId = "h8opdk2mciz3xd869am8n6tn2b5oo8";
+
+    /// <summary>設定の Client ID が空なら組み込みの ID を使う。</summary>
+    public static string ResolveClientId(string? configured) =>
+        string.IsNullOrWhiteSpace(configured) ? DefaultClientId : configured.Trim();
 
     private static readonly HttpClient Http = CreateHttp();
     private static readonly Dictionary<string, string> AvatarCache = new();
@@ -97,8 +106,6 @@ public static class TwitchService
 
     public static async Task<TwitchFollowed> GetFollowedLiveAsync(string clientId, TwitchAuth? auth)
     {
-        if (string.IsNullOrWhiteSpace(clientId))
-            return new(Array.Empty<TwitchStream>(), "設定画面の「Twitch」で Client ID を登録してください", true);
         if (auth == null)
             return new(Array.Empty<TwitchStream>(), "設定画面の「Twitch」でログインしてください", true);
 
