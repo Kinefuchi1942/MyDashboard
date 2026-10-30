@@ -78,4 +78,16 @@ public sealed record Snapshot(
     IReadOnlyList<DiskInfo> Disks,
     NetworkInfo Network,
     FpsInfo Fps,
-    bool SensorDriverMissing);
+    bool SensorDriverMissing,
+    PowerInfo? Power = null);
+
+/// <summary>消費電力の推定（すべてコンセント側の W）。OtherW は CPU・GPU 以外の PC 本体、MonitorW は合計に含めないときは 0。</summary>
+public sealed record PowerInfo(
+    double TotalW,
+    double CpuW,
+    double GpuW,
+    double OtherW,
+    double MonitorW,
+    double TodayKwh,
+    double MonthKwh,
+    double YenPerKwh);

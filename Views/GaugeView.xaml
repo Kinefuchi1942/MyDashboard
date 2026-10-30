@@ -1,7 +1,8 @@
 <UserControl x:Class="MyDashboard.Views.GaugeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:c="clr-namespace:MyDashboard.Controls">
+             xmlns:c="clr-namespace:MyDashboard.Controls"
+             xmlns:v="clr-namespace:MyDashboard.Views">
     <!-- 計器盤レイアウト：CPU・FPS・GPU の3連メーター。中央の FPS がいちばん大きい -->
     <UserControl.Background>
         <RadialGradientBrush Center="0.5,0.45" GradientOrigin="0.5,0.45" RadiusX="0.7" RadiusY="0.8">
@@ -74,6 +75,9 @@
         </StackPanel>
         <TextBlock x:Name="ClockText" Canvas.Right="120" Canvas.Top="40" FontFamily="{StaticResource NumFont}" FontWeight="SemiBold"
                    FontSize="48" Foreground="#EEF2F8" Text="00:00"/>
+
+        <!-- ============ 消費電力（推定）。時計の左 -->
+        <v:PowerSummary x:Name="Power" Canvas.Right="290" Canvas.Top="42" RuleBrush="#1AFFFFFF"/>
 
         <!-- ============ Present Mode（左上、時計と同じ高さ）。ゲーム中だけ表示 -->
         <StackPanel x:Name="PresentPanel" Canvas.Left="120" Canvas.Top="51" Orientation="Horizontal" Visibility="Collapsed">

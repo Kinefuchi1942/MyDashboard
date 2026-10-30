@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using MyDashboard.Info;
+using MyDashboard.Monitoring;
 using Screen = System.Windows.Forms.Screen;
 
 namespace MyDashboard;
@@ -30,6 +31,8 @@ public partial class SettingsWindow : Window
     private readonly ObservableCollection<FeedSource> _feeds = new();
     private readonly ObservableCollection<string> _excludes = new();
     private readonly ObservableCollection<YouTubeChannel> _ytChannels = new();
+    /// <summary>消費電力のページのモニターの W 数の欄（キーはモニターの目印）。</summary>
+    private readonly Dictionary<string, TextBox> _monitorBoxes = new();
     /// <summary>画面にない設定（最後に見ていた Twitch のチャンネルなど）を保存で消さないための元の値。</summary>
     private readonly AppSettings _original;
 
@@ -87,6 +90,14 @@ public partial class SettingsWindow : Window
         LoadCritBox.Text = Num(s.LoadCrit);
         MemWarnBox.Text = Num(s.MemWarn);
         MemCritBox.Text = Num(s.MemCrit);
+
+        BuildPowerRows(s.MonitorWatts);
+        PowerMonitorBox.IsChecked = s.PowerIncludeMonitors;
+        PsuBox.Text = s.PsuWatts.ToString(Inv);
+        (PsuRatingPanel.Children.OfType<RadioButton>().FirstOrDefault(r => (string)r.Tag == s.PsuRating)
+            ?? PsuRatingPanel.Children.OfType<RadioButton>().First(r => (string)r.Tag == "gold")).IsChecked = true;
+        PowerOffsetBox.Text = Num(s.PowerOffsetW);
+        YenBox.Text = Num(s.YenPerKwh);
 
         NewsBox.IsChecked = s.EnableNews;
         RotateSlider.Value = Math.Clamp(s.NewsRotateSeconds, 3, 60);
@@ -181,6 +192,8 @@ public partial class SettingsWindow : Window
             EnableYouTube = YouTubeBox.IsChecked == true,
             YouTubeChannels = _ytChannels.Select(c => new YouTubeChannel { Id = c.Id, Name = c.Name }).ToList(),
             YouTubeLastVideo = _original.YouTubeLastVideo,
+            PowerIncludeMonitors = PowerMonitorBox.IsChecked == true,
+            PsuRating = PsuRatingPanel.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked == true)?.Tag as string ?? "gold",
             EnableFps = FpsBox.IsChecked == true,
             FpsExcludeProcesses = _excludes.ToList(),
         };
@@ -192,6 +205,36 @@ public partial class SettingsWindow : Window
         if (!Pair(MemWarnBox, MemCritBox, 10, 100, "メモリ・VRAM 使用率", out var mw, out var mc, out message)) return Fail(NavIndex.Thresholds);
         (s.CpuTempWarn, s.CpuTempCrit, s.GpuTempWarn, s.GpuTempCrit, s.LoadWarn, s.LoadCrit) = (cw, cc, gw, gc, lw, lc);
         (s.MemWarn, s.MemCrit) = (mw, mc);
+
+        // ---- 消費電力
+        if (!TryNum(PsuBox.Text, out var psu) || psu < 200 || psu > 2000)
+        {
+            message = "消費電力：電源の容量は 200〜2000 W の数字で入れてください";
+            return Fail(NavIndex.Power);
+        }
+        if (!TryNum(PowerOffsetBox.Text, out var offset) || offset < -300 || offset > 300)
+        {
+            message = "消費電力：補正は -300〜300 W の数字で入れてください（なければ 0）";
+            return Fail(NavIndex.Power);
+        }
+        if (!TryNum(YenBox.Text, out var yen) || yen < 0 || yen > 200)
+        {
+            message = "消費電力：電気代の単価は 0〜200 円の数字で入れてください";
+            return Fail(NavIndex.Power);
+        }
+        (s.PsuWatts, s.PowerOffsetW, s.YenPerKwh) = ((int)Math.Round(psu), offset, yen);
+        // いまつないでいないモニターの値は消さずに残す
+        s.MonitorWatts = _original.MonitorWatts.Where(kv => !_monitorBoxes.ContainsKey(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value);
+        foreach (var (key, box) in _monitorBoxes)
+        {
+            if (box.Text.Trim().Length == 0) continue;
+            if (!TryNum(box.Text, out var w) || w < 0 || w > 500)
+            {
+                message = "消費電力：モニターの W 数は 0〜500 の数字で入れてください（空欄なら自動）";
+                return Fail(NavIndex.Power);
+            }
+            s.MonitorWatts[key] = w;
+        }
 
         // ---- ニュースの配信元（URL が空の行は捨てる）
         s.NewsFeeds = new List<FeedSource>();
@@ -222,7 +265,7 @@ public partial class SettingsWindow : Window
         return s;
     }
 
-    private enum NavIndex { Display, Aurora, Thresholds, News, Weather, Media, Twitch, YouTube, Fps }
+    private enum NavIndex { Display, Aurora, Thresholds, Power, News, Weather, Media, Twitch, YouTube, Fps }
 
     /// <summary>入力に問題があったページを開いて null を返す。</summary>
     private AppSettings? Fail(NavIndex page)
@@ -263,7 +306,7 @@ public partial class SettingsWindow : Window
     private void OnNav(object sender, RoutedEventArgs e)
     {
         if (sender is not RadioButton { Tag: string pageName } || PageScroll == null) return;
-        foreach (var page in new FrameworkElement[] { PageDisplay, PageAurora, PageThresholds, PageNews, PageWeather, PageMedia, PageTwitch, PageYouTube, PageFps })
+        foreach (var page in new FrameworkElement[] { PageDisplay, PageAurora, PageThresholds, PagePower, PageNews, PageWeather, PageMedia, PageTwitch, PageYouTube, PageFps })
             page.Visibility = page.Name == pageName ? Visibility.Visible : Visibility.Collapsed;
         PageScroll.ScrollToTop();
     }
@@ -499,6 +542,90 @@ public partial class SettingsWindow : Window
     private void OnExcludeRemove(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement { Tag: string name }) _excludes.Remove(name);
+    }
+
+    // =========================================================== 消費電力：見つかった構成
+
+    /// <summary>見つかった部品と W 数の表を作る。モニターの行には W 数を直す欄を付ける（overrides は欄に入れておく値）。</summary>
+    private void BuildPowerRows(IReadOnlyDictionary<string, double> overrides)
+    {
+        PowerRows.Children.Clear();
+        _monitorBoxes.Clear();
+        var rows = PowerMeter.Shared.Rows;
+        if (rows.Count == 0)
+        {
+            PowerRows.Children.Add(new TextBlock { Text = "まだ調べています。少し待ってから開き直してください", Foreground = Res("Dim"), Margin = new Thickness(0, 6, 0, 6) });
+            return;
+        }
+        int monitorNo = 0;
+        foreach (var r in rows)
+        {
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(150) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            string label = r.MonitorKey != null && rows.Count(x => x.MonitorKey != null) > 1 ? $"{r.Label} {++monitorNo}" : r.Label;
+            grid.Children.Add(new TextBlock { Text = label, Foreground = Res("Dim"), VerticalAlignment = VerticalAlignment.Center });
+
+            var detail = new WrapPanel { VerticalAlignment = VerticalAlignment.Center };
+            detail.Children.Add(new TextBlock { Text = r.Detail, Foreground = Res("Soft"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) });
+            detail.Children.Add(PowerTag(r.Measured ? "実測" : "見積もり" + (r.Note != null ? "・" + r.Note : ""), r.Measured));
+            Grid.SetColumn(detail, 1);
+            grid.Children.Add(detail);
+
+            FrameworkElement right;
+            if (r.MonitorKey != null)
+            {
+                var box = new TextBox { Style = (Style)FindResource("NumBox"), Width = 76, FontSize = 17, Padding = new Thickness(8, 2, 8, 2),
+                                        Text = overrides.TryGetValue(r.MonitorKey, out var o) ? Num(o) : "" };
+                _monitorBoxes[r.MonitorKey] = box;
+                var sp = new StackPanel { Orientation = Orientation.Horizontal };
+                sp.Children.Add(new TextBlock { Text = $"自動 {r.AutoWatts:0} W", Foreground = Res("Dim"), FontSize = 13, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) });
+                sp.Children.Add(box);
+                sp.Children.Add(new TextBlock { Text = "W", Foreground = Res("Dim"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
+                right = sp;
+            }
+            else
+            {
+                right = new TextBlock { Text = $"{r.Watts:0} W", FontFamily = (System.Windows.Media.FontFamily)FindResource("NumFont"), FontSize = 17,
+                                        VerticalAlignment = VerticalAlignment.Center };
+            }
+            Grid.SetColumn(right, 2);
+            grid.Children.Add(right);
+
+            PowerRows.Children.Add(new Border { Style = (Style)FindResource("RowLine"), Padding = new Thickness(0, 8, 0, 8), Child = grid });
+        }
+    }
+
+    private Border PowerTag(string text, bool measured) => new()
+    {
+        CornerRadius = new CornerRadius(10),
+        BorderThickness = new Thickness(1),
+        BorderBrush = measured ? Res("Accent") : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x4A, 0x56, 0x68)),
+        Background = measured ? Res("AccentSoft") : System.Windows.Media.Brushes.Transparent,
+        Padding = new Thickness(8, 1, 8, 2),
+        VerticalAlignment = VerticalAlignment.Center,
+        Child = new TextBlock { Text = text, FontSize = 12, Foreground = measured ? Res("Accent") : Res("Dim") },
+    };
+
+    private System.Windows.Media.Brush Res(string key) => (System.Windows.Media.Brush)FindResource(key);
+
+    private async void OnPowerRescan(object sender, RoutedEventArgs e)
+    {
+        // 欄に入力中の値は残す
+        var typed = _monitorBoxes.Where(kv => TryNum(kv.Value.Text, out _)).ToDictionary(kv => kv.Key, kv => { TryNum(kv.Value.Text, out var v); return v; });
+        RescanButton.IsEnabled = false;
+        ShowNote("構成を調べています…");
+        try
+        {
+            await PowerMeter.Shared.Rescan();
+            await Task.Delay(1500);   // 新しい構成での見積もりが一度出るのを待つ
+            BuildPowerRows(typed);
+            ShowNote("構成を読み直しました");
+        }
+        catch { ShowNote("構成を読み直せませんでした", error: true); }
+        finally { RescanButton.IsEnabled = true; }
     }
 
     // =========================================================== 下のボタン・タイトルバー

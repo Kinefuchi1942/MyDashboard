@@ -24,7 +24,7 @@ public sealed class HardwareMonitor : IDisposable
             IsGpuEnabled = true,
             IsMemoryEnabled = false,   // RAMはWindows APIで取る
             IsStorageEnabled = true,
-            IsMotherboardEnabled = false,
+            IsMotherboardEnabled = true,   // ファンの数（消費電力の見積もり）
             IsNetworkEnabled = false,  // ネットワークは NetworkMonitor で取る
             IsControllerEnabled = false,
         };
@@ -153,6 +153,22 @@ public sealed class HardwareMonitor : IDisposable
             NormalizeBytes(used),
             NormalizeBytes(total),
             fan);
+    }
+
+    // ---------------------------------------------------------------- ファン（マザーボード）
+
+    /// <summary>回っているファン・ポンプの数（100 rpm 超）。マザーボードにファンのセンサーがなければ null。</summary>
+    public int? CountFans()
+    {
+        bool any = false;
+        int spinning = 0;
+        foreach (var hw in _computer.Hardware.Where(h => h.HardwareType == HardwareType.Motherboard))
+            foreach (var s in AllSensors(hw).Where(s => s.SensorType == SensorType.Fan))
+            {
+                any = true;
+                if (s.Value is > 100) spinning++;
+            }
+        return any ? spinning : null;
     }
 
     // ---------------------------------------------------------------- ストレージ

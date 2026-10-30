@@ -96,6 +96,16 @@ RSS 2.0・RSS 1.0（RDF）・Atom のどれでも読めます。サイトの RSS
 
 数字は通常は白で、しきい値を超えると琥珀色（注意）、さらに超えると赤（危険）に変わります。しきい値は `settings.json` で変えられます。
 
+## 消費電力（標準・計器盤）
+
+標準と計器盤では、時計の左に PC 全体とモニターの消費電力（推定、W）と、今日・今月の電力量（kWh）と電気代を出します。数字の下の細い帯は内訳で、左から CPU（青緑）・GPU（紫）・その他の部品（濃い灰）・モニター（明るい灰）の割合です。
+
+- **CPU と GPU はセンサーの実測**、ほかは起動時に自動で調べた構成（マザーボード・メモリ・ドライブ・ファン・モニター）から見積もり、電源の効率で割ってコンセント側の値にしています。だいたい ±10〜15% の誤差があります
+- 電源の容量と 80 PLUS の等級は自動では分からないので、設定画面の「消費電力」で入れてください（初期値は 850 W・Gold）。ワットチェッカーで測った値とずれるときは「補正」で合わせられます
+- モニターは大きさ（何型）とリフレッシュレート、読めればモニターの明るさから見積もります。モニターごとの W 数は設定画面で直せます。画面が消えている間は 1 台 0.5 W で数えます
+- 電力量はダッシュボードが動いている間だけ数えます。今日は毎日 0 時、今月は毎月 1 日に 0 に戻ります（`power-log.json` に保存）
+- 見つかった構成は設定画面の「消費電力」と `power-diagnostics.txt` で確認できます。部品を付け替えたら「構成を読み直す」を押してください
+
 ## CPU 温度を表示するには（PawnIO）
 
 CPU の温度・クロック・電力の読み取りには、LibreHardwareMonitor が使う **PawnIO** ドライバが必要です。
@@ -170,6 +180,12 @@ FPS は Intel の公式ツール **PresentMon（コンソール版）** を裏�
 | `enableYouTube` | `true` | オーロラのニュースカードに YouTube への切り替えを出すか |
 | `youTubeChannels` | `[]` | 登録した YouTube のチャンネル（`id` と `name`。設定画面で追加する） |
 | `youTubeLastVideo` | `""` | 最後に見ていた動画（自動で保存。一覧にあれば次もこれから） |
+| `powerIncludeMonitors` | `true` | 消費電力の合計にモニターを含めるか |
+| `psuWatts` | `850` | 電源の容量（W、200〜2000） |
+| `psuRating` | `gold` | 電源の 80 PLUS の等級（`none` / `standard` / `bronze` / `silver` / `gold` / `platinum` / `titanium`） |
+| `powerOffsetW` | `0` | 消費電力の補正（W、-300〜300） |
+| `yenPerKwh` | `31` | 電気代の単価（円/kWh。0 で電気代を出さない） |
+| `monitorWatts` | `{}` | モニターごとに自分で決めた W 数（設定画面で入れる。ないモニターは自動の見積もり） |
 | `enableFps` | `true` | FPS 計測のオン／オフ |
 | `fpsExcludeProcesses` | （一覧） | FPS 計測から外すプロセス名 |
 
@@ -190,6 +206,7 @@ MainWindow.xaml(.cs)      ウィンドウ本体。レイアウト切り替え、
 SettingsWindow.xaml(.cs)  設定画面（settings.json を画面で編集し、保存ですぐ反映）
 Views/
   ClassicView             標準レイアウト
+  PowerSummary            消費電力（推定）の表示。標準・計器盤で共通
   GaugeView               計器盤レイアウト
   AuroraView              オーロラレイアウト
   AuroraView.Twitch.cs    オーロラの Twitch 表示（通常／拡張、フォロー中の一覧、低画質の切り替え）
@@ -215,6 +232,8 @@ Monitoring/
   FpsMonitor.cs           PresentMon の出力から FPS・1% Low を計算
   CpuTopology.cs          P コア／E コアの判別
   DlssDetector.cs         DLSS（SR／FG／RR）の検出
+  SystemScanner.cs        PC の構成（マザーボード・メモリ・ドライブ・ファン・モニター）を調べる
+  PowerMeter.cs           消費電力の推定と、今日・今月の電力量の積算
   Snapshot.cs             1回分の測定値の入れ物
   Collector.cs            一定間隔でまとめて取得し、画面に渡す
 ```
