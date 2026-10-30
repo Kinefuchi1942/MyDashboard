@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace MyDashboard;
 
-/// <summary>exe と同じフォルダの settings.json を読み書きする。</summary>
+/// <summary>%APPDATA%MyDashboardsettings.json を読み書きする（AppPaths）。</summary>
 public sealed class AppSettings
 {
     /// <summary>表示するモニター番号（0始まり）。-1 ならメイン以外の最初のモニター。</summary>
@@ -112,7 +112,7 @@ public sealed class AppSettings
         WriteIndented = true,
     };
 
-    public static string FilePath => Path.Combine(AppContext.BaseDirectory, "settings.json");
+    public static string FilePath => AppPaths.Data("settings.json");
 
     public static AppSettings Load()
     {

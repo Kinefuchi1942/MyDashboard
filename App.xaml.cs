@@ -31,6 +31,7 @@ public partial class App : Application
         };
 
         base.OnStartup(e);
+        AppPaths.Prepare();
         new MainWindow().Show();
         WatchQuitRequest();
     }

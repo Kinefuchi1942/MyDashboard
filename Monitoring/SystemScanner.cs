@@ -273,7 +273,7 @@ public static class SystemScanner
                 string b = m.GdiName != null && brightness != null && brightness.TryGetValue(m.GdiName, out var v) ? $"{v:0}%" : "(読めない)";
                 sb.AppendLine($"  {m.Name} / {(m.Inches?.ToString("0.0") ?? "?")} 型 / {m.RefreshHz} Hz / {m.GdiName} / 明るさ {b} / key={m.Key}");
             }
-            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "power-diagnostics.txt"), sb.ToString());
+            File.WriteAllText(AppPaths.Data("power-diagnostics.txt"), sb.ToString());
         }
         catch { }
     }

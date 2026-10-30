@@ -17,16 +17,16 @@
 - `Monitoring/`：センサー収集（1秒ごと）
   - HardwareMonitor：LibreHardwareMonitorLib 0.9.6（CPU / GPU / ストレージ）、メモリは GlobalMemoryStatusEx
   - CpuTopology：GetLogicalProcessorInformationEx の EfficiencyClass で P/E コアを判定し、センサー名「CPU Core #N」の N をコア順に当てる（取れなければ HT なしのコア＝E コアで推定）。CoreBars は E コアを淡色・グループ分け・ラベル付きで描く
-  - FpsMonitor：Intel PresentMon（コンソール版）を子プロセスで起動し CSV を読む。診断を publish\fps-diagnostics.txt に出力
-  - DlssDetector：ゲームが読み込んでいる nvngx_dlss / dlssg / dlssd の DLL（ドライバー差し替え時は ProgramData\NVIDIA\NGX\models 以下の .bin）から DLSS の SR・FG・RR を推定。診断を publish\dlss-diagnostics.txt に出力
+  - FpsMonitor：Intel PresentMon（コンソール版）を子プロセスで起動し CSV を読む。診断を %APPDATA%\MyDashboard\fps-diagnostics.txt に出力
+  - DlssDetector：ゲームが読み込んでいる nvngx_dlss / dlssg / dlssd の DLL（ドライバー差し替え時は ProgramData\NVIDIA\NGX\models 以下の .bin）から DLSS の SR・FG・RR を推定。診断を %APPDATA%\MyDashboard\dlss-diagnostics.txt に出力
   - NetworkMonitor：NetworkInterface の送受信量
-  - SystemScanner：消費電力の見積もり用に PC の構成を調べる（起動時と設定画面の「構成を読み直す」）。マザーボード＝レジストリ HARDWARE\DESCRIPTION\System\BIOS、メモリ＝SMBIOS の Type 17（GetSystemFirmwareTable）、ドライブ＝\\.\PhysicalDriveN への IOCTL_STORAGE_QUERY_PROPERTY（BusType 17＝NVMe、シークペナルティあり＝HDD、USB・仮想は除外）、ファン＝HardwareMonitor の LHM で Motherboard を有効にして毎回数える（100 rpm 超。LHM の Computer を別に開いて閉じると、ドライバーが共有ごと閉じられて本体のセンサーが NullReference で読めなくなるので、別に開かない）、モニター＝QueryDisplayConfig（名前・リフレッシュレート・GDI 名）＋レジストリの EDID（大きさ）、明るさ＝DDC/CI（dxva2 GetMonitorBrightness、1分ごと・裏で）。診断を publish\power-diagnostics.txt に出力
-  - PowerMeter：消費電力の推定（アプリ全体で1つ。設定の保存で Collector が作り直されても積算は続く）。CPU・GPU は LHM の実測、マザーボード＝Z/X 系 18 W・B/H/A 系 12 W・不明 15 W＋CPU 電力の 1 割（電源回路の損失）、メモリ＝DDR5 4 W・ほか 3 W／枚、ドライブ＝NVMe 1.5〜6 W・SATA SSD 0.8〜3 W・HDD 5〜8 W（LHM の読み書き速度で増やす。100 MB/s で最大）、ファン 1.5 W／個（読めなければ 4 個）、その他 5 W。合計を 80 PLUS の等級ごとの効率曲線（10・20・50・100% 負荷）で割り、補正を足す。モニター＝（インチ×1 W＋120Hz 以上 5 W／200Hz 以上 8 W）×（0.4＋0.6×明るさ）、明るさが読めなければ 50%、画面消灯中（MainWindow が GUID_CONSOLE_DISPLAY_STATE の通知で PowerMeter.DisplayOn を書く）は 0.5 W。電力量は publish\power-log.json（日・月ごと、1分ごとと終了時に保存。5 秒以上あいた間は数えない）
+  - SystemScanner：消費電力の見積もり用に PC の構成を調べる（起動時と設定画面の「構成を読み直す」）。マザーボード＝レジストリ HARDWARE\DESCRIPTION\System\BIOS、メモリ＝SMBIOS の Type 17（GetSystemFirmwareTable）、ドライブ＝\\.\PhysicalDriveN への IOCTL_STORAGE_QUERY_PROPERTY（BusType 17＝NVMe、シークペナルティあり＝HDD、USB・仮想は除外）、ファン＝HardwareMonitor の LHM で Motherboard を有効にして毎回数える（100 rpm 超。LHM の Computer を別に開いて閉じると、ドライバーが共有ごと閉じられて本体のセンサーが NullReference で読めなくなるので、別に開かない）、モニター＝QueryDisplayConfig（名前・リフレッシュレート・GDI 名）＋レジストリの EDID（大きさ）、明るさ＝DDC/CI（dxva2 GetMonitorBrightness、1分ごと・裏で）。診断を %APPDATA%\MyDashboard\power-diagnostics.txt に出力
+  - PowerMeter：消費電力の推定（アプリ全体で1つ。設定の保存で Collector が作り直されても積算は続く）。CPU・GPU は LHM の実測、マザーボード＝Z/X 系 18 W・B/H/A 系 12 W・不明 15 W＋CPU 電力の 1 割（電源回路の損失）、メモリ＝DDR5 4 W・ほか 3 W／枚、ドライブ＝NVMe 1.5〜6 W・SATA SSD 0.8〜3 W・HDD 5〜8 W（LHM の読み書き速度で増やす。100 MB/s で最大）、ファン 1.5 W／個（読めなければ 4 個）、その他 5 W。合計を 80 PLUS の等級ごとの効率曲線（10・20・50・100% 負荷）で割り、補正を足す。モニター＝（インチ×1 W＋120Hz 以上 5 W／200Hz 以上 8 W）×（0.4＋0.6×明るさ）、明るさが読めなければ 50%、画面消灯中（MainWindow が GUID_CONSOLE_DISPLAY_STATE の通知で PowerMeter.DisplayOn を書く）は 0.5 W。電力量は %APPDATA%\MyDashboard\power-log.json（日・月ごと、1分ごとと終了時に保存。5 秒以上あいた間は数えない）
   - Collector：上記を1秒ごと（updateIntervalMs）にまとめて Snapshot にして画面へ渡す
 - `Info/`：ニュースと天気（センサーとは別ループ）
   - InfoService：RSS を10分ごと、天気（Open-Meteo、API キー不要）を15分ごとに取得
   - FeedParser：RSS 2.0 / RSS 1.0 (RDF) / Atom を要素名で読む。配信元を交互に並べる
-  - MediaService：Windows の再生中メディア情報（GlobalSystemMediaTransportControls）から Spotify などの曲名・ジャケット・再生位置を読む。通知方式で負荷ほぼゼロ。診断を publish\media-diagnostics.txt に出力。このため TargetFramework は net8.0-windows10.0.19041.0
+  - MediaService：Windows の再生中メディア情報（GlobalSystemMediaTransportControls）から Spotify などの曲名・ジャケット・再生位置を読む。通知方式で負荷ほぼゼロ。診断を %APPDATA%\MyDashboard\media-diagnostics.txt に出力。このため TargetFramework は net8.0-windows10.0.19041.0
 - `Views/`：差し替え可能なレイアウト（IDashboardView：Render / UpdateClock / SetNotice / ShowNews / ShowWeather / ShowMedia）
   - ClassicView「標準」：情報量重視のパネル型（スレッド別負荷、ディスクごとの速度まで表示）。見出しの時計の左に消費電力
   - PowerSummary：消費電力（推定）の表示。合計 W・内訳の帯（CPU／GPU／その他／モニター）・今日と今月の kWh と電気代。標準と計器盤の時計の左に置く（2026-10-30 追加、モックアップ `mockups/power-classic.png`・`power-gauge.png`・`power-settings.png`）
@@ -35,19 +35,19 @@
     - 左列（1920×1080 基準）：時計（y150・文字300）、日付（y470）、天気カード（x96・y556・幅860・高さ200）。曲の再生中は天気の下に再生中カード（x96・y726〜852・幅860・高さ126）を出し、そのあいだ時計・日付・天気を 50px 上げる（MediaLift）。背景にジャケット色の光。再生なし／一時停止5分でカードを隠す
     - 右列：メディアカード（ニュース⇄Twitch⇄YouTube）。右端から96px・上端 y48・幅844×高さ804で、天気・再生中カードの右24px、下段バーの手前まで。ニュースは見出し（46px）＋要約（空き高さに合わせて最大5行）＋次の記事4件、前へ／次へのボタンと件数表示。ダブルクリックで記事を開く
     - 「ニュース｜Twitch」で Twitch に手動で切り替え（AuroraView.Twitch.cs。起動時はニュース）。通常表示＝同じ位置・寸法のカードに映像 760×428（TwitchSlot）＋配信者名・視聴者数・経過時間・タイトル＋フォロー中で配信中の全員を丸いチップで並べる（入りきらない分は矢印／ホイールで横送り）。「拡張」で x96・y124・幅1728・高さ734 に広げ、映像（16:9・高さいっぱい）の右にチャット。拡張中は右上に時計と気温を出し、時計・天気・再生中カードは DailyLayer / MediaLayer ごと隠す
-  - TwitchPlayer（Views/TwitchPlayer.cs）：WebView2 で Twitch 公式の埋め込みプレーヤーとチャットを出す。親ページは仮ドメイン https://mydashboard.local/（SetVirtualHostNameToFolderMapping。Twitch の parent 指定に必要）。WebView2 は HWND なので WPF の上に重ねられない・Viewbox の拡大は ZoomFactor で合わせる（1秒ごとにも確認）。映像は消音で始まる。チャットは拡張表示のときだけ iframe で読み込む。ゲーム中の低画質（設定でオン、360p 以上）は、ゲームが30秒続いてから下げ、終わって1分たってから戻す。WebView2 のデータ（ログインの Cookie）は publish\webview2。ニュースに戻すと Dispose
+  - TwitchPlayer（Views/TwitchPlayer.cs）：WebView2 で Twitch 公式の埋め込みプレーヤーとチャットを出す。親ページは仮ドメイン https://mydashboard.local/（SetVirtualHostNameToFolderMapping。Twitch の parent 指定に必要）。WebView2 は HWND なので WPF の上に重ねられない・Viewbox の拡大は ZoomFactor で合わせる（1秒ごとにも確認）。映像は消音で始まる。チャットは拡張表示のときだけ iframe で読み込む。ゲーム中の低画質（設定でオン、360p 以上）は、ゲームが30秒続いてから下げ、終わって1分たってから戻す。WebView2 のデータ（ログインの Cookie）は %LOCALAPPDATA%\MyDashboard\webview2。ニュースに戻すと Dispose
   - YouTube（AuroraView.YouTube.cs、2026-10-28 追加）：Twitch と同じカード・同じ拡張表示・同じ要素（TwitchSlot、TwitchName、TwitchChips など）を使い、AuroraView.Twitch.cs の _source（Twitch / YouTube）で見分ける。カードの「ニュース｜Twitch｜YouTube」のタブは選んでいる方にコードで色を付ける（Twitch 紫・YouTube 赤）。一覧は登録チャンネルの配信中（丸いチップ＋LIVE、視聴者の多い順）→新着動画（サムネイル付きの角丸チップ、新しい順に最大30本）。「＋ URL」はクリップボードの動画 URL を再生（文字入力欄を出さないため。WebView2 の上に入力欄を重ねられない）。表示中だけ1分ごとのタイマーで、配信中は3分・新着は15分たったものを取り直す（同時に4件まで）。動画が終わったら止める。埋め込み禁止（エラー 101/150）はメッセージを出し、選び直すまで再生し直さない。ゲーム中の低画質はなし（IFrame API で画質を変えられない）
-  - WebPlayer（Views/WebPlayer.cs）：TwitchPlayer と YouTubePlayer の共通部分（WebView2 の初期化、仮ドメイン、ページへの命令の順番待ち、拡張表示の幅）。どちらのページも TwitchWeb.PageFolder が publish\webview2\page に書き出す
+  - WebPlayer（Views/WebPlayer.cs）：TwitchPlayer と YouTubePlayer の共通部分（WebView2 の初期化、仮ドメイン、ページへの命令の順番待ち、拡張表示の幅）。どちらのページも TwitchWeb.PageFolder が %LOCALAPPDATA%\MyDashboard\webview2\page に書き出す
   - YouTubePlayer（Views/YouTubePlayer.cs）：YouTube IFrame Player API（youtube.html）。動画 ID 指定なら仮ドメインで再生できる（2026-10-28 に試作で確認）。チャンネル指定の配信（listType=live）はエラー 150 になるので使わない。拡張表示の右は、配信なら live_chat?v=…&embed_domain=mydashboard.local&dark_theme=1、動画ならページ内に新着の一覧（押すと pick:ID を送る）
   - YouTubeService（Info/YouTubeService.cs）：キー不要。/channel/ID/videos の ytInitialData（lockupViewModel）から新着（ショートと配信は入らない）、/channel/ID/live の ytInitialPlayerResponse（videoDetails.isLive）で配信中を判定。RSS（feeds/videos.xml）はチャンネルによって 404 になるので使わない。日本語のページ（Accept-Language: ja）の「8 時間前」から投稿時刻を逆算。配信の開始時刻は取れないことが多い（そのときは経過時間を出さない）
-  - TwitchService（Info/TwitchService.cs）：Helix API（streams/followed、users）。Client ID は設定、トークンは publish\twitch-auth.json（Implicit grant。ログイン画面は TwitchLoginWindow が http://localhost への移動を横取り）
+  - TwitchService（Info/TwitchService.cs）：Helix API（streams/followed、users）。Client ID は設定、トークンは %APPDATA%\MyDashboard\twitch-auth.json（Implicit grant。ログイン画面は TwitchLoginWindow が http://localhost への移動を横取り）
   - AuroraTheme：オーロラの時間帯テーマ（朝・昼は明るい背景＋濃い文字、夕方は紫と橙、夜はほぼ黒で約1割暗く）。境目は日の出／10時／日の入り1時間前／日の入り1時間後で、前後15分で背景を混ぜ、文字色は中間で3秒かけて切り替える。オーロラの文字・カードの色は DynamicResource（AText・AT85〜AT40・AGlass・ALine など）で、コードがブラシの色を変える。明るいテーマでは CPU #0B8494、GPU #5A52D0 の濃い版を使う
   - テーマ切替（AuroraView の ThemePicker）：メディアカードの右、画面右端に朝・昼・夕方・夜の四角を縦に並べる（中は各テーマの空の色を XAML に直書き）。クリックで settings.json の auroraTheme をそのテーマに固定して保存、固定中のものを再クリックで auto に戻す。いまの配色の四角を文字色の枠で囲む。モックアップは `mockups/aurora-theme-icons.png`
   - ViewSupport：共通の色・書式（Fmt）、ニュースの順送り（NewsRotator / NewsTicker）、演出（Fx）
 - `Controls/`：自前描画の部品（HistoryChart、ArcGauge、FrameTimeChart、WeatherIcon、Meters.cs の BarMeter・CoreBars）
 - `settings.json`：monitor、更新間隔、alwaysBehind、しきい値、layout（classic / gauge / aurora）、auroraMotion、auroraTheme（auto / morning / day / evening / night / classic）、auroraDayBrightness、enableMedia、mediaSpotifyOnly、enableTwitch / twitchClientId / twitchLowQualityInGame / twitchLastChannel、enableYouTube / youTubeChannels / youTubeLastVideo、memWarn / memCrit（メモリ・VRAM 使用率）、newsFeeds、天気の地点（緯度経度）、FPS 除外プロセス
 - `app.ico`：アプリのアイコン（紺の角丸＋オーロラの光＋計器の弧。16〜40px は簡略版の絵）
-- 操作：右クリックメニュー（レイアウト / 次のモニター / 常に背後 / 設定… / 設定ファイルを開く / 終了）、S＝設定画面、L＝レイアウト切替、M＝モニター移動、B＝常に背後（壁紙のように後ろのまま）、Ctrl+Q＝終了、ニュースはダブルクリックで記事を開く
+- 操作：右クリックメニュー（レイアウト / 次のモニター / 常に背後 / サインイン時に自動起動 / 設定… / 設定ファイルを開く / 保存フォルダを開く / 終了）、S＝設定画面、L＝レイアウト切替、M＝モニター移動、B＝常に背後（壁紙のように後ろのまま）、Ctrl+Q＝終了、ニュースはダブルクリックで記事を開く
 
 ## ファイル一覧
 
@@ -91,6 +91,7 @@ Monitoring/
   Collector.cs            一定間隔でまとめて取得し、画面に渡す
 build.bat                 本番ビルド（publish へ。PresentMon のダウンロードも聞く）
 make-dist.ps1             配布用の単体 exe を dist\ に作る（PresentMon を vendor\ に用意して exe に埋め込む）
+AppPaths.cs               保存場所（%APPDATA%\MyDashboard と %LOCALAPPDATA%\MyDashboard）。起動時に exe の隣の旧データを移す
 AutoStart.cs              自動起動（タスクスケジューラの「MyDashboard」）の登録・解除。右クリック「サインイン時に自動起動」
 .github/workflows/release.yml  タグの push で exe を作って GitHub Releases に公開
 mockups/                  デザインのモックアップ画像

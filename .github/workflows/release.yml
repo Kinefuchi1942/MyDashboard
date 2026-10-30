@@ -46,7 +46,7 @@ jobs:
           $notes = @"
           ## ダウンロード
 
-          - **MyDashboard.exe** … これだけで動きます。好きなフォルダに置いてダブルクリックしてください（設定などは同じフォルダに保存されます）
+          - **MyDashboard.exe** … これだけで動きます。好きなフォルダに置いてダブルクリックしてください（設定は %APPDATA%\MyDashboard に保存されます）
 
           使い方・設定・自動起動は [README](https://github.com/$env:GITHUB_REPOSITORY#readme) を参照してください。
           "@

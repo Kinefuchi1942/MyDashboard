@@ -16,7 +16,7 @@ public static class TwitchWeb
     public const string Host = "mydashboard.local";
     private static Task<CoreWebView2Environment>? _env;
 
-    public static string DataFolder => Path.Combine(AppContext.BaseDirectory, "webview2");
+    public static string DataFolder => AppPaths.Local("webview2");
 
     /// <summary>WebView2 の実行環境。同じフォルダを使う WebView2 は同じ設定で作る必要があるので1つを使い回す。</summary>
     public static Task<CoreWebView2Environment> GetEnvironmentAsync()

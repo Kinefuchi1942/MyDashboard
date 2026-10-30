@@ -23,7 +23,7 @@ public sealed class PowerMeter
     /// <summary>画面が点いているか（Windows の画面の電源。MainWindow が通知を受けて書く）。消えている間はモニターを 0.5 W で数える。</summary>
     public static volatile bool DisplayOn = true;
 
-    private static string LogPath => Path.Combine(AppContext.BaseDirectory, "power-log.json");
+    private static string LogPath => AppPaths.Data("power-log.json");
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
 
     private readonly object _lock = new();

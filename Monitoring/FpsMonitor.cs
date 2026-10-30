@@ -64,31 +64,26 @@ public sealed class FpsMonitor : IDisposable
                                .FirstOrDefault();
             if (hit != null) return hit;
         }
-        return ExtractBundledPresentMon(baseDir);
+        return ExtractBundledPresentMon();
     }
 
     /// <summary>
     /// 配布版の exe には PresentMon.exe を埋め込んである（make-dist.ps1 が vendor\ に用意したとき）。
-    /// exe だけ渡されても FPS が出るよう、初回に exe と同じフォルダ（書けなければ LocalAppData）へ取り出す。
+    /// exe だけ渡されても FPS が出るよう、%LOCALAPPDATA%\MyDashboard へ取り出して使う（中身が変わったときだけ書き直す）。
     /// </summary>
-    private static string? ExtractBundledPresentMon(string baseDir)
+    private static string? ExtractBundledPresentMon()
     {
         using var res = typeof(FpsMonitor).Assembly.GetManifestResourceStream("PresentMon.exe");
         if (res == null) return null;
-        var fallback = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MyDashboard");
-        foreach (var dir in new[] { baseDir, fallback })
+        var path = AppPaths.Local("PresentMon.exe");
+        try
         {
-            var path = Path.Combine(dir, "PresentMon.exe");
-            try
-            {
-                if (File.Exists(path) && new FileInfo(path).Length == res.Length) return path;
-                Directory.CreateDirectory(dir);
-                using (var file = File.Create(path)) { res.Position = 0; res.CopyTo(file); }
-                return path;
-            }
-            catch { /* 書き込めない場所なら次へ */ }
+            if (File.Exists(path) && new FileInfo(path).Length == res.Length) return path;
+            Directory.CreateDirectory(AppPaths.LocalFolder);
+            using (var file = File.Create(path)) res.CopyTo(file);
+            return path;
         }
-        return null;
+        catch { return null; }
     }
 
     private void Start()
@@ -194,7 +189,7 @@ public sealed class FpsMonitor : IDisposable
     private static int Col(string[] cols, string name) =>
         Array.FindIndex(cols, c => string.Equals(c.Trim(), name, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>FPSが出ないときの原因調査用。5秒ごとに exe と同じフォルダへ書き出す。</summary>
+    /// <summary>FPSが出ないときの原因調査用。5秒ごとに %APPDATA%\MyDashboard へ書き出す。</summary>
     private void WriteDiagnostics()
     {
         if (DateTime.Now < _nextDiag) return;
@@ -223,7 +218,7 @@ public sealed class FpsMonitor : IDisposable
                     sb.AppendLine($"  {kv.Key}: {kv.Value}");
             sb.AppendLine("エラー出力:");
             lock (_stderr) foreach (var l in _stderr) sb.AppendLine("  " + l);
-            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "fps-diagnostics.txt"), sb.ToString());
+            File.WriteAllText(AppPaths.Data("fps-diagnostics.txt"), sb.ToString());
         }
         catch { }
     }
@@ -236,7 +231,7 @@ public sealed class FpsMonitor : IDisposable
                 return new FpsInfo(FpsState.Disabled, null, null, null, null, "FPS計測はオフです");
             case FpsState.NotInstalled:
                 return new FpsInfo(FpsState.NotInstalled, null, null, null, null,
-                    "PresentMon.exe を exe と同じフォルダに置くと FPS を表示します");
+                    "PresentMon.exe を MyDashboard.exe と同じフォルダに置くと FPS を表示します");
         }
 
         WriteDiagnostics();

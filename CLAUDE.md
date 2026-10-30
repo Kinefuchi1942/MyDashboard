@@ -49,7 +49,10 @@
    - Git Bash から schtasks を呼ぶと `/Run` がパスに変換されるので、PowerShell を使う
 5. 起動したか `Get-Process MyDashboard` で確かめる
 
-- `publish\PresentMon.exe`（FPS 計測）、`publish\settings.json`（依頼者の設定）、`publish\twitch-auth.json`（Twitch のログイン）、`publish\webview2\`、`publish\power-log.json`（今日・今月の電力量）は消さない・上書きしない
+- 設定・記録は exe の隣ではなくユーザーごとのフォルダ（`AppPaths.cs`、2026-10-30 から）。消さない・上書きしない：
+  - `%APPDATA%\MyDashboard`：`settings.json`（依頼者の設定）、`twitch-auth.json`（Twitch のログイン）、`power-log.json`（今日・今月の電力量）、診断ファイル
+  - `%LOCALAPPDATA%\MyDashboard`：`webview2\`、埋め込みから取り出した `PresentMon.exe`
+  - `publish\PresentMon.exe`（FPS 計測。あればこちらを優先）も消さない。`quit.request` だけは今も exe の隣（publish）に置く
 - ソース側に `settings.json` は置かない（初回起動時に `AppSettings.cs` の既定値で作られる）。既定値を変えたいときは `AppSettings.cs` を直す
 - 自動起動の登録・解除はダッシュボードの右クリック「サインイン時に自動起動」（`AutoStart.cs`。管理者権限のアプリ内から schtasks を呼ぶ）。.bat は廃止した
 - 二重起動は Mutex で防いでいる。起動前に必ず前のプロセスが終わっていることを確かめる
@@ -73,7 +76,7 @@
   - ViewSupport：共通の色・書式・ニュース送り・演出
 - `Controls/`：自前描画の部品（ArcGauge、HistoryChart、FrameTimeChart、WeatherIcon、Meters）
 - 操作：右クリック、S＝設定、L＝レイアウト、M＝モニター移動、B＝常に背後、Ctrl+Q＝終了
-- 診断ファイル（publish 内）：`fps-diagnostics.txt`、`dlss-diagnostics.txt`、`media-diagnostics.txt`、`power-diagnostics.txt`
+- 診断ファイル（`%APPDATA%\MyDashboard`）：`fps-diagnostics.txt`、`dlss-diagnostics.txt`、`media-diagnostics.txt`、`power-diagnostics.txt`
 - 消費電力（標準・計器盤）：`Monitoring/PowerMeter.cs`（推定と積算）、`SystemScanner.cs`（構成の自動調査）、`Views/PowerSummary`（表示）
 
 ## 再発させない注意点

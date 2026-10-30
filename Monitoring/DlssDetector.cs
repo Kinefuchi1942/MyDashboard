@@ -10,7 +10,7 @@ namespace MyDashboard.Monitoring;
 /// ゲームのプロセスが読み込んでいる DLL から DLSS の使用状況を推定する。
 /// PresentMon は NVIDIA のフレーム生成を見分けられないため、この方法をとる。
 /// DLSS をオフにしても DLL を読み込んだままのゲームがあるので、あくまで目安。
-/// 判定の手がかりは exe と同じフォルダの dlss-diagnostics.txt に書き出す。
+/// 判定の手がかりは %APPDATA%\MyDashboard の dlss-diagnostics.txt に書き出す。
 /// </summary>
 public sealed class DlssDetector
 {
@@ -86,7 +86,7 @@ public sealed class DlssDetector
         _lastDiag = text;
         try
         {
-            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "dlss-diagnostics.txt"),
+            File.WriteAllText(AppPaths.Data("dlss-diagnostics.txt"),
                 $"更新: {DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}{text}");
         }
         catch { }

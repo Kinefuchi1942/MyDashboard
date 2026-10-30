@@ -304,7 +304,7 @@ public sealed class MediaService : IDisposable
                     sb.AppendLine($"  {s.SourceAppUserModelId}  [{status}]");
                 }
             }
-            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "media-diagnostics.txt"), sb.ToString());
+            File.WriteAllText(AppPaths.Data("media-diagnostics.txt"), sb.ToString());
         }
         catch { }
     }

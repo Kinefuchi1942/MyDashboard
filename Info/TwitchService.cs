@@ -36,7 +36,7 @@ public static class TwitchService
     private static readonly Dictionary<string, string> AvatarCache = new();
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
 
-    public static string AuthPath => Path.Combine(AppContext.BaseDirectory, "twitch-auth.json");
+    public static string AuthPath => AppPaths.Data("twitch-auth.json");
 
     private static HttpClient CreateHttp()
     {

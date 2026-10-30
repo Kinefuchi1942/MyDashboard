@@ -326,6 +326,13 @@ public partial class MainWindow : Window
         catch { }
     }
 
+    /// <summary>設定・診断ファイルのある %APPDATA%\MyDashboard をエクスプローラーで開く。</summary>
+    private void OnOpenDataFolder(object sender, RoutedEventArgs e)
+    {
+        try { Process.Start(new ProcessStartInfo("explorer.exe", $"\"{AppPaths.DataFolder}\"") { UseShellExecute = true }); }
+        catch { }
+    }
+
     // =========================================================== 重なり順（常に背後）
 
     private void ToggleBehind()

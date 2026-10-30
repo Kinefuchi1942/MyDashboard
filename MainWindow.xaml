@@ -23,6 +23,7 @@
             <MenuItem x:Name="AutoStartItem" Header="サインイン時に自動起動" IsCheckable="True" Click="OnToggleAutoStart"/>
             <MenuItem Header="設定…" InputGestureText="S" Click="OnOpenSettingsWindow"/>
             <MenuItem Header="設定ファイルを開く" Click="OnOpenSettings"/>
+            <MenuItem Header="保存フォルダを開く" Click="OnOpenDataFolder"/>
             <Separator/>
             <MenuItem Header="終了" InputGestureText="Ctrl+Q" Click="OnQuit"/>
         </ContextMenu>
