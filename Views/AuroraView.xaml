@@ -89,12 +89,12 @@
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
         <!-- フォロー中の一覧を横に送る矢印（入りきらないときだけ出す） -->
+        <!-- 枠と文字の色は各要素に直接書く（Style の Setter でテーマのブラシを使うと WPF が凍結して色が変わらなくなる） -->
         <Style x:Key="ChipArrow" TargetType="Border">
             <Setter Property="Width" Value="44"/>
             <Setter Property="Height" Value="58"/>
             <Setter Property="CornerRadius" Value="22"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource ALine}"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Visibility" Value="Collapsed"/>
@@ -105,7 +105,6 @@
             <Setter Property="Margin" Value="0,-5,0,0"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="{DynamicResource AT70}"/>
         </Style>
         <Style x:Key="LiveBadge" TargetType="Border">
             <Setter Property="Background" Value="#E5484D"/>
@@ -408,14 +407,14 @@
                             <ColumnDefinition/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Border x:Name="TwitchChipsLeft" Style="{StaticResource ChipArrow}" Margin="0,0,10,0" ToolTip="前のチャンネル">
-                            <TextBlock Style="{StaticResource ChipArrowText}" Text="‹"/>
+                        <Border x:Name="TwitchChipsLeft" Style="{StaticResource ChipArrow}" BorderBrush="{DynamicResource ALine}" Margin="0,0,10,0" ToolTip="前のチャンネル">
+                            <TextBlock Style="{StaticResource ChipArrowText}" Foreground="{DynamicResource AT70}" Text="‹"/>
                         </Border>
                         <ScrollViewer x:Name="TwitchChipsScroll" Grid.Column="1" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled" Focusable="False">
                             <StackPanel x:Name="TwitchChips" Orientation="Horizontal"/>
                         </ScrollViewer>
-                        <Border x:Name="TwitchChipsRight" Grid.Column="2" Style="{StaticResource ChipArrow}" Margin="10,0,0,0" ToolTip="次のチャンネル">
-                            <TextBlock Style="{StaticResource ChipArrowText}" Text="›"/>
+                        <Border x:Name="TwitchChipsRight" Grid.Column="2" Style="{StaticResource ChipArrow}" BorderBrush="{DynamicResource ALine}" Margin="10,0,0,0" ToolTip="次のチャンネル">
+                            <TextBlock Style="{StaticResource ChipArrowText}" Foreground="{DynamicResource AT70}" Text="›"/>
                         </Border>
                     </Grid>
                 </StackPanel>
@@ -556,14 +555,14 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="WideListLabel" FontFamily="{StaticResource UiFont}" FontSize="17" Foreground="{DynamicResource AT50}"
                                VerticalAlignment="Center" Margin="0,0,16,0"/>
-                    <Border x:Name="WideChipsLeft" Grid.Column="1" Style="{StaticResource ChipArrow}" Margin="0,0,10,0" ToolTip="前のチャンネル">
-                        <TextBlock Style="{StaticResource ChipArrowText}" Text="‹"/>
+                    <Border x:Name="WideChipsLeft" Grid.Column="1" Style="{StaticResource ChipArrow}" BorderBrush="{DynamicResource ALine}" Margin="0,0,10,0" ToolTip="前のチャンネル">
+                        <TextBlock Style="{StaticResource ChipArrowText}" Foreground="{DynamicResource AT70}" Text="‹"/>
                     </Border>
                     <ScrollViewer x:Name="WideChipsScroll" Grid.Column="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled" Focusable="False">
                         <StackPanel x:Name="WideChips" Orientation="Horizontal"/>
                     </ScrollViewer>
-                    <Border x:Name="WideChipsRight" Grid.Column="3" Style="{StaticResource ChipArrow}" Margin="10,0,0,0" ToolTip="次のチャンネル">
-                        <TextBlock Style="{StaticResource ChipArrowText}" Text="›"/>
+                    <Border x:Name="WideChipsRight" Grid.Column="3" Style="{StaticResource ChipArrow}" BorderBrush="{DynamicResource ALine}" Margin="10,0,0,0" ToolTip="次のチャンネル">
+                        <TextBlock Style="{StaticResource ChipArrowText}" Foreground="{DynamicResource AT70}" Text="›"/>
                     </Border>
                 </Grid>
             </Grid>
