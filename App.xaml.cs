@@ -33,34 +33,6 @@ public partial class App : Application
         base.OnStartup(e);
         new MainWindow().Show();
         WatchQuitRequest();
-        WatchScreenshotRequest();
-    }
-
-    /// <summary>
-    /// exe の隣に screenshot.request が置かれたら、3つのレイアウトの画面を screenshots フォルダに PNG で保存する。
-    /// quit.request と同じく、通常権限の側から管理者権限のアプリに頼むための入口。
-    /// </summary>
-    private void WatchScreenshotRequest()
-    {
-        string path = Path.Combine(AppContext.BaseDirectory, "screenshot.request");
-        try { File.Delete(path); } catch { }
-
-        bool busy = false;
-        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        timer.Tick += async (_, _) =>
-        {
-            if (busy || !File.Exists(path)) return;
-            busy = true;
-            try { File.Delete(path); } catch { }
-            try
-            {
-                if (MainWindow is MainWindow w)
-                    await w.CaptureLayoutsAsync(Path.Combine(AppContext.BaseDirectory, "screenshots"));
-            }
-            catch { }
-            busy = false;
-        };
-        timer.Start();
     }
 
     /// <summary>

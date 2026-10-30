@@ -16,6 +16,8 @@
     <Version>1.0.0</Version>
     <!-- Windows 以外（クラウドの Linux）でもコンパイル確認できるようにする。実行は Windows のみ -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- tools\ は別のプロジェクト（README の画像づくりなど）。本体に .cs を取り込まない -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);tools\**</DefaultItemExcludes>
 
     <!-- 1つのexeにまとめる設定（build.bat から dotnet publish で使用） -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>

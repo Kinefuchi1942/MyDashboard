@@ -47,7 +47,6 @@
 4. 起動：`Start-ScheduledTask -TaskName MyDashboard`（または `schtasks /Run /TN MyDashboard`）。管理者権限のまま UAC なしで起動する
    - Git Bash から schtasks を呼ぶと `/Run` がパスに変換されるので、PowerShell を使う
 5. 起動したか `Get-Process MyDashboard` で確かめる
-6. 画面の確認：`publish\screenshot.request` を置くと、アプリが3つのレイアウトを `publish\screenshots\*.png` に保存する（約15秒。詳しくは PROJECT.md）
 
 - `publish\PresentMon.exe`（FPS 計測）、`publish\settings.json`（依頼者の設定）、`publish\twitch-auth.json`（Twitch のログイン）、`publish\webview2\`、`publish\power-log.json`（今日・今月の電力量）は消さない・上書きしない
 - ソース側の `settings.json` は publish へ「新しければ上書き」でコピーされる。ソース側を編集すると依頼者の設定が初期値で上書きされるので、既定値を変えたいときは `AppSettings.cs` を直す
@@ -107,4 +106,5 @@
 ## 作業の終わりに
 
 - 変更したら `PROJECT.md` と `README.md` の該当箇所も直す
+- 見た目を変えたら `dotnet run -c Release --project tools/Screenshots` で README の画面写真（docs/images）も作り直す
 - ビルド → 起動まで済ませてから、依頼者に「何が変わったか」と「見てほしいところ」を短く伝える

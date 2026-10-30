@@ -94,19 +94,22 @@ make-dist.ps1             配布用 zip を dist\ に作る（同梱の説明書
 install-autostart.bat     自動起動の登録（Shift_JIS・CRLF）
 uninstall-autostart.bat   自動起動の解除（Shift_JIS・CRLF）
 mockups/                  デザインのモックアップ画像
-docs/images/              README の画面写真（下の「README の画面写真を撮り直す」で作る）
+docs/images/              README の画面写真（tools/Screenshots で作る）
+tools/Screenshots/        README の画面写真を見本データから作るツール（本体の csproj からは DefaultItemExcludes で除外）
 ```
 
-### README の画面写真を撮り直す
+### README の画面写真を作り直す
 
-ダッシュボードは管理者権限で動くので、外から画面を撮れない（後ろに隠れている・キーも送れない）。代わりにアプリ自身に撮らせる。
+見た目を変えたら、次の1行で `docs/images/` の4枚（`classic.png`・`gauge.png`・`aurora-night.png`・`aurora-day.png`、1920×1080）を作り直して commit する。
 
-1. `publish\screenshot.request` という空ファイルを置く（`New-Item -ItemType File D:\MyDashboard\publish\screenshot.request -Force`）
-2. アプリが 標準 → 計器盤 → オーロラ を4秒ずつ表示して `publish\screenshots\classic.png`・`gauge.png`・`aurora.png`（1920×1080）に保存し、元のレイアウトに戻す（約15秒。settings.json は書き換えない）
-3. `docs/images/` にコピーして commit
+```
+dotnet run -c Release --project tools/Screenshots
+```
 
-- WebView2（Twitch・YouTube の映像）は写らないので、オーロラはメディアカードをニュースにしておく
-- ゲーム中に撮ると FPS やメーターが動いた写真になる（何もしていないと前面のアプリ名と低い FPS が出る）
+- 本体のレイアウト（Views）をそのまま使い、見本データ（ゲーム中を想定した負荷・架空のニュース・天気・曲）を流し込んで、画面の外のウィンドウで描いて保存する。センサー・ネット・管理者権限は使わず、動いているダッシュボードにも触らない（約25秒）
+- 見本データは `tools/Screenshots/Program.cs`。Snapshot や Info のレコードの形を変えたら、ここも直さないとコンパイルが通らない
+- オーロラは夜・昼のテーマに固定して撮る。WebView2（Twitch・YouTube）は描けないので、メディアカードはニュースのまま
+- Windows でだけ動く（クラウドの Linux では作れない）
 
 ## これまでに分かった注意点（再発させないこと）
 - .bat は Shift_JIS（CP932）・CRLF で保存し、chcp 65001 は使わない（UTF-8 だと行が壊れて誤実行される）
