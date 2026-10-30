@@ -94,7 +94,19 @@ make-dist.ps1             配布用 zip を dist\ に作る（同梱の説明書
 install-autostart.bat     自動起動の登録（Shift_JIS・CRLF）
 uninstall-autostart.bat   自動起動の解除（Shift_JIS・CRLF）
 mockups/                  デザインのモックアップ画像
+docs/images/              README の画面写真（下の「README の画面写真を撮り直す」で作る）
 ```
+
+### README の画面写真を撮り直す
+
+ダッシュボードは管理者権限で動くので、外から画面を撮れない（後ろに隠れている・キーも送れない）。代わりにアプリ自身に撮らせる。
+
+1. `publish\screenshot.request` という空ファイルを置く（`New-Item -ItemType File D:\MyDashboard\publish\screenshot.request -Force`）
+2. アプリが 標準 → 計器盤 → オーロラ を4秒ずつ表示して `publish\screenshots\classic.png`・`gauge.png`・`aurora.png`（1920×1080）に保存し、元のレイアウトに戻す（約15秒。settings.json は書き換えない）
+3. `docs/images/` にコピーして commit
+
+- WebView2（Twitch・YouTube の映像）は写らないので、オーロラはメディアカードをニュースにしておく
+- ゲーム中に撮ると FPS やメーターが動いた写真になる（何もしていないと前面のアプリ名と低い FPS が出る）
 
 ## これまでに分かった注意点（再発させないこと）
 - .bat は Shift_JIS（CP932）・CRLF で保存し、chcp 65001 は使わない（UTF-8 だと行が壊れて誤実行される）

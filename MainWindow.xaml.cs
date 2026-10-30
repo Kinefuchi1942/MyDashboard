@@ -171,6 +171,37 @@ public partial class MainWindow : Window
 
     private void OnNextLayout(object sender, RoutedEventArgs e) => NextLayout();
 
+    /// <summary>
+    /// 3つのレイアウトを順に表示して 1920×1080 の PNG に保存し、元のレイアウトに戻す（README の画像用）。
+    /// WebView2（Twitch・YouTube の映像）は写らない。
+    /// </summary>
+    public async Task CaptureLayoutsAsync(string folder)
+    {
+        System.IO.Directory.CreateDirectory(folder);
+        string original = _settings.Layout;
+        foreach (var name in LayoutOrder)
+        {
+            SwitchLayout(name, save: false);
+            await Task.Delay(TimeSpan.FromSeconds(4));   // フェードやグラフが落ち着くまで待つ
+
+            var visual = new DrawingVisual();
+            using (var dc = visual.RenderOpen())
+            {
+                var rect = new Rect(0, 0, Host.Width, Host.Height);
+                dc.DrawRectangle(Background, null, rect);
+                dc.DrawRectangle(new VisualBrush(Host), null, rect);
+            }
+            var bmp = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                (int)Host.Width, (int)Host.Height, 96, 96, PixelFormats.Pbgra32);
+            bmp.Render(visual);
+            var png = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            png.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmp));
+            using var file = System.IO.File.Create(System.IO.Path.Combine(folder, name + ".png"));
+            png.Save(file);
+        }
+        SwitchLayout(original, save: false);
+    }
+
     // =========================================================== モニター配置
 
     private static int ResolveMonitor(int requested)
