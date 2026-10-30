@@ -49,6 +49,53 @@
 - `app.ico`：アプリのアイコン（紺の角丸＋オーロラの光＋計器の弧。16〜40px は簡略版の絵）
 - 操作：右クリックメニュー（レイアウト / 次のモニター / 常に背後 / 設定… / 設定ファイルを開く / 終了）、S＝設定画面、L＝レイアウト切替、M＝モニター移動、B＝常に背後（壁紙のように後ろのまま）、Ctrl+Q＝終了、ニュースはダブルクリックで記事を開く
 
+## ファイル一覧
+
+```
+MyDashboard.csproj      .NET 8 / WPF。publish で単一 exe
+app.manifest              管理者権限・高DPI対応
+App.xaml                  配色・フォント・文字スタイル
+MainWindow.xaml(.cs)      ウィンドウ本体。レイアウト切り替え、モニター配置、操作
+SettingsWindow.xaml(.cs)  設定画面（settings.json を画面で編集し、保存ですぐ反映）
+TwitchLoginWindow.cs      Twitch のログイン画面
+AppSettings.cs            settings.json の読み書き（既定値はここで決める）
+app.ico                   アプリのアイコン
+Views/
+  ClassicView             標準レイアウト
+  PowerSummary            消費電力（推定）の表示。標準・計器盤で共通
+  GaugeView               計器盤レイアウト
+  AuroraView              オーロラレイアウト
+  AuroraView.Twitch.cs    オーロラの Twitch 表示（通常／拡張、フォロー中の一覧、低画質の切り替え）
+  AuroraView.YouTube.cs   オーロラの YouTube 表示（配信中・新着の一覧、＋URL、拡張表示の右側）
+  WebPlayer.cs            Twitch・YouTube 共通の映像の部品（WebView2）
+  TwitchPlayer.cs         Twitch の映像とチャット（WebView2）
+  YouTubePlayer.cs        YouTube の映像とライブチャット・新着の一覧（WebView2）
+  AuroraTheme.cs          オーロラの時間帯テーマ（朝・昼・夕方・夜の配色と切り替え）
+  ViewSupport.cs          レイアウト共通の口（IDashboardView）・色・数値の書式
+Info/
+  InfoService.cs          ニュース（RSS）と天気（Open-Meteo）の取得
+  FeedParser.cs           RSS 2.0 / RSS 1.0 / Atom の読み取り
+  MediaService.cs         再生中の曲（Windows のメディア情報）
+  TwitchService.cs        Twitch のフォロー中の配信（Helix API）とログイン情報
+  YouTubeService.cs       YouTube のチャンネルの新着と配信中（公開ページから読む）
+Controls/                 推移グラフ・円弧メーター・フレームタイムのグラフ・天気アイコン・棒グラフ（自前描画で軽量）
+Monitoring/
+  HardwareMonitor.cs      LibreHardwareMonitor で CPU / GPU / ディスクを取得
+  NetworkMonitor.cs       送受信速度
+  FpsMonitor.cs           PresentMon の出力から FPS・1% Low を計算
+  CpuTopology.cs          P コア／E コアの判別
+  DlssDetector.cs         DLSS（SR／FG／RR）の検出
+  SystemScanner.cs        PC の構成（マザーボード・メモリ・ドライブ・ファン・モニター）を調べる
+  PowerMeter.cs           消費電力の推定と、今日・今月の電力量の積算
+  Snapshot.cs             1回分の測定値の入れ物
+  Collector.cs            一定間隔でまとめて取得し、画面に渡す
+build.bat                 本番ビルド（publish へ。PresentMon のダウンロードも聞く）
+make-dist.ps1             配布用 zip を dist\ に作る（同梱の説明書は dist-readme.txt）
+install-autostart.bat     自動起動の登録（Shift_JIS・CRLF）
+uninstall-autostart.bat   自動起動の解除（Shift_JIS・CRLF）
+mockups/                  デザインのモックアップ画像
+```
+
 ## これまでに分かった注意点（再発させないこと）
 - .bat は Shift_JIS（CP932）・CRLF で保存し、chcp 65001 は使わない（UTF-8 だと行が壊れて誤実行される）
 - PresentMon の CSV 列名は版によって大文字小文字が違う（msBetweenPresents）→ 大文字小文字を区別せずに照合する
