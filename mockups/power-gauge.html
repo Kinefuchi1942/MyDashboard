@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;font-family:"Yu Gothic UI",sans-serif;color:#EEF2F8;position:relative;
+ background:radial-gradient(ellipse 70% 80% at 50% 45%,#16202C,#0A0E14)}
+.num{font-family:Bahnschrift,sans-serif;font-variant-numeric:tabular-nums}
+.abs{position:absolute}
+.dim{color:#7F8DA3}
+.chip{display:inline-flex;align-items:center;height:42px;padding:0 20px;border-radius:21px;border:1px solid rgba(184,224,106,.7);background:rgba(118,185,0,.16);color:#B8E06A;font-size:22px;margin-right:12px}
+.new{position:absolute;border:3px dashed rgba(255,181,71,.8);border-radius:14px}
+.newlabel{position:absolute;left:112px;top:812px;color:#FFB547;font-size:18px}
+#threads{position:absolute;left:130px;top:666px;width:480px}
+.bars{display:flex;align-items:flex-end;height:64px;margin-top:10px}
+.b{width:13px;height:64px;background:rgba(255,255,255,.1);margin-right:3px;position:relative}
+.b i{position:absolute;left:0;right:0;bottom:0;display:block}
+.grp{display:flex}
+.lab{display:flex;margin-top:6px;font-size:15px;color:#8592A5;font-weight:600}
+.lab div{border-top:1.5px solid #8592A5;text-align:center;padding-top:2px}
+</style></head><body>
+<svg class="abs" style="left:0;top:0" width="1920" height="1080">
+ <defs><filter id="g"><feGaussianBlur stdDeviation="7"/></filter></defs>
+ <!-- CPU r=225 c=370,448 -->
+ <g fill="none" stroke-linecap="round">
+  <path d="M211,607 A225,225 0 1 1 529,607" stroke="rgba(255,255,255,.08)" stroke-width="14"/>
+  <path d="M233,585 A194,194 0 1 1 507,585" stroke="rgba(255,255,255,.06)" stroke-width="5"/>
+  <path d="M233,585 A194,194 0 0 1 336,257" stroke="#8FA0B8" stroke-width="5"/>
+  <path d="M211,607 A225,225 0 0 1 370,223" stroke="#5CC8D7" stroke-width="14" filter="url(#g)" opacity=".7"/>
+  <path d="M211,607 A225,225 0 0 1 370,223" stroke="#5CC8D7" stroke-width="14"/>
+  <!-- FPS r=295 c=960,424 -->
+  <path d="M751,633 A295,295 0 1 1 1169,633" stroke="rgba(255,255,255,.08)" stroke-width="16"/>
+  <path d="M751,633 A295,295 0 1 1 1240,333" stroke="#F2F5FA" stroke-width="16" filter="url(#g)" opacity=".6"/>
+  <path d="M751,633 A295,295 0 1 1 1240,333" stroke="#F2F5FA" stroke-width="16"/>
+  <!-- GPU c=1550,448 -->
+  <path d="M1391,607 A225,225 0 1 1 1709,607" stroke="rgba(255,255,255,.08)" stroke-width="14"/>
+  <path d="M1391,607 A225,225 0 1 1 1764,380" stroke="#8E9CFF" stroke-width="14" filter="url(#g)" opacity=".7"/>
+  <path d="M1391,607 A225,225 0 1 1 1764,380" stroke="#8E9CFF" stroke-width="14"/>
+ </g>
+</svg>
+<div class="abs num" style="right:120px;top:40px;font-size:48px;font-weight:600">21:48</div>
+<!-- ★追加：消費電力（時計の左） -->
+<div class="abs" style="right:290px;top:36px;display:flex;align-items:center;gap:18px">
+  <div>
+    <div style="display:flex;align-items:baseline;gap:10px"><span class="dim" style="font-size:17px">消費電力（推定）</span>
+      <span class="num" style="font-size:40px;font-weight:600;line-height:1">561</span><span class="num dim" style="font-size:22px">W</span></div>
+    <div style="display:flex;width:270px;height:6px;border-radius:3px;overflow:hidden;margin-top:6px;gap:2px">
+      <div style="width:21%;background:#5CC8D7"></div><div style="width:51%;background:#8E9CFF"></div><div style="width:18%;background:#4A5668"></div><div style="width:10%;background:#AEB9CA"></div></div>
+  </div>
+  <div style="border-left:1px solid rgba(255,255,255,.1);padding-left:18px;line-height:1.4;font-size:18px">
+    <div><span class="dim">今日</span> <span class="num" style="font-size:20px">2.58 kWh</span> <span class="dim">· 約<span class="num">80</span>円</span></div>
+    <div><span class="dim">今月</span> <span class="num" style="font-size:20px">54.1 kWh</span> <span class="dim">· 約<span class="num">1,677</span>円</span></div>
+  </div>
+</div>
+<div class="new" style="right:276px;top:26px;width:600px;height:84px"></div>
+<div class="abs" style="right:276px;top:114px;color:#FFB547;font-size:18px">追加：消費電力（PC＋モニター）・内訳の帯・今日と今月</div>
+<div class="abs" style="left:120px;top:51px"><span class="chip num">Hardware: Independent Flip</span></div>
+
+<div class="abs" style="left:115px;top:330px;width:510px;text-align:center"><div class="dim" style="font-size:29px">CPU</div>
+ <div class="num" style="font-size:150px;font-weight:700;line-height:1">38<span class="dim" style="font-size:46px">%</span></div>
+ <div class="num" style="font-size:29px;color:#AEB9CA">68°C · 5.3 GHz</div></div>
+<div class="abs" style="left:635px;top:270px;width:650px;text-align:center"><div class="dim" style="font-size:38px">GameTitle</div>
+ <div class="num" style="font-size:200px;font-weight:700;line-height:1">142<span class="dim" style="font-size:60px">fps</span></div>
+ <div class="num" style="font-size:38px;color:#AEB9CA">1% Low 118 · 7.0 ms</div></div>
+<div class="abs" style="left:1295px;top:330px;width:510px;text-align:center"><div class="dim" style="font-size:29px">GPU</div>
+ <div class="num" style="font-size:150px;font-weight:700;line-height:1">91<span class="dim" style="font-size:46px">%</span></div>
+ <div class="num" style="font-size:29px;color:#AEB9CA">71°C · 284 W</div></div>
+
+<div class="abs" style="left:120px;top:842px;width:1680px;height:1px;background:rgba(255,255,255,.08)"></div>
+<div class="abs dim" style="left:120px;top:700px;font-size:20px">（メーターの下と下段は今のまま）</div>
+</body></html>

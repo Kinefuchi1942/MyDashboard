@@ -3,7 +3,7 @@
 <!-- 消費電力（推定）：設定画面に「消費電力」ページを追加。起動時に構成を自動で調べて表示 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{width:1100px;height:760px;overflow:hidden;background:#0F141B;font-family:"Yu Gothic UI","IPAPGothic",sans-serif;color:#E8ECF2;font-size:15px;border:1px solid #2A3646}
+body{width:1100px;height:820px;overflow:hidden;background:#0F141B;font-family:"Yu Gothic UI","IPAPGothic",sans-serif;color:#E8ECF2;font-size:15px;border:1px solid #2A3646}
 .num{font-family:Bahnschrift,"DejaVu Sans Condensed",sans-serif}
 .dim{color:#8592A5}
 .nav{position:absolute;left:0;top:44px;width:230px;bottom:0;padding:16px 14px;border-right:1px solid #243040}
@@ -11,7 +11,7 @@ body{width:1100px;height:760px;overflow:hidden;background:#0F141B;font-family:"Y
 .nav .on{background:#223042}
 .main{position:absolute;left:230px;top:44px;right:0;bottom:0;padding:26px 36px}
 table{width:100%;border-collapse:collapse;margin-top:10px}
-td{padding:8px 6px;border-bottom:1px solid #243040}
+td{padding:6px 6px;border-bottom:1px solid #243040}
 td:last-child{text-align:right}
 .tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;margin-left:8px}
 .real{background:#1A5CC8D7;color:#5CC8D7;border:1px solid #5CC8D7}
@@ -24,7 +24,7 @@ td:last-child{text-align:right}
 <div class="nav"><div>表示</div><div>オーロラ</div><div>警告の目安</div><div class="on">● 消費電力</div><div>情報</div><div>Twitch</div><div>YouTube</div></div>
 <div class="main">
   <div style="font-size:24px;font-weight:600">消費電力</div>
-  <div class="dim" style="margin-top:4px">PC 全体の消費電力を推定します。CPU と GPU はセンサーの実測、ほかは見つかった部品から見積もります（モニターは含みません）</div>
+  <div class="dim" style="margin-top:4px">PC 全体の消費電力を推定します。CPU と GPU はセンサーの実測、ほかは見つかった部品から見積もります</div>
 
   <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:18px">
     <div style="font-weight:600">見つかった構成</div><div class="btn">構成を読み直す</div>
@@ -36,10 +36,13 @@ td:last-child{text-align:right}
     <tr><td class="dim">メモリ</td><td>DDR5 16 GB × 2 枚<span class="tag est">見積もり</span></td><td class="num">8 W</td></tr>
     <tr><td class="dim">ストレージ</td><td>NVMe SSD × 2、HDD × 1<span class="tag est">見積もり・使用中は増える</span></td><td class="num">14 W</td></tr>
     <tr><td class="dim">ファン・ポンプ</td><td>5 個（回転数から）<span class="tag est">見積もり</span></td><td class="num">9 W</td></tr>
+    <tr><td class="dim">モニター 1</td><td>LG 27GR95QE（27 型・240Hz）<span class="tag est">見積もり・消灯中は 0.5 W</span></td><td class="num">32 W</td></tr>
+    <tr><td class="dim">モニター 2</td><td>DELL P2422H（24 型・60Hz）<span class="tag est">見積もり</span></td><td class="num">18 W</td></tr>
     <tr><td class="dim">その他</td><td>USB 機器など（固定値）</td><td class="num">5 W</td></tr>
   </table>
 
-  <div style="font-weight:600;margin-top:20px">電源（自動では分かりません）</div>
+  <div class="row" style="margin-top:6px"><div>モニターを合計に含める<div class="dim" style="font-size:13px">数字をクリックすると、モニターごとの W 数を自分で直せます</div></div><div style="width:44px;height:22px;border-radius:11px;background:#5CC8D7;position:relative"><div style="position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:8px;background:#0F141B"></div></div></div>
+  <div style="font-weight:600;margin-top:14px">電源（自動では分かりません）</div>
   <div class="row"><div>電源の容量</div><div><span class="box num">850</span> W</div></div>
   <div class="row"><div>80 PLUS の等級<div class="dim" style="font-size:13px">効率から、コンセント側の電力を出します</div></div><div class="box" style="min-width:140px;text-align:left">Gold　▾</div></div>
   <div class="row"><div>補正<div class="dim" style="font-size:13px">ワットチェッカーで測った値とずれるときに足し引き</div></div><div><span class="box num">+0</span> W</div></div>
