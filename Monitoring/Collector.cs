@@ -50,13 +50,18 @@ public sealed class Collector : IDisposable
                 CpuInfo? cpu = null;
                 GpuInfo? gpu = null;
                 IReadOnlyList<DiskInfo> disks = Array.Empty<DiskInfo>();
+                int? fans = null;
                 if (_hw != null)
                 {
                     _hw.Update();
                     cpu = _hw.ReadCpu();
                     gpu = _hw.ReadGpu();
                     disks = _hw.ReadDisks();
+                    fans = _hw.CountFans();
                 }
+                // 消費電力の推定で何か起きても、ほかの表示は止めない
+                PowerInfo? power = null;
+                try { power = PowerMeter.Shared.Estimate(_settings, cpu, gpu, disks, fans); } catch { }
                 var snap = new Snapshot(
                     cpu, gpu,
                     HardwareMonitor.ReadMemory(),
@@ -64,7 +69,7 @@ public sealed class Collector : IDisposable
                     _net.Read(),
                     _fps.Read(),
                     driverMissing && cpu?.Temperature == null,
-                    PowerMeter.Shared.Estimate(_settings, cpu, gpu, disks));
+                    power);
                 Updated?.Invoke(snap);
             }
             catch (Exception ex)

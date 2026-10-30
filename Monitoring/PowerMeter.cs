@@ -61,7 +61,8 @@ public sealed class PowerMeter
     }
 
     /// <summary>1回分のセンサーの値から消費電力を出し、電力量に足す。Collector から毎回呼ぶ。</summary>
-    public PowerInfo Estimate(AppSettings s, CpuInfo? cpu, GpuInfo? gpu, IReadOnlyList<DiskInfo> disks)
+    /// <param name="fans">回っているファン・ポンプの数（マザーボードから読めなければ null）。</param>
+    public PowerInfo Estimate(AppSettings s, CpuInfo? cpu, GpuInfo? gpu, IReadOnlyList<DiskInfo> disks, int? fans)
     {
         if (_scan == null) Rescan();
         RefreshBrightnessIfDue();
@@ -106,9 +107,8 @@ public sealed class PowerMeter
         rows.Add(new PowerRow("ストレージ", c?.Disks is { Count: > 0 } ? DiskSummary(c.Disks) : "不明（NVMe SSD 1 台と仮定）", diskW, false, "使用中は増える"));
 
         // ---- ファン・ポンプ
-        int fans = c?.Fans ?? 4;
-        double fanW = fans * 1.5;
-        rows.Add(new PowerRow("ファン・ポンプ", c?.Fans is { } f ? $"{f} 個（回転数から）" : "読めない（4 個と仮定）", fanW, false, null));
+        double fanW = (fans ?? 4) * 1.5;
+        rows.Add(new PowerRow("ファン・ポンプ", fans is { } f ? $"{f} 個（回転数から）" : "読めない（4 個と仮定）", fanW, false, null));
 
         const double otherW = 5;
         rows.Add(new PowerRow("その他", "USB 機器など（固定値）", otherW, false, null));

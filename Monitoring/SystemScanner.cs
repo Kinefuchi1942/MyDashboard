@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using LibreHardwareMonitor.Hardware;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
@@ -24,13 +23,13 @@ public sealed record SystemConfig(
     int MemoryModules,
     double MemoryTotalGb,
     IReadOnlyList<ScannedDisk> Disks,
-    int? Fans,                      // 回っているファン・ポンプの数。マザーボードから読めなければ null
     IReadOnlyList<ScannedMonitor> Monitors,
     DateTime ScannedAt);
 
 /// <summary>
 /// PC の構成を調べる。マザーボードはレジストリ、メモリは SMBIOS、ドライブは各ドライブへの問い合わせ、
-/// ファンは LibreHardwareMonitor のマザーボードのセンサー、モニターは Windows の画面構成と EDID から読む。
+/// モニターは Windows の画面構成と EDID から読む。ファンは HardwareMonitor が毎回数える
+/// （LibreHardwareMonitor の Computer を別に開くと、閉じたときにドライバーが共有ごと閉じられて本体のセンサーが読めなくなるため）。
 /// どれも失敗したら「分からない」として先へ進む（管理者権限で動いている前提）。
 /// </summary>
 public static class SystemScanner
@@ -42,7 +41,6 @@ public static class SystemScanner
             Try(ReadBoard, null),
             memType, modules, totalGb,
             Try(ReadDisks, new List<ScannedDisk>()),
-            Try(CountFans, null),
             Try(ReadMonitors, new List<ScannedMonitor>()),
             DateTime.Now);
     }
@@ -173,30 +171,6 @@ public static class SystemScanner
         return Encoding.ASCII.GetString(b, offset, e - offset).Trim();
     }
 
-    // ---------------------------------------------------------------- ファン（マザーボードの Super I/O）
-
-    private static int? CountFans()
-    {
-        var c = new Computer { IsMotherboardEnabled = true };
-        try
-        {
-            c.Open();
-            var fans = new List<float>();
-            void Walk(IHardware hw)
-            {
-                hw.Update();
-                foreach (var s in hw.Sensors)
-                    if (s.SensorType == SensorType.Fan && s.Value is > 100) fans.Add(s.Value.Value);
-                foreach (var sub in hw.SubHardware) Walk(sub);
-            }
-            foreach (var hw in c.Hardware) Walk(hw);
-            // ファンのセンサー自体がないときは「分からない」。あるのに全部止まっているときは 0
-            bool hasFanSensor = c.Hardware.SelectMany(h => h.SubHardware.Prepend(h)).SelectMany(h => h.Sensors).Any(s => s.SensorType == SensorType.Fan);
-            return hasFanSensor ? fans.Count : null;
-        }
-        finally { c.Close(); }
-    }
-
     // ---------------------------------------------------------------- モニター（画面構成＋EDID）
 
     private static List<ScannedMonitor> ReadMonitors()
@@ -293,7 +267,6 @@ public static class SystemScanner
             sb.AppendLine($"メモリ: {c.MemoryType ?? "(種類不明)"} {c.MemoryModules} 枚 {c.MemoryTotalGb} GB");
             sb.AppendLine($"ドライブ: {c.Disks.Count} 台");
             foreach (var d in c.Disks) sb.AppendLine($"  {d.Kind}: {d.Model}");
-            sb.AppendLine($"ファン・ポンプ: {(c.Fans?.ToString() ?? "(読めない)")}");
             sb.AppendLine($"モニター: {c.Monitors.Count} 台");
             foreach (var m in c.Monitors)
             {

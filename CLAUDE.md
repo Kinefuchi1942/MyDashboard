@@ -81,6 +81,7 @@
 - **PresentMon の CSV 列名は版によって大文字小文字が違う**（msBetweenPresents など）→ 区別せずに照合する。依頼者 PC は `--v1_metrics` で動いている
 - **LibreHardwareMonitorLib 0.9.6 では VRAM が `SensorType.SmallData`（MB）。** 開発版とは種別や単位が違うので、容量系のセンサーは名前で探して単位をそろえる
 - **CPU 温度には PawnIO ドライバ（pawnio.eu）が必要。** 管理者権限もやめられない
+- **LibreHardwareMonitor の `Computer` は1つだけにする。** 別に開いて閉じると、ドライバーが共有ごと閉じられて本体のセンサーが「Object reference not set…」で読めなくなり、画面の数字が止まる（2026-10-30）
 - **管理者権限のアプリから URL を開くときは `explorer.exe` 経由にする**（ブラウザを管理者権限で起動しないため）。常に背後モードでは先に `AllowSetForegroundWindow(ASFW_ANY)`
 - **ゲームの邪魔をしない：** フォーカスを奪わない（ShowActivated=False）、アニメーションは1秒20コマ程度、表示中のレイアウトでだけ動かす
 - **WPF の凍結ブラシ：** テーマで色が変わるブラシ（AText・AT85〜AT40・AGlass・ALine など）を Style / ControlTemplate / Trigger の Setter から DynamicResource で参照しない。WPF が Freeze し、色のアニメーションで「シールまたは固定されているため…」例外で落ちる。要素の属性に直接書くか、コードから設定する
