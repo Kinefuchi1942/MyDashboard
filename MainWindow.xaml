@@ -20,6 +20,7 @@
             </MenuItem>
             <MenuItem Header="次のモニターへ移動" InputGestureText="M" Click="OnNextMonitor"/>
             <MenuItem x:Name="BehindItem" Header="常に背後に表示" IsCheckable="True" InputGestureText="B" Click="OnToggleBehind"/>
+            <MenuItem x:Name="AutoStartItem" Header="サインイン時に自動起動" IsCheckable="True" Click="OnToggleAutoStart"/>
             <MenuItem Header="設定…" InputGestureText="S" Click="OnOpenSettingsWindow"/>
             <MenuItem Header="設定ファイルを開く" Click="OnOpenSettings"/>
             <Separator/>

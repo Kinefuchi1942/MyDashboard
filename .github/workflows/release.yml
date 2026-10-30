@@ -1,0 +1,54 @@
+# v1.2.3 のようなタグをプッシュすると、make-dist.ps1 で exe を作って GitHub Releases に公開する
+# 利用者は https://github.com/Kinefuchi1942/MyDashboard/releases/latest/download/MyDashboard.exe から常に最新版を落とせる
+name: リリース
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # タグと csproj の <Version> がずれていると、exe のプロパティとリリース名が食い違う
+      - name: タグとバージョンの一致を確認
+        id: version
+        run: |
+          $csproj = 'MyDashboard.csproj'
+          $version = ([xml](Get-Content $csproj -Encoding UTF8)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          if ("v$version" -ne $env:GITHUB_REF_NAME) {
+            throw "タグ $env:GITHUB_REF_NAME と $csproj の <Version>$version</Version> が一致しません。"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      # 手元で使うときと同じ Windows PowerShell で動かす（PresentMon のダウンロードと埋め込みもここで行う）
+      - name: exe を作る
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./make-dist.ps1
+
+      # exe は名前を固定して、releases/latest/download/MyDashboard.exe が常に最新版を指すようにする
+      - name: リリースを作る
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $notes = @"
+          ## ダウンロード
+
+          - **MyDashboard.exe** … これだけで動きます。好きなフォルダに置いてダブルクリックしてください（設定などは同じフォルダに保存されます）
+
+          使い方・設定・自動起動は [README](https://github.com/$env:GITHUB_REPOSITORY#readme) を参照してください。
+          "@
+          gh release create $env:GITHUB_REF_NAME dist/MyDashboard.exe `
+            --title "MyDashboard $env:VERSION" --notes $notes --generate-notes

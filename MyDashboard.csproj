@@ -19,7 +19,7 @@
     <!-- tools\ は別のプロジェクト（README の画像づくりなど）。本体に .cs を取り込まない -->
     <DefaultItemExcludes>$(DefaultItemExcludes);tools\**</DefaultItemExcludes>
 
-    <!-- 1つのexeにまとめる設定（build.bat から dotnet publish で使用） -->
+    <!-- 1つのexeにまとめる設定（build.bat・make-dist.ps1 から dotnet publish で使用） -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
@@ -41,12 +41,10 @@
     <Resource Include="app.ico" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
+  <!-- FPS 計測の PresentMon.exe を exe に埋め込む（make-dist.ps1 が vendor\ に置いたときだけ）。
+       配布は exe 1つだけなので、初回起動時に FpsMonitor が取り出して使う -->
+  <ItemGroup Condition="Exists('vendor\PresentMon.exe')">
+    <EmbeddedResource Include="vendor\PresentMon.exe" LogicalName="PresentMon.exe" />
   </ItemGroup>
 
 </Project>

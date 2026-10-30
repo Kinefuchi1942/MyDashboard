@@ -50,8 +50,9 @@ public partial class MainWindow : Window
 
         ApplyStacking();
         SwitchLayout(_settings.Layout, save: false);
+        AutoStartItem.IsChecked = AutoStart.IsRegistered();
 
-        _clock = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _clock =new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clock.Tick += (_, _) => _view?.UpdateClock(DateTime.Now);
         _clock.Start();
 
@@ -223,6 +224,16 @@ public partial class MainWindow : Window
 
     private void OnNextMonitor(object sender, RoutedEventArgs e) => MoveToNextMonitor();
     private void OnToggleBehind(object sender, RoutedEventArgs e) => ToggleBehind();
+
+    private void OnToggleAutoStart(object sender, RoutedEventArgs e)
+    {
+        bool on = !AutoStart.IsRegistered();
+        if (!(on ? AutoStart.Register() : AutoStart.Unregister()))
+            MessageBox.Show(on ? "自動起動の登録に失敗しました。" : "自動起動の解除に失敗しました。", "MyDashboard",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        AutoStartItem.IsChecked = AutoStart.IsRegistered();
+    }
+
     private void OnQuit(object sender, RoutedEventArgs e) => Close();
 
     private void OnOpenSettingsWindow(object sender, RoutedEventArgs e) => OpenSettingsWindow();

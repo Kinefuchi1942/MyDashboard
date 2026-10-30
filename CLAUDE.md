@@ -21,6 +21,8 @@
 - C# / .NET 8 / WPF。TargetFramework は `net8.0-windows10.0.19041.0`（再生中の曲を読む WinRT API のため。ビルドエラーが出たらまずここを疑う）
 - 主なパッケージ：LibreHardwareMonitorLib 0.9.6、Microsoft.Web.WebView2 1.0.3856.49
 - ソースの正本は `D:\MyDashboard`、実行版は `D:\MyDashboard\publish\MyDashboard.exe`
+- 配布は exe 1つだけ（GitHub Releases）。`v1.2.3` のタグを push すると `.github/workflows/release.yml` が `make-dist.ps1` で作って公開する。
+  タグと csproj の `<Version>` をそろえる。説明書は同梱せず README に書く。PresentMon は exe に埋め込み、初回起動時に取り出す
 - アプリは管理者権限で動く（`app.manifest` で requireAdministrator）。CPU 温度（PawnIO）と PresentMon の FPS 計測に必要
 - 自動起動はタスクスケジューラのタスク `MyDashboard`（ログオン時、最上位の特権、72 時間制限なし）
 - claude.ai のプロジェクト側にも同じソースの写しがあり、クラウドの Claude が別に作業することがある。
@@ -43,14 +45,13 @@
    - 終わったかの確認：`Get-Process MyDashboard -ErrorAction SilentlyContinue` が何も返さなければ終了済み（通常1秒ほど）
 3. 本番ビルド：`dotnet publish MyDashboard.csproj -c Release -o publish`
    - `build.bat` は最後に `choice` / `pause` / エクスプローラーを開くなど対話的なので、Claude Code からは dotnet を直接呼ぶ
-   - `build.bat` がやっている残り：`install-autostart.bat` と `uninstall-autostart.bat` を publish へコピー（変えたときだけ必要）
 4. 起動：`Start-ScheduledTask -TaskName MyDashboard`（または `schtasks /Run /TN MyDashboard`）。管理者権限のまま UAC なしで起動する
    - Git Bash から schtasks を呼ぶと `/Run` がパスに変換されるので、PowerShell を使う
 5. 起動したか `Get-Process MyDashboard` で確かめる
 
 - `publish\PresentMon.exe`（FPS 計測）、`publish\settings.json`（依頼者の設定）、`publish\twitch-auth.json`（Twitch のログイン）、`publish\webview2\`、`publish\power-log.json`（今日・今月の電力量）は消さない・上書きしない
-- ソース側の `settings.json` は publish へ「新しければ上書き」でコピーされる。ソース側を編集すると依頼者の設定が初期値で上書きされるので、既定値を変えたいときは `AppSettings.cs` を直す
-- 自動起動の登録（`install-autostart.bat`）は管理者として実行が必要で、Claude Code からはできない。必要なら依頼者に「右クリック →管理者として実行」を頼む
+- ソース側に `settings.json` は置かない（初回起動時に `AppSettings.cs` の既定値で作られる）。既定値を変えたいときは `AppSettings.cs` を直す
+- 自動起動の登録・解除はダッシュボードの右クリック「サインイン時に自動起動」（`AutoStart.cs`。管理者権限のアプリ内から schtasks を呼ぶ）。.bat は廃止した
 - 二重起動は Mutex で防いでいる。起動前に必ず前のプロセスが終わっていることを確かめる
 - Program Files の下ではビルドできない（書き込み不可）
 

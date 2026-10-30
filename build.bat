@@ -35,9 +35,6 @@ if errorlevel 1 (
   exit /b 1
 )
 
-copy /y install-autostart.bat publish\ >nul
-copy /y uninstall-autostart.bat publish\ >nul
-
 rem ---- FPS 計測用の PresentMon（任意）
 if exist publish\PresentMon.exe goto done
 echo.

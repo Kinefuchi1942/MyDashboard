@@ -64,6 +64,30 @@ public sealed class FpsMonitor : IDisposable
                                .FirstOrDefault();
             if (hit != null) return hit;
         }
+        return ExtractBundledPresentMon(baseDir);
+    }
+
+    /// <summary>
+    /// 配布版の exe には PresentMon.exe を埋め込んである（make-dist.ps1 が vendor\ に用意したとき）。
+    /// exe だけ渡されても FPS が出るよう、初回に exe と同じフォルダ（書けなければ LocalAppData）へ取り出す。
+    /// </summary>
+    private static string? ExtractBundledPresentMon(string baseDir)
+    {
+        using var res = typeof(FpsMonitor).Assembly.GetManifestResourceStream("PresentMon.exe");
+        if (res == null) return null;
+        var fallback = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MyDashboard");
+        foreach (var dir in new[] { baseDir, fallback })
+        {
+            var path = Path.Combine(dir, "PresentMon.exe");
+            try
+            {
+                if (File.Exists(path) && new FileInfo(path).Length == res.Length) return path;
+                Directory.CreateDirectory(dir);
+                using (var file = File.Create(path)) { res.Position = 0; res.CopyTo(file); }
+                return path;
+            }
+            catch { /* 書き込めない場所なら次へ */ }
+        }
         return null;
     }
 

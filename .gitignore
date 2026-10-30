@@ -12,3 +12,6 @@ old/
 # エディタ
 .vs/
 *.user
+
+# 配布版の exe に埋め込む PresentMon（make-dist.ps1 がダウンロードする）
+vendor/

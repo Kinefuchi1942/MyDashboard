@@ -8,7 +8,7 @@
 - 依頼者は C# を書かない。成果物はそのままビルドできる形で渡し、手順は短く具体的に伝える
 - PC：日本語 Windows、Intel Core i7-14700K（20スレッド）、NVIDIA GeForce RTX 系、サブモニターあり
 - 開発：C# / .NET 8 / WPF。build.bat で単一 exe（publish フォルダ）を作る
-- 配布：make-dist.ps1 で dist\ に配布用 zip を作る（個人の設定・ログイン情報は含めない。同梱の説明書は dist-readme.txt）
+- 配布：exe 1つだけ。`v1.2.3` のようなタグを push すると GitHub Actions（.github/workflows/release.yml）が make-dist.ps1 で dist\MyDashboard.exe を作り、Releases に公開する。説明書は同梱せず README に寄せる
 - ソースは Program Files 以外に置く（Program Files の下ではビルドできない）
 
 ## 構成
@@ -90,9 +90,9 @@ Monitoring/
   Snapshot.cs             1回分の測定値の入れ物
   Collector.cs            一定間隔でまとめて取得し、画面に渡す
 build.bat                 本番ビルド（publish へ。PresentMon のダウンロードも聞く）
-make-dist.ps1             配布用 zip を dist\ に作る（同梱の説明書は dist-readme.txt）
-install-autostart.bat     自動起動の登録（Shift_JIS・CRLF）
-uninstall-autostart.bat   自動起動の解除（Shift_JIS・CRLF）
+make-dist.ps1             配布用の単体 exe を dist\ に作る（PresentMon を vendor\ に用意して exe に埋め込む）
+AutoStart.cs              自動起動（タスクスケジューラの「MyDashboard」）の登録・解除。右クリック「サインイン時に自動起動」
+.github/workflows/release.yml  タグの push で exe を作って GitHub Releases に公開
 mockups/                  デザインのモックアップ画像
 docs/images/              README の画面写真（tools/Screenshots で作る）
 tools/Screenshots/        README の画面写真を見本データから作るツール（本体の csproj からは DefaultItemExcludes で除外）
@@ -134,7 +134,7 @@ dotnet run -c Release --project tools/Screenshots
 ## 進め方
 - 変更後は XAML とコードの対応や構文を静的にチェックし、変更点と更新手順を短く伝える
 - 実機で未確認の部分は正直に伝え、エラー画面・写真・fps-diagnostics.txt をもらって直す
-- 更新手順：ダッシュボードを終了 → 新しいソースで build.bat → publish に PresentMon.exe を置く → 起動
+- 更新手順：ダッシュボードを終了 → 新しいソースで build.bat → 起動（PresentMon.exe は publish にあればそれを、なければ exe に埋め込んだものを取り出して使う）
 
 ## ソース管理（git）
 - `D:\MyDashboard` は git リポジトリ（ブランチ main）。GitHub の非公開リポジトリを正本にして、クラウドの Claude Code セッションでも作業する
@@ -142,18 +142,24 @@ dotnet run -c Release --project tools/Screenshots
 - `.gitattributes` で改行変換を止めている（.bat の Shift_JIS・CRLF を守るため）
 - クラウド（Linux）ではコンパイル確認まで（csproj の `EnableWindowsTargeting`）。起動・画面・センサーの確認はこの PC で、取り込み（git pull）→ publish → 起動
 
-### 友人に配る zip を作る
+### リリース（配布用の exe を公開する）
 
-PowerShell で次を実行すると `dist\MyDashboard-<版>.zip` ができます（動いているダッシュボードは止めなくて大丈夫です）。
+1. `MyDashboard.csproj` の `<Version>` を上げて commit・push する
+2. 同じ版のタグを付けて push する（例：`git tag v1.0.1` → `git push origin v1.0.1`）
+3. GitHub Actions の「リリース」が `make-dist.ps1` で exe を作り、Releases に `MyDashboard.exe` を載せる
+   - タグと `<Version>` が違うと失敗する
+   - 最新版はいつも `https://github.com/Kinefuchi1942/MyDashboard/releases/latest/download/MyDashboard.exe`
+
+手元で exe だけ作るときは（動いているダッシュボードは止めなくて大丈夫です）：
 
 ```
 powershell -NoProfile -ExecutionPolicy Bypass -File D:\MyDashboard\make-dist.ps1
 ```
 
-- 中身は `MyDashboard.exe`・`PresentMon.exe`・初期値の `settings.json`・自動起動の .bat・`はじめにお読みください.txt`（元は `dist-readme.txt`）
+- できるのは `dist\MyDashboard.exe` 1つだけ。.NET と PresentMon が入っていて、設定（settings.json）は初回起動時に既定値で作られる
 - 自分の設定・Twitch のログイン（`twitch-auth.json`）・`webview2` フォルダ・診断ファイルは入りません
 - 相手の PC に .NET を入れる必要はありません。CPU 温度を出すには相手側でも PawnIO が必要です
-- 署名のない exe なので、初回は「Windows によって PC が保護されました」→「詳細情報」→「実行」が必要です（説明書に記載済み）
+- 署名のない exe なので、初回は「Windows によって PC が保護されました」→「詳細情報」→「実行」が必要です（README に記載済み）
 
 ## 作り方（初回だけ）
 
@@ -165,7 +171,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File D:\MyDashboard\make-dist.ps1
 2. **ソースのフォルダを書き込みできる場所に置く**
    `C:\Program Files` や `D:\Program Files` の下はビルドできません。`D:\Dev\MyDashboard` のような場所に置いてください。
 3. **`build.bat` をダブルクリック**
-   `publish` フォルダに `MyDashboard.exe` ができます。途中で「PresentMon をダウンロードしますか」と聞かれたら **Y** を押すと FPS 表示が使えるようになります。
+   `publish` フォルダに `MyDashboard.exe` ができます。途中で「PresentMon をダウンロードしますか」と聞かれたら **Y** を押すと FPS 表示が使えるようになります（make-dist.ps1 で作った exe なら PresentMon は内蔵済み）。
 4. `publish` フォルダを好きな場所（例：`C:\Tools\MyDashboard`）に移して、`MyDashboard.exe` を起動します。
 
 起動時に管理者権限の確認（UAC）が出ます。CPU 温度とクロックの読み取り、FPS の計測に必要なためです。
