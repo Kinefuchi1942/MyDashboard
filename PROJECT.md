@@ -56,7 +56,7 @@
 - LibreHardwareMonitorLib 0.9.6 では VRAM が SensorType.SmallData（MB単位）。開発版とは種別や単位が違うため、容量系のセンサーは名前で探して単位をそろえる
 - CPU 温度の取得には PawnIO ドライバ（pawnio.eu）が必要。アプリは管理者権限で動く
 - 管理者権限のアプリから記事を開くときは explorer.exe 経由にする（ブラウザを管理者権限で起動しないため）
-- ゲームの邪魔をしない：フォーカスを奪わない（ShowActivated=False）、アニメーションは1秒20コマ程度に抑え、表示中のレイアウトでだけ動かす
+- ゲームの邪魔をしない：フォーカスを奪わない（ShowActivated=False）、アニメーションは1秒20コマ程度に抑え（設定の animationFps。新しいアニメーションは必ず `Fx.Limit` を通す）、表示中のレイアウトでだけ動かす
 
 ## デザイン方針
 - 暗い部屋で目に優しい暗色が基調。数字は Bahnschrift、日本語は Yu Gothic UI

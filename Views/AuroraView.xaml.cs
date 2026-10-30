@@ -167,7 +167,7 @@ public partial class AuroraView : UserControl, IDashboardView
         }
     }
 
-    /// <summary>光の塊をゆっくり漂わせる。描画負荷を抑えるため 1秒20コマに制限する。</summary>
+    /// <summary>光の塊をゆっくり漂わせる。描画負荷を抑えるためコマ数を制限する（Fx.FrameRate）。</summary>
     private static void Drift(Ellipse blob, double dx, double dy, double secondsX, double secondsY)
     {
         if (blob.RenderTransform is not TranslateTransform t) return;
@@ -176,8 +176,8 @@ public partial class AuroraView : UserControl, IDashboardView
             { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = ease };
         var ay = new DoubleAnimation(-dy, dy, TimeSpan.FromSeconds(secondsY))
             { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever, EasingFunction = ease };
-        Timeline.SetDesiredFrameRate(ax, 20);
-        Timeline.SetDesiredFrameRate(ay, 20);
+        Fx.Limit(ax);
+        Fx.Limit(ay);
         t.BeginAnimation(TranslateTransform.XProperty, ax);
         t.BeginAnimation(TranslateTransform.YProperty, ay);
     }
@@ -187,7 +187,7 @@ public partial class AuroraView : UserControl, IDashboardView
     {
         var a = new DoubleAnimation(Math.Clamp(opacity, 0, 1), TimeSpan.FromSeconds(2))
             { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut } };
-        Timeline.SetDesiredFrameRate(a, 20);
+        Fx.Limit(a);
         blob.BeginAnimation(OpacityProperty, a);
     }
 
@@ -310,7 +310,7 @@ public partial class AuroraView : UserControl, IDashboardView
         }
         var a = new ColorAnimation(to, TimeSpan.FromSeconds(3))
             { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut } };
-        Timeline.SetDesiredFrameRate(a, 20);
+        Fx.Limit(a);
         brush.BeginAnimation(SolidColorBrush.ColorProperty, a);
     }
 

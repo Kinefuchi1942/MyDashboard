@@ -248,12 +248,22 @@ public sealed class NewsTicker
 /// <summary>小さな演出の共通処理。</summary>
 public static class Fx
 {
+    /// <summary>アニメーションのコマ数（settings.json の animationFps。レイアウトを作る前に MainWindow が入れる）。</summary>
+    public static int FrameRate { get; set; } = 20;
+
+    /// <summary>アニメーションを FrameRate のコマ数に抑える（制限しないとモニターのリフレッシュレートで描き直し、GPU を食う）。</summary>
+    public static T Limit<T>(T timeline) where T : System.Windows.Media.Animation.Timeline
+    {
+        System.Windows.Media.Animation.Timeline.SetDesiredFrameRate(timeline, FrameRate);
+        return timeline;
+    }
+
     /// <summary>要素をふわっと出す（切り替え時）。</summary>
     public static void FadeIn(UIElement e, double ms = 450)
     {
         var a = new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(ms))
             { EasingFunction = new System.Windows.Media.Animation.QuadraticEase() };
-        e.BeginAnimation(UIElement.OpacityProperty, a);
+        e.BeginAnimation(UIElement.OpacityProperty, Limit(a));
     }
 
     /// <summary>ページ位置を示す点（現在だけ横長）を作り直す。</summary>

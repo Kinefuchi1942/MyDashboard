@@ -119,6 +119,7 @@ public partial class MainWindow : Window
     private void SwitchLayout(string? name, bool save = true)
     {
         name = Array.IndexOf(LayoutOrder, name?.ToLowerInvariant()) >= 0 ? name!.ToLowerInvariant() : "classic";
+        Fx.FrameRate = _settings.AnimationFps;
 
         // 一度作ったレイアウトは使い回す（戻ったときにグラフの履歴が残る）
         if (!_views.TryGetValue(name, out var view))

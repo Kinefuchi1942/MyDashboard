@@ -19,6 +19,9 @@ public sealed class AppSettings
     /// <summary>画面のレイアウト："classic"（標準）/ "gauge"（計器盤）/ "aurora"（オーロラ）。</summary>
     public string Layout { get; set; } = "classic";
 
+    /// <summary>アニメーションのコマ数（1秒あたり、10〜60）。上げるとなめらかになるが GPU を使う。</summary>
+    public int AnimationFps { get; set; } = 20;
+
     /// <summary>オーロラの背景アニメーション。false にすると背景の動きを止める（色の変化は残る）。</summary>
     public bool AuroraMotion { get; set; } = true;
 
@@ -156,6 +159,7 @@ public sealed class AppSettings
     {
         UpdateIntervalMs = Math.Clamp(UpdateIntervalMs, 250, 5000);
         HistorySeconds = Math.Clamp(HistorySeconds, 20, 600);
+        AnimationFps = Math.Clamp(AnimationFps, 10, 60);
         FpsExcludeProcesses ??= new List<string>();
         NewsFeeds ??= new List<MyDashboard.Info.FeedSource>();
         NewsRotateSeconds = Math.Clamp(NewsRotateSeconds, 3, 120);

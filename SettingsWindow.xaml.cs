@@ -75,6 +75,7 @@ public partial class SettingsWindow : Window
         BehindBox.IsChecked = s.AlwaysBehind;
         IntervalSlider.Value = s.UpdateIntervalMs;
         HistorySlider.Value = s.HistorySeconds;
+        FpsSlider.Value = s.AnimationFps;
 
         var theme = ThemePanel.Children.OfType<RadioButton>().FirstOrDefault(r => (string)r.Tag == s.AuroraTheme)
                     ?? ThemePanel.Children.OfType<RadioButton>().First();
@@ -175,6 +176,7 @@ public partial class SettingsWindow : Window
             AlwaysBehind = BehindBox.IsChecked == true,
             UpdateIntervalMs = (int)IntervalSlider.Value,
             HistorySeconds = (int)HistorySlider.Value,
+            AnimationFps = (int)FpsSlider.Value,
             AuroraTheme = ThemePanel.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked == true)?.Tag as string ?? "auto",
             AuroraDayBrightness = BrightnessSlider.Value / 100.0,
             AuroraMotion = MotionBox.IsChecked == true,
@@ -316,9 +318,10 @@ public partial class SettingsWindow : Window
     private void UpdateSliderTexts()
     {
         // InitializeComponent の途中（まだ部品がそろっていない）でも呼ばれるため null を確かめる
-        if (IntervalText == null || HistoryText == null || BrightnessText == null || RotateText == null || RefreshText == null) return;
+        if (IntervalText == null || HistoryText == null || FpsText == null || BrightnessText == null || RotateText == null || RefreshText == null) return;
         IntervalText.Text = $"{IntervalSlider.Value / 1000.0:0.00} 秒";
         HistoryText.Text = $"{HistorySlider.Value:0} 秒";
+        FpsText.Text = $"{FpsSlider.Value:0} コマ/秒";
         BrightnessText.Text = $"{BrightnessSlider.Value:0} %";
         RotateText.Text = $"{RotateSlider.Value:0} 秒";
         RefreshText.Text = $"{RefreshSlider.Value:0} 分";

@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using MyDashboard.Views;
 
 namespace MyDashboard.Controls;
 
@@ -57,16 +58,9 @@ public sealed class ArcGauge : FrameworkElement
     {
         var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
         var d = TimeSpan.FromMilliseconds(650);
-        BeginAnimation(ValueProperty, Limit(new DoubleAnimation(Math.Clamp(value, 0, 1), d) { EasingFunction = ease }));
+        BeginAnimation(ValueProperty, Fx.Limit(new DoubleAnimation(Math.Clamp(value, 0, 1), d) { EasingFunction = ease }));
         if (!double.IsNaN(second))
-            BeginAnimation(SecondValueProperty, Limit(new DoubleAnimation(Math.Clamp(second, 0, 1), d) { EasingFunction = ease }));
-    }
-
-    /// <summary>1秒20コマに抑える（制限しないとモニターのリフレッシュレートで発光のぼかしごと描き直し、GPU を食う）。</summary>
-    private static DoubleAnimation Limit(DoubleAnimation a)
-    {
-        Timeline.SetDesiredFrameRate(a, 20);
-        return a;
+            BeginAnimation(SecondValueProperty, Fx.Limit(new DoubleAnimation(Math.Clamp(second, 0, 1), d) { EasingFunction = ease }));
     }
 
     /// <summary>主の弧の半径（目盛りのぶん内側に入れる）。</summary>

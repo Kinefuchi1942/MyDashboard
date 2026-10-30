@@ -484,6 +484,21 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="アニメーションのコマ数"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="上げるとなめらかに、下げると GPU の負荷が減ります"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Slider x:Name="FpsSlider" Style="{StaticResource DashSlider}" Minimum="10" Maximum="60"
+                                            TickFrequency="5" SmallChange="5" LargeChange="5" ValueChanged="OnSliderChanged"/>
+                                    <TextBlock x:Name="FpsText" Style="{StaticResource SliderValue}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </StackPanel>
 
                     <!-- ========================================================= オーロラ -->
