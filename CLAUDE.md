@@ -28,6 +28,8 @@
 - 2026-10-29 から git 管理（main）。GitHub の非公開リポジトリを正本にして、クラウドの Claude Code セッションでも作業する。
   ローカルで作業を始める前に `git pull`、終わったら commit して push する
 - クラウド（Linux）ではアプリを動かせない。できるのは編集と `dotnet build` によるコンパイル確認まで。
+  ただしクラウドの .NET に WPF のビルド部品（Microsoft.NET.Sdk.WindowsDesktop）が入っていないと `dotnet build` は通らない。
+  そのときは XAML の名前付き要素を仮の宣言で置き換えた別の csproj で C# だけコンパイル確認する（XAML は目で確認し、実機のビルドで確かめる）
   起動・画面・センサーの確認は依頼者の PC で行う（取り込み → publish → 起動は下の手順のとおり）
 
 ## ビルドと停止・起動（UAC なし）
@@ -46,7 +48,7 @@
    - Git Bash から schtasks を呼ぶと `/Run` がパスに変換されるので、PowerShell を使う
 5. 起動したか `Get-Process MyDashboard` で確かめる
 
-- `publish\PresentMon.exe`（FPS 計測）、`publish\settings.json`（依頼者の設定）、`publish\twitch-auth.json`（Twitch のログイン）、`publish\webview2\` は消さない・上書きしない
+- `publish\PresentMon.exe`（FPS 計測）、`publish\settings.json`（依頼者の設定）、`publish\twitch-auth.json`（Twitch のログイン）、`publish\webview2\`、`publish\power-log.json`（今日・今月の電力量）は消さない・上書きしない
 - ソース側の `settings.json` は publish へ「新しければ上書き」でコピーされる。ソース側を編集すると依頼者の設定が初期値で上書きされるので、既定値を変えたいときは `AppSettings.cs` を直す
 - 自動起動の登録（`install-autostart.bat`）は管理者として実行が必要で、Claude Code からはできない。必要なら依頼者に「右クリック →管理者として実行」を頼む
 - 二重起動は Mutex で防いでいる。起動前に必ず前のプロセスが終わっていることを確かめる
@@ -70,7 +72,8 @@
   - ViewSupport：共通の色・書式・ニュース送り・演出
 - `Controls/`：自前描画の部品（ArcGauge、HistoryChart、FrameTimeChart、WeatherIcon、Meters）
 - 操作：右クリック、S＝設定、L＝レイアウト、M＝モニター移動、B＝常に背後、Ctrl+Q＝終了
-- 診断ファイル（publish 内）：`fps-diagnostics.txt`、`dlss-diagnostics.txt`、`media-diagnostics.txt`
+- 診断ファイル（publish 内）：`fps-diagnostics.txt`、`dlss-diagnostics.txt`、`media-diagnostics.txt`、`power-diagnostics.txt`
+- 消費電力（標準・計器盤）：`Monitoring/PowerMeter.cs`（推定と積算）、`SystemScanner.cs`（構成の自動調査）、`Views/PowerSummary`（表示）
 
 ## 再発させない注意点
 

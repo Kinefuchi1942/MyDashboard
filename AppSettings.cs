@@ -80,6 +80,20 @@ public sealed class AppSettings
     /// <summary>最後に見ていた動画（一覧にあれば次もこれから表示する）。</summary>
     public string YouTubeLastVideo { get; set; } = "";
 
+    // ---- 消費電力（推定。標準・計器盤に表示）
+    /// <summary>モニターの消費電力を合計に含める。</summary>
+    public bool PowerIncludeMonitors { get; set; } = true;
+    /// <summary>電源の容量（W）。効率の計算に使う。</summary>
+    public int PsuWatts { get; set; } = 850;
+    /// <summary>80 PLUS の等級："none" / "standard" / "bronze" / "silver" / "gold" / "platinum" / "titanium"。</summary>
+    public string PsuRating { get; set; } = "gold";
+    /// <summary>補正（W）。ワットチェッカーで測った値とずれるときに足し引きする。</summary>
+    public double PowerOffsetW { get; set; }
+    /// <summary>電気代の単価（円/kWh）。</summary>
+    public double YenPerKwh { get; set; } = 31;
+    /// <summary>モニターごとに自分で決めた W 数（キーはモニターの機種コード＋接続先）。ないモニターは自動の見積もり。</summary>
+    public Dictionary<string, double> MonitorWatts { get; set; } = new();
+
     public bool EnableFps { get; set; } = true;
     public List<string> FpsExcludeProcesses { get; set; } = new()
     {
@@ -155,6 +169,12 @@ public sealed class AppSettings
         Layout = string.IsNullOrWhiteSpace(Layout) ? "classic" : Layout.Trim().ToLowerInvariant();
         AuroraTheme = string.IsNullOrWhiteSpace(AuroraTheme) ? "auto" : AuroraTheme.Trim().ToLowerInvariant();
         AuroraDayBrightness = Math.Clamp(AuroraDayBrightness, 0.5, 1.0);
+        PsuWatts = Math.Clamp(PsuWatts, 200, 2000);
+        PsuRating = string.IsNullOrWhiteSpace(PsuRating) ? "gold" : PsuRating.Trim().ToLowerInvariant();
+        PowerOffsetW = Math.Clamp(PowerOffsetW, -300, 300);
+        YenPerKwh = Math.Clamp(YenPerKwh, 0, 200);
+        MonitorWatts = (MonitorWatts ?? new()).Where(kv => kv.Value is >= 0 and <= 500)
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
         return this;
     }
 }

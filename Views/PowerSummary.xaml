@@ -1,0 +1,38 @@
+<UserControl x:Class="MyDashboard.Views.PowerSummary"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- 消費電力（推定）：標準・計器盤の時計の左に置く。左に合計と内訳の帯、右に今日・今月の電力量と電気代 -->
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <StackPanel VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="消費電力（推定）" FontFamily="{StaticResource UiFont}" FontSize="17" Foreground="{StaticResource Dim}"
+                           VerticalAlignment="Bottom" Margin="0,0,10,5"/>
+                <TextBlock x:Name="TotalText" Text="--" FontFamily="{StaticResource NumFont}" FontStretch="SemiCondensed" FontWeight="SemiBold"
+                           FontSize="40" Foreground="{StaticResource Text}" Typography.NumeralAlignment="Tabular" VerticalAlignment="Bottom"/>
+                <TextBlock Text="W" FontFamily="{StaticResource NumFont}" FontSize="22" Foreground="{StaticResource Dim}"
+                           VerticalAlignment="Bottom" Margin="8,0,0,5"/>
+            </StackPanel>
+            <!-- 内訳：CPU / GPU / その他 / モニター（幅の割合はコードで設定） -->
+            <Grid x:Name="Bar" Width="270" Height="6" Margin="0,6,0,0" HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0*"/><ColumnDefinition Width="0*"/><ColumnDefinition Width="0*"/><ColumnDefinition Width="0*"/><ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" CornerRadius="3" Margin="0,0,2,0" Background="{StaticResource Cpu}"/>
+                <Border Grid.Column="1" CornerRadius="3" Margin="0,0,2,0" Background="{StaticResource Gpu}"/>
+                <Border Grid.Column="2" CornerRadius="3" Margin="0,0,2,0" Background="#4A5668"/>
+                <Border Grid.Column="3" CornerRadius="3" Background="#AEB9CA"/>
+                <Border Grid.Column="4" CornerRadius="3" Background="#1FFFFFFF"/>
+            </Grid>
+        </StackPanel>
+        <Border x:Name="Rule" BorderBrush="{StaticResource Rule}" BorderThickness="1,0,0,0" Margin="18,2,0,2" Padding="18,0,0,0">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock FontFamily="{StaticResource UiFont}" FontSize="18" Foreground="{StaticResource Dim}">
+                    <Run Text="今日 "/><Run x:Name="TodayKwh" Text="--" FontFamily="{StaticResource NumFont}" FontSize="20" Foreground="{StaticResource Text}"/><Run x:Name="TodayYen"/>
+                </TextBlock>
+                <TextBlock FontFamily="{StaticResource UiFont}" FontSize="18" Foreground="{StaticResource Dim}" Margin="0,2,0,0">
+                    <Run Text="今月 "/><Run x:Name="MonthKwh" Text="--" FontFamily="{StaticResource NumFont}" FontSize="20" Foreground="{StaticResource Text}"/><Run x:Name="MonthYen"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

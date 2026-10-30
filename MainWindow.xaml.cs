@@ -59,7 +59,11 @@ public partial class MainWindow : Window
 
         SourceInitialized += (_, _) =>
         {
-            HwndSource.FromHwnd(new WindowInteropHelper(this).Handle)?.AddHook(WndProc);
+            var hwnd = new WindowInteropHelper(this).Handle;
+            HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
+            // 画面の点灯・消灯を受け取る（消えている間はモニターの消費電力を待機分だけにする）
+            var displayState = GUID_CONSOLE_DISPLAY_STATE;
+            _powerNotify = RegisterPowerSettingNotification(hwnd, ref displayState, 0);
             _monitorIndex = ResolveMonitor(_settings.Monitor);
             PlaceOnMonitor(_monitorIndex);
         };
@@ -332,6 +336,12 @@ public partial class MainWindow : Window
     /// </summary>
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
+        if (msg == WM_POWERBROADCAST && wParam.ToInt32() == PBT_POWERSETTINGCHANGE && lParam != IntPtr.Zero)
+        {
+            // POWERBROADCAST_SETTING：GUID（16）・データ長（4）のあとに 0＝消灯 / 1＝点灯 / 2＝暗くなった
+            if (Marshal.PtrToStructure<Guid>(lParam) == GUID_CONSOLE_DISPLAY_STATE)
+                PowerMeter.DisplayOn = Marshal.ReadInt32(lParam, 20) != 0;
+        }
         if (!_settings.AlwaysBehind) return IntPtr.Zero;
         if (msg == WM_MOUSEACTIVATE)
         {
@@ -357,10 +367,23 @@ public partial class MainWindow : Window
         _collector.Dispose();
         _info.Dispose();
         _media.Dispose();
+        PowerMeter.Shared.Save();
+        if (_powerNotify != IntPtr.Zero) UnregisterPowerSettingNotification(_powerNotify);
         base.OnClosed(e);
     }
 
     // =========================================================== Win32
+
+    private IntPtr _powerNotify;
+    private static readonly Guid GUID_CONSOLE_DISPLAY_STATE = new("6FE69556-704A-47A0-8F24-C28D936FDA47");
+    private const int WM_POWERBROADCAST = 0x0218;
+    private const int PBT_POWERSETTINGCHANGE = 0x8013;
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr RegisterPowerSettingNotification(IntPtr hRecipient, ref Guid powerSettingGuid, int flags);
+
+    [DllImport("user32.dll")]
+    private static extern bool UnregisterPowerSettingNotification(IntPtr handle);
 
     private static readonly IntPtr HWND_NOTOPMOST = new(-2);
     private static readonly IntPtr HWND_BOTTOM = new(1);

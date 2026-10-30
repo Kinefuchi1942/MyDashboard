@@ -13,20 +13,23 @@
 
 ## 構成
 - `MainWindow`：ウィンドウ本体。モニター配置、レイアウト切り替え、右クリックメニュー、キー操作
-- `SettingsWindow`：設定画面（右クリック「設定…」または S キー）。左の一覧で 表示 / オーロラ / 警告の目安 / ニュース / 天気 / 再生中の音楽 / Twitch / YouTube / FPS を切り替え。「保存」で settings.json に書き、MainWindow.ApplySettings が再起動なしで反映（変わった部分のサービスだけ作り直し、レイアウトは作り直す）。天気は Open-Meteo の地名検索（geocoding-api.open-meteo.com）で地点を選ぶ
+- `SettingsWindow`：設定画面（右クリック「設定…」または S キー）。左の一覧で 表示 / オーロラ / 警告の目安 / 消費電力 / ニュース / 天気 / 再生中の音楽 / Twitch / YouTube / FPS を切り替え。「保存」で settings.json に書き、MainWindow.ApplySettings が再起動なしで反映（変わった部分のサービスだけ作り直し、レイアウトは作り直す）。天気は Open-Meteo の地名検索（geocoding-api.open-meteo.com）で地点を選ぶ
 - `Monitoring/`：センサー収集（1秒ごと）
   - HardwareMonitor：LibreHardwareMonitorLib 0.9.6（CPU / GPU / ストレージ）、メモリは GlobalMemoryStatusEx
   - CpuTopology：GetLogicalProcessorInformationEx の EfficiencyClass で P/E コアを判定し、センサー名「CPU Core #N」の N をコア順に当てる（取れなければ HT なしのコア＝E コアで推定）。CoreBars は E コアを淡色・グループ分け・ラベル付きで描く
   - FpsMonitor：Intel PresentMon（コンソール版）を子プロセスで起動し CSV を読む。診断を publish\fps-diagnostics.txt に出力
   - DlssDetector：ゲームが読み込んでいる nvngx_dlss / dlssg / dlssd の DLL（ドライバー差し替え時は ProgramData\NVIDIA\NGX\models 以下の .bin）から DLSS の SR・FG・RR を推定。診断を publish\dlss-diagnostics.txt に出力
   - NetworkMonitor：NetworkInterface の送受信量
+  - SystemScanner：消費電力の見積もり用に PC の構成を調べる（起動時と設定画面の「構成を読み直す」）。マザーボード＝レジストリ HARDWARE\DESCRIPTION\System\BIOS、メモリ＝SMBIOS の Type 17（GetSystemFirmwareTable）、ドライブ＝\\.\PhysicalDriveN への IOCTL_STORAGE_QUERY_PROPERTY（BusType 17＝NVMe、シークペナルティあり＝HDD、USB・仮想は除外）、ファン＝別に開いた LHM の Motherboard（Super I/O）で回っているファンの数、モニター＝QueryDisplayConfig（名前・リフレッシュレート・GDI 名）＋レジストリの EDID（大きさ）、明るさ＝DDC/CI（dxva2 GetMonitorBrightness、1分ごと・裏で）。診断を publish\power-diagnostics.txt に出力
+  - PowerMeter：消費電力の推定（アプリ全体で1つ。設定の保存で Collector が作り直されても積算は続く）。CPU・GPU は LHM の実測、マザーボード＝Z/X 系 18 W・B/H/A 系 12 W・不明 15 W＋CPU 電力の 1 割（電源回路の損失）、メモリ＝DDR5 4 W・ほか 3 W／枚、ドライブ＝NVMe 1.5〜6 W・SATA SSD 0.8〜3 W・HDD 5〜8 W（LHM の読み書き速度で増やす。100 MB/s で最大）、ファン 1.5 W／個（読めなければ 4 個）、その他 5 W。合計を 80 PLUS の等級ごとの効率曲線（10・20・50・100% 負荷）で割り、補正を足す。モニター＝（インチ×1 W＋120Hz 以上 5 W／200Hz 以上 8 W）×（0.4＋0.6×明るさ）、明るさが読めなければ 50%、画面消灯中（MainWindow が GUID_CONSOLE_DISPLAY_STATE の通知で PowerMeter.DisplayOn を書く）は 0.5 W。電力量は publish\power-log.json（日・月ごと、1分ごとと終了時に保存。5 秒以上あいた間は数えない）
   - Collector：上記を1秒ごと（updateIntervalMs）にまとめて Snapshot にして画面へ渡す
 - `Info/`：ニュースと天気（センサーとは別ループ）
   - InfoService：RSS を10分ごと、天気（Open-Meteo、API キー不要）を15分ごとに取得
   - FeedParser：RSS 2.0 / RSS 1.0 (RDF) / Atom を要素名で読む。配信元を交互に並べる
   - MediaService：Windows の再生中メディア情報（GlobalSystemMediaTransportControls）から Spotify などの曲名・ジャケット・再生位置を読む。通知方式で負荷ほぼゼロ。診断を publish\media-diagnostics.txt に出力。このため TargetFramework は net8.0-windows10.0.19041.0
 - `Views/`：差し替え可能なレイアウト（IDashboardView：Render / UpdateClock / SetNotice / ShowNews / ShowWeather / ShowMedia）
-  - ClassicView「標準」：情報量重視のパネル型（スレッド別負荷、ディスクごとの速度まで表示）
+  - ClassicView「標準」：情報量重視のパネル型（スレッド別負荷、ディスクごとの速度まで表示）。見出しの時計の左に消費電力
+  - PowerSummary：消費電力（推定）の表示。合計 W・内訳の帯（CPU／GPU／その他／モニター）・今日と今月の kWh と電気代。標準と計器盤の時計の左に置く（2026-10-30 追加、モックアップ `mockups/power-classic.png`・`power-gauge.png`・`power-settings.png`）
   - GaugeView「計器盤」：CPU・FPS・GPU の円弧メーター3連。外側＝使用率、内側＝温度。FPS の満点はメインモニターのリフレッシュレート。CPU メーターの下にスレッド別負荷（CoreBars、P/E コア別・スレッド数と最大スレッドの %。2026-10-28 追加、モックアップ `mockups/gauge-threads.png`）。FPS メーターの下に直近10秒のフレームタイムのグラフ（FrameTimeChart）と 1% Low、左上に Present Mode のチップ（Hardware＝緑、Composed＝琥珀で「DWM 合成あり」）、右下に DLSS のチップ（SR / FG / RR。DlssDetector が読み込み済み DLL から推定。保護されたゲームは「unavailable」）。最下段にメモリ・VRAM・ディスク・ネットの細い帯。ニュースは表示しない（2026-10-26 に帯を削除）。Present Mode と DLSS は計器盤だけの表示（標準・オーロラには出ない）
   - AuroraView「オーロラ」：日常使い向け。大きな時計・天気（現在＋3時間ごと6コマ）・ニュースカードが主役。FPS は表示しない（2026-10-27 に左上のバッジを削除。ゲーム中の判定は Twitch の低画質切り替え用に残す）。PC 状態は下段の細いバー（x96・下端から84px・高さ120、CPU / GPU / メモリ / VRAM / ネットの5区画と推移グラフ）。背景の光が負荷に連動（CPU 青緑・GPU 紫・高温で赤）。
     - 左列（1920×1080 基準）：時計（y150・文字300）、日付（y470）、天気カード（x96・y556・幅860・高さ200）。曲の再生中は天気の下に再生中カード（x96・y726〜852・幅860・高さ126）を出し、そのあいだ時計・日付・天気を 50px 上げる（MediaLift）。背景にジャケット色の光。再生なし／一時停止5分でカードを隠す

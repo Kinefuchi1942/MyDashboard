@@ -1,7 +1,8 @@
 <UserControl x:Class="MyDashboard.Views.ClassicView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:c="clr-namespace:MyDashboard.Controls">
+             xmlns:c="clr-namespace:MyDashboard.Controls"
+             xmlns:v="clr-namespace:MyDashboard.Views">
     <!-- 標準レイアウト：情報量重視のパネル型 -->
     <Grid Width="1920" Height="1080">
         <Grid Margin="28">
@@ -34,6 +35,8 @@
                                Foreground="{StaticResource Warn}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- 消費電力（推定） -->
+                    <v:PowerSummary x:Name="Power" Margin="0,0,44,0" VerticalAlignment="Center"/>
                     <TextBlock x:Name="DateText" FontFamily="{StaticResource UiFont}" FontSize="20"
                                Foreground="{StaticResource Dim}" VerticalAlignment="Bottom" Margin="0,0,18,8"/>
                     <TextBlock x:Name="ClockText" Text="00:00" FontFamily="{StaticResource NumFont}" FontStretch="SemiCondensed"

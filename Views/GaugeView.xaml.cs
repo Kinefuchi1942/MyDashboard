@@ -151,6 +151,8 @@ public partial class GaugeView : UserControl, IDashboardView
         var (up, upUnit) = Fmt.BitsSplit(s.Network.UpBps);
         NetText.Text = unit == upUnit ? $"↓{down}  ↑{up} {unit}" : $"↓{down} {unit}  ↑{up} {upUnit}";
         NetChart.Push(s.Network.DownBps, s.Network.UpBps);
+
+        Power.Show(s.Power);
     }
 
     /// <summary>DLSS のバッジ。ゲームが DLSS の部品を読み込んでいないときは何も出さない。</summary>

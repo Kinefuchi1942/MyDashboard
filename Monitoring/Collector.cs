@@ -63,7 +63,8 @@ public sealed class Collector : IDisposable
                     disks,
                     _net.Read(),
                     _fps.Read(),
-                    driverMissing && cpu?.Temperature == null);
+                    driverMissing && cpu?.Temperature == null,
+                    PowerMeter.Shared.Estimate(_settings, cpu, gpu, disks));
                 Updated?.Invoke(snap);
             }
             catch (Exception ex)

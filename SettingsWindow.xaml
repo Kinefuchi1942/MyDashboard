@@ -365,6 +365,7 @@
                     <RadioButton x:Name="NavDisplay" Style="{StaticResource NavItem}" Content="表示" Tag="PageDisplay" Checked="OnNav"/>
                     <RadioButton Style="{StaticResource NavItem}" Content="オーロラ" Tag="PageAurora" Checked="OnNav"/>
                     <RadioButton Style="{StaticResource NavItem}" Content="警告の目安" Tag="PageThresholds" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="消費電力" Tag="PagePower" Checked="OnNav"/>
                     <RadioButton Style="{StaticResource NavItem}" Content="ニュース" Tag="PageNews" Checked="OnNav"/>
                     <RadioButton Style="{StaticResource NavItem}" Content="天気" Tag="PageWeather" Checked="OnNav"/>
                     <RadioButton Style="{StaticResource NavItem}" Content="再生中の音楽" Tag="PageMedia" Checked="OnNav"/>
@@ -654,6 +655,90 @@
                                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                                     <TextBox x:Name="MemCritBox" Style="{StaticResource NumBox}" BorderBrush="#80FF5D5D"/>
                                     <TextBlock Text="%" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ========================================================= 消費電力 -->
+                    <StackPanel x:Name="PagePower" Visibility="Collapsed">
+                        <TextBlock Style="{StaticResource PageTitle}" Text="消費電力"/>
+                        <TextBlock Style="{StaticResource Lead}" Text="PC 全体とモニターの消費電力を推定して、標準・計器盤の時計の左に出します。CPU と GPU はセンサーの実測、ほかは見つかった部品からの見積もりです"/>
+
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="見つかった構成" FontSize="16" FontWeight="Medium" VerticalAlignment="Center"/>
+                            <Button x:Name="RescanButton" Style="{StaticResource Btn}" Content="構成を読み直す" HorizontalAlignment="Right"
+                                    Click="OnPowerRescan" ToolTip="部品を付け替えたときやモニターをつなぎ直したときに"/>
+                        </Grid>
+                        <!-- 1行ずつコードで作る（モニターの行は W 数を直せる） -->
+                        <StackPanel x:Name="PowerRows"/>
+                        <TextBlock Style="{StaticResource Hint}" Margin="0,8,0,0"
+                                   Text="W 数はこの画面を開いたときの値です。モニターの欄に数字を入れるとその値を使い、空欄にすると自動の見積もりに戻ります"/>
+
+                        <Border Style="{StaticResource RowLine}" Margin="0,14,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="モニターを合計に含める"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="画面が消えている間は 1 台 0.5 W で数えます"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" x:Name="PowerMonitorBox" Style="{StaticResource Switch}"/>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="電源" FontSize="16" FontWeight="Medium" Margin="0,22,0,0"/>
+                        <TextBlock Style="{StaticResource Hint}" Margin="0,3,0,10" Text="電源の容量と効率は自動では分かりません。電源の箱や本体のラベルを見て入れてください"/>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Label}" Text="電源の容量"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="PsuBox" Style="{StaticResource NumBox}"/>
+                                    <TextBlock Text="W" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="80 PLUS の等級"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="効率から、コンセント側の電力を出します"/>
+                                </StackPanel>
+                                <WrapPanel Grid.Column="1" x:Name="PsuRatingPanel" Margin="0,10,0,0">
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Psu" Tag="none" Content="なし"/>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Psu" Tag="standard" Content="スタンダード"/>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Psu" Tag="bronze" Content="Bronze"/>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Psu" Tag="silver" Content="Silver"/>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Psu" Tag="gold" Content="Gold"/>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Psu" Tag="platinum" Content="Platinum"/>
+                                    <RadioButton Style="{StaticResource Chip}" GroupName="Psu" Tag="titanium" Content="Titanium"/>
+                                </WrapPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="補正"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="ワットチェッカーで測った値とずれるときに足し引き（PC 本体の分）"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="PowerOffsetBox" Style="{StaticResource NumBox}"/>
+                                    <TextBlock Text="W" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="電気代の単価"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="電気の明細にある 1 kWh あたりの料金。0 にすると電気代を出しません"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBox x:Name="YenBox" Style="{StaticResource NumBox}"/>
+                                    <TextBlock Text="円/kWh" Foreground="{StaticResource Dim}" VerticalAlignment="Center" Margin="10,0,0,0"/>
                                 </StackPanel>
                             </Grid>
                         </Border>

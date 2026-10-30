@@ -107,6 +107,7 @@ public partial class ClassicView : UserControl, IDashboardView
 
         RenderDisks(s.Disks);
         RenderFps(s.Fps);
+        Power.Show(s.Power);
     }
 
     private void RenderFps(FpsInfo f)
