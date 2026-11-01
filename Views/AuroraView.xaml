@@ -446,6 +446,30 @@
                         <TextBlock x:Name="MediaSource" FontFamily="{StaticResource UiFont}" FontSize="19" Foreground="{DynamicResource AT60}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,-8,0,-8">
+                        <!-- 音量（Windows の音量ミキサーのこのアプリの音量）。スピーカーで消音、バーはクリック・ドラッグ、カードの上でホイール。音声が見つからない間は隠す -->
+                        <Border x:Name="MediaVolume" BorderBrush="{DynamicResource ALine}" BorderThickness="0,0,1,0" Height="28" Margin="0,0,14,0" Padding="0,0,14,0" Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border x:Name="MediaMute" Style="{StaticResource MediaButton}" Width="36" Height="32" ToolTip="消音／解除">
+                                    <Grid Width="20" Height="18">
+                                        <Path x:Name="MediaSpeaker" Fill="{DynamicResource AT70}" Data="M0,6 H4 L9,1 V17 L4,12 H0 Z"/>
+                                        <Path x:Name="MediaSpeakerWaves" Stroke="{DynamicResource AT70}" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              Data="M12,5.5 Q14.5,9 12,12.5 M14.5,3 Q18.5,9 14.5,15"/>
+                                        <Path x:Name="MediaSpeakerMuted" Stroke="#FFB547" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              Data="M12.5,6 L18,12 M18,6 L12.5,12" Visibility="Collapsed"/>
+                                    </Grid>
+                                </Border>
+                                <!-- 当たり判定を広げるため、透明な背景で高さ 24 にする -->
+                                <Grid x:Name="MediaVolTrack" Width="110" Height="24" Margin="4,0,10,0" Background="Transparent" Cursor="Hand" VerticalAlignment="Center">
+                                    <Grid x:Name="MediaVolBar" Height="12" VerticalAlignment="Center">
+                                        <Border Height="4" CornerRadius="2" Background="{DynamicResource ALine}"/>
+                                        <Border x:Name="MediaVolFill" Height="4" CornerRadius="2" Background="{DynamicResource AT70}" HorizontalAlignment="Left" Width="0"/>
+                                        <Ellipse x:Name="MediaVolKnob" Width="12" Height="12" Fill="{DynamicResource AText}" HorizontalAlignment="Left"/>
+                                    </Grid>
+                                </Grid>
+                                <TextBlock x:Name="MediaVolText" FontFamily="{StaticResource NumFont}" FontSize="16" Foreground="{DynamicResource AT60}"
+                                           Typography.NumeralAlignment="Tabular" MinWidth="32" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
                         <Border x:Name="MediaPrev" Style="{StaticResource MediaButton}" ToolTip="前の曲">
                             <Path Width="16" Height="16" Stretch="Uniform" Fill="{DynamicResource AT70}" Data="M0,0 H3 V14 H0 Z M16,0 V14 L4,7 Z"/>
                         </Border>

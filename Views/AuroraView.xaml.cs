@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
@@ -51,6 +52,17 @@ public partial class AuroraView : UserControl, IDashboardView
     private NowPlaying? _media;
     private DateTime? _pausedSince;
     private Color? _glowColor;
+
+    // 再生中のアプリの音量（Windows の音量ミキサー）
+    private readonly Brush _amber = new SolidColorBrush(Color.FromRgb(0xFF, 0xB5, 0x47));
+    private float _volLevel;
+    private bool _volMuted;
+    private float? _volPending;      // ドラッグ中に送りそびれた最新の値
+    private bool _volSending;
+    private DateTime _volHoldUntil;  // 操作の直後は読み直さない（古い値に戻って見えないように）
+    private DateTime _volCheckedAt;
+    private static readonly TimeSpan VolumeCheckEvery = TimeSpan.FromSeconds(2);
+    private const float VolumeWheelStep = 0.05f;
 
     // ゲーム中かどうか（Twitch をゲーム中だけ低画質にするのに使う）
     private DateTime _sessionLastSeen;
@@ -124,7 +136,8 @@ public partial class AuroraView : UserControl, IDashboardView
         MediaPrev.MouseLeftButtonUp += (_, e) => { e.Handled = true; _ = _ctx.Media?.PreviousAsync(); };
         MediaPlayPause.MouseLeftButtonUp += (_, e) => { e.Handled = true; _ = _ctx.Media?.PlayPauseAsync(); };
         MediaNext.MouseLeftButtonUp += (_, e) => { e.Handled = true; _ = _ctx.Media?.NextAsync(); };
-        foreach (var button in new[] { MediaPrev, MediaPlayPause, MediaNext })
+        InitVolume();
+        foreach (var button in new[] { MediaPrev, MediaPlayPause, MediaNext, MediaMute })
         {
             // マウスを乗せたときの背景（Style のトリガーで ALine を使うと WPF がブラシを凍結し、色を変えられなくなる）
             button.MouseEnter += (s, _) => ((Border)s).Background = _line;
@@ -331,6 +344,8 @@ public partial class AuroraView : UserControl, IDashboardView
                 SetMediaVisible(false);
             else
                 UpdateMediaProgress(now);
+            if (MediaCard.Visibility == Visibility.Visible && now - _volCheckedAt >= VolumeCheckEvery)
+                RefreshVolume();
         }
     }
 
@@ -603,6 +618,7 @@ public partial class AuroraView : UserControl, IDashboardView
         bool wasVisible = MediaCard.Visibility == Visibility.Visible;
         SetMediaVisible(true);
         UpdateMediaProgress(DateTime.Now);
+        RefreshVolume();
         if (wasVisible && newTrack) Fx.FadeIn(MediaBody);
     }
 
@@ -641,6 +657,110 @@ public partial class AuroraView : UserControl, IDashboardView
         t.TotalHours >= 1
             ? $"{(int)t.TotalHours}:{t.Minutes:00}:{t.Seconds:00}"
             : $"{(int)t.TotalMinutes}:{t.Seconds:00}";
+
+    // =========================================================== 再生中のアプリの音量
+
+    private void InitVolume()
+    {
+        MediaMute.MouseLeftButtonUp += (_, e) =>
+        {
+            e.Handled = true;
+            _volMuted = !_volMuted;
+            _volHoldUntil = DateTime.Now + VolumeCheckEvery;
+            ShowVolume();
+            _ = _ctx.Media?.SetMuteAsync(_volMuted);
+        };
+
+        // バーはクリックした位置へ。押したままドラッグで動かせる
+        MediaVolTrack.MouseLeftButtonDown += (_, e) =>
+        {
+            e.Handled = true;
+            MediaVolTrack.CaptureMouse();
+            SetVolumeFrom(e.GetPosition(MediaVolTrack).X);
+        };
+        MediaVolTrack.MouseMove += (_, e) =>
+        {
+            if (MediaVolTrack.IsMouseCaptured) SetVolumeFrom(e.GetPosition(MediaVolTrack).X);
+        };
+        MediaVolTrack.MouseLeftButtonUp += (_, e) =>
+        {
+            e.Handled = true;
+            MediaVolTrack.ReleaseMouseCapture();
+        };
+
+        // カードの上でホイールを回すと 5% ずつ
+        MediaCard.MouseWheel += (_, e) =>
+        {
+            if (MediaVolume.Visibility != Visibility.Visible) return;
+            e.Handled = true;
+            SetVolume(_volLevel + Math.Sign(e.Delta) * VolumeWheelStep);
+        };
+    }
+
+    private void SetVolumeFrom(double x) => SetVolume((float)(x / MediaVolTrack.Width));
+
+    private void SetVolume(float level)
+    {
+        // ホイールの 5% 刻みがずれないよう、1% 単位にそろえる
+        _volLevel = MathF.Round(Math.Clamp(level, 0f, 1f) * 100) / 100;
+        _volMuted = false;
+        _volHoldUntil = DateTime.Now + VolumeCheckEvery;
+        ShowVolume();
+        _volPending = _volLevel;
+        if (!_volSending) _ = SendVolume();
+    }
+
+    /// <summary>音量を送る。ドラッグ中は前の送信が終わってから最新の値だけ送る（順番が入れ替わらないように）。</summary>
+    private async System.Threading.Tasks.Task SendVolume()
+    {
+        _volSending = true;
+        try
+        {
+            while (_volPending is { } level && _ctx.Media is { } media)
+            {
+                _volPending = null;
+                await media.SetVolumeAsync(level);
+            }
+        }
+        finally
+        {
+            _volSending = false;
+        }
+    }
+
+    /// <summary>今の音量を読み直す（ミキサーや他のアプリで変えられたときのため、2秒ごと）。</summary>
+    private async void RefreshVolume()
+    {
+        _volCheckedAt = DateTime.Now;
+        if (_ctx.Media == null || MediaVolTrack.IsMouseCaptured || DateTime.Now < _volHoldUntil) return;
+        var v = await _ctx.Media.GetVolumeAsync();
+        if (MediaVolTrack.IsMouseCaptured || DateTime.Now < _volHoldUntil) return;
+        if (v is { } got)
+        {
+            _volLevel = got.Level;
+            _volMuted = got.Muted;
+            MediaVolume.Visibility = Visibility.Visible;
+            ShowVolume();
+        }
+        else
+        {
+            MediaVolume.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void ShowVolume()
+    {
+        double w = Math.Max(0, MediaVolTrack.Width * _volLevel);
+        MediaVolFill.Width = w;
+        MediaVolKnob.Margin = new Thickness(Math.Clamp(w - 6, 0, Math.Max(0, MediaVolTrack.Width - 12)), 0, 0, 0);
+        MediaVolBar.Opacity = _volMuted ? 0.4 : 1;
+        MediaSpeaker.Fill = _volMuted ? _amber : _t70;
+        MediaSpeakerWaves.Visibility = _volMuted ? Visibility.Collapsed : Visibility.Visible;
+        MediaSpeakerMuted.Visibility = _volMuted ? Visibility.Visible : Visibility.Collapsed;
+        MediaVolText.Text = _volMuted ? "消音" : $"{Math.Round(_volLevel * 100)}";
+        MediaVolText.FontFamily = _volMuted ? (FontFamily)FindResource("UiFont") : (FontFamily)FindResource("NumFont");
+        MediaVolText.Foreground = _volMuted ? _amber : _t60;
+    }
 
     /// <summary>背景の光をジャケットの色にする（同じ色なら作り直さない）。</summary>
     private void SetMusicGlowColor(Color c)

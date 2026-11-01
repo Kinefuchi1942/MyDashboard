@@ -63,6 +63,23 @@ public sealed class MediaService : IDisposable
     public Task NextAsync() => Control(s => s.TrySkipNextAsync().AsTask());
     public Task PreviousAsync() => Control(s => s.TrySkipPreviousAsync().AsTask());
 
+    // 音量は Windows の音量ミキサーの、表示中のアプリの音量（Core Audio は時間がかかることがあるので画面のスレッドでは呼ばない）
+    private readonly AppVolume _volume = new();
+
+    /// <summary>表示中のアプリの音量（0〜1）と消音か。そのアプリの音声が見つからなければ null。</summary>
+    public Task<(float Level, bool Muted)?> GetVolumeAsync() =>
+        _current?.SourceAppUserModelId is { Length: > 0 } id
+            ? Task.Run(() => _volume.Get(AppVolume.ProcessNameOf(id)))
+            : Task.FromResult<(float, bool)?>(null);
+
+    public Task SetVolumeAsync(float level) => VolumeControl(name => _volume.SetLevel(name, level));
+    public Task SetMuteAsync(bool muted) => VolumeControl(name => _volume.SetMute(name, muted));
+
+    private Task VolumeControl(Action<string> action) =>
+        _current?.SourceAppUserModelId is { Length: > 0 } id
+            ? Task.Run(() => action(AppVolume.ProcessNameOf(id)))
+            : Task.CompletedTask;
+
     private async Task Control(Func<WinMedia.GlobalSystemMediaTransportControlsSession, Task<bool>> action)
     {
         var s = _current;

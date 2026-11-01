@@ -26,7 +26,7 @@
 - `Info/`：ニュースと天気（センサーとは別ループ）
   - InfoService：RSS を10分ごと、天気（Open-Meteo、API キー不要）を15分ごとに取得
   - FeedParser：RSS 2.0 / RSS 1.0 (RDF) / Atom を要素名で読む。配信元を交互に並べる
-  - MediaService：Windows の再生中メディア情報（GlobalSystemMediaTransportControls）から Spotify などの曲名・ジャケット・再生位置を読む。通知方式で負荷ほぼゼロ。診断を %APPDATA%\MyDashboard\media-diagnostics.txt に出力。このため TargetFramework は net8.0-windows10.0.19041.0
+  - MediaService：Windows の再生中メディア情報（GlobalSystemMediaTransportControls）から Spotify などの曲名・ジャケット・再生位置を読む。通知方式で負荷ほぼゼロ。診断を %APPDATA%\MyDashboard\media-diagnostics.txt に出力。このため TargetFramework は net8.0-windows10.0.19041.0。音量は AppVolume（Core Audio の COM を直接呼ぶ。音量ミキサーのアプリごとの音量を、表示中アプリのプロセス名で探して読み書き）
 - `Views/`：差し替え可能なレイアウト（IDashboardView：Render / UpdateClock / SetNotice / ShowNews / ShowWeather / ShowMedia）
   - ClassicView「標準」：情報量重視のパネル型（スレッド別負荷、ディスクごとの速度まで表示）。見出しの時計の左に消費電力
   - PowerSummary：消費電力（推定）の表示。合計 W・内訳の帯（CPU／GPU／その他／モニター）・今日と今月の kWh と電気代。標準と計器盤の時計の左に置く（2026-10-30 追加、モックアップ `mockups/power-classic.png`・`power-gauge.png`・`power-settings.png`）
@@ -78,6 +78,7 @@ Info/
   InfoService.cs          ニュース（RSS）と天気（Open-Meteo）の取得
   FeedParser.cs           RSS 2.0 / RSS 1.0 / Atom の読み取り
   MediaService.cs         再生中の曲（Windows のメディア情報）
+  AppVolume.cs            再生中カードの音量（音量ミキサーのアプリごとの音量）
   TwitchService.cs        Twitch のフォロー中の配信（Helix API）とログイン情報
   YouTubeService.cs       YouTube のチャンネルの新着と配信中（公開ページから読む）
 Controls/                 推移グラフ・円弧メーター・フレームタイムのグラフ・天気アイコン・棒グラフ（自前描画で軽量）

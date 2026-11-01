@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1000px;height:560px;overflow:hidden;background:#070A12;font-family:"Yu Gothic UI",sans-serif;color:#F4F7FB;position:relative}
+.num{font-family:Bahnschrift,sans-serif}
+.glow{position:absolute;border-radius:50%;filter:blur(10px)}
+.card{position:absolute;left:70px;width:860px;height:126px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:15px 20px 15px 15px;display:flex;gap:22px}
+.art{width:96px;height:96px;border-radius:12px;background:linear-gradient(135deg,#C9506B,#5B3A9E)}
+.body{flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.top{display:flex;align-items:center;height:22px}
+.src{font-size:19px;color:rgba(244,247,251,.6);display:flex;align-items:center;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:#1ED760}
+.ctrl{margin-left:auto;display:flex;align-items:center}
+.b{width:44px;height:36px;display:flex;align-items:center;justify-content:center}
+.vol{display:flex;align-items:center;gap:10px;margin-right:18px;padding-right:18px;border-right:1px solid rgba(255,255,255,.12);height:28px}
+.track{position:relative;width:110px;height:12px}
+.track .bg{position:absolute;top:4px;left:0;right:0;height:4px;border-radius:2px;background:rgba(255,255,255,.14)}
+.track .fill{position:absolute;top:4px;left:0;height:4px;border-radius:2px;background:rgba(244,247,251,.7)}
+.track .knob{position:absolute;top:0;width:12px;height:12px;border-radius:50%;background:#F4F7FB}
+.pct{font-size:16px;color:rgba(244,247,251,.6);min-width:30px}
+.title{font-size:29px;font-weight:600}.sub{font-size:20px;color:rgba(244,247,251,.7);font-weight:400}
+.prog{display:flex;align-items:center;gap:14px;font-size:17px;color:rgba(244,247,251,.6)}
+.prog .t{position:relative;flex:1;height:12px}
+.label{position:absolute;left:70px;font-size:18px;color:rgba(244,247,251,.75)}
+.label b{color:#FFB547;font-weight:600}
+</style></head><body>
+<div class="glow" style="left:-300px;top:-100px;width:900px;height:800px;background:radial-gradient(rgba(29,143,166,.35),transparent 70%)"></div>
+<div class="glow" style="left:500px;top:-300px;width:900px;height:900px;background:radial-gradient(rgba(106,75,216,.35),transparent 70%)"></div>
+
+<div class="label" style="top:28px"><b>通常</b>　スピーカー・音量バー・% を操作ボタンの左に追加（バーはクリック／ドラッグ、カードの上でホイールでも変更）</div>
+<div class="card" style="top:66px">
+  <div class="art"></div>
+  <div class="body">
+    <div class="top">
+      <div class="src"><span class="dot"></span>Spotify</div>
+      <div class="ctrl">
+        <div class="vol">
+          <svg width="20" height="18" viewBox="0 0 20 18"><path d="M0,6 H4 L9,1 V17 L4,12 H0 Z" fill="rgba(244,247,251,.7)"/><path d="M12,5.5 Q14.5,9 12,12.5 M14.5,3 Q18.5,9 14.5,15" stroke="rgba(244,247,251,.7)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+          <div class="track"><div class="bg"></div><div class="fill" style="width:68px"></div><div class="knob" style="left:62px"></div></div>
+          <span class="pct num">62</span>
+        </div>
+        <div class="b"><svg width="16" height="16" viewBox="0 0 16 14"><path d="M0,0 H3 V14 H0 Z M16,0 V14 L4,7 Z" fill="rgba(244,247,251,.7)"/></svg></div>
+        <div class="b"><svg width="20" height="20" viewBox="0 0 15 18"><path d="M0,0 H5 V18 H0 Z M10,0 H15 V18 H10 Z" fill="#F4F7FB"/></svg></div>
+        <div class="b"><svg width="16" height="16" viewBox="0 0 16 14"><path d="M13,0 H16 V14 H13 Z M0,0 V14 L12,7 Z" fill="rgba(244,247,251,.7)"/></svg></div>
+      </div>
+    </div>
+    <div><span class="title">夜に駆ける</span> <span class="sub">　YOASOBI · THE BOOK</span></div>
+    <div class="prog"><span class="num">1:42</span><div class="t"><div class="track" style="width:100%"><div class="bg"></div><div class="fill" style="width:40%;background:#F4F7FB"></div><div class="knob" style="left:calc(40% - 6px)"></div></div></div><span class="num">4:21</span></div>
+  </div>
+</div>
+
+<div class="label" style="top:250px"><b>ミュート</b>　スピーカーをクリックで消音／戻す。消音中はバーが薄くなる</div>
+<div class="card" style="top:288px">
+  <div class="art"></div>
+  <div class="body">
+    <div class="top">
+      <div class="src"><span class="dot"></span>Spotify</div>
+      <div class="ctrl">
+        <div class="vol">
+          <svg width="20" height="18" viewBox="0 0 20 18"><path d="M0,6 H4 L9,1 V17 L4,12 H0 Z" fill="#FFB547"/><path d="M12.5,6 L18,12 M18,6 L12.5,12" stroke="#FFB547" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div class="track" style="opacity:.4"><div class="bg"></div><div class="fill" style="width:68px"></div><div class="knob" style="left:62px"></div></div>
+          <span class="pct num" style="color:#FFB547">消音</span>
+        </div>
+        <div class="b"><svg width="16" height="16" viewBox="0 0 16 14"><path d="M0,0 H3 V14 H0 Z M16,0 V14 L4,7 Z" fill="rgba(244,247,251,.7)"/></svg></div>
+        <div class="b"><svg width="20" height="20" viewBox="0 0 15 18"><path d="M0,0 H5 V18 H0 Z M10,0 H15 V18 H10 Z" fill="#F4F7FB"/></svg></div>
+        <div class="b"><svg width="16" height="16" viewBox="0 0 16 14"><path d="M13,0 H16 V14 H13 Z M0,0 V14 L12,7 Z" fill="rgba(244,247,251,.7)"/></svg></div>
+      </div>
+    </div>
+    <div><span class="title">夜に駆ける</span> <span class="sub">　YOASOBI · THE BOOK</span></div>
+    <div class="prog"><span class="num">1:42</span><div class="t"><div class="track" style="width:100%"><div class="bg"></div><div class="fill" style="width:40%;background:#F4F7FB"></div><div class="knob" style="left:calc(40% - 6px)"></div></div></div><span class="num">4:21</span></div>
+  </div>
+</div>
+
+<div class="label" style="top:450px;line-height:1.6;color:rgba(244,247,251,.6)">
+※ Windows の「音量ミキサー」の Spotify の音量を変えます（PC 全体の音量や他のアプリはそのまま）。<br>
+※ Spotify アプリ内の音量バーとは別です。Spotify 以外（ブラウザなど）を表示中はそのアプリの音量になります。
+</div>
+</body></html>
