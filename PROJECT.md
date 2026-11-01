@@ -8,7 +8,7 @@
 - 依頼者は C# を書かない。成果物はそのままビルドできる形で渡し、手順は短く具体的に伝える
 - PC：日本語 Windows、Intel Core i7-14700K（20スレッド）、NVIDIA GeForce RTX 系、サブモニターあり
 - 開発：C# / .NET 8 / WPF。build.bat で単一 exe（publish フォルダ）を作る
-- 配布：exe 1つだけ。`v1.2.3` のようなタグを push すると GitHub Actions（.github/workflows/release.yml）が make-dist.ps1 で dist\MyDashboard.exe を作り、Releases に公開する。説明書は同梱せず README に寄せる
+- 配布：Velopack のインストーラー（MyDashboard-win-Setup.exe）と自動更新。`v1.2.3` のようなタグを push すると GitHub Actions（.github/workflows/release.yml）が make-dist.ps1 でインストーラー・Portable.zip・更新パッケージ（nupkg、releases.win.json）を作り、Releases に公開する。インストール版は右クリックメニューから更新できる。説明書は同梱せず README に寄せる
 - ソースは Program Files 以外に置く（Program Files の下ではビルドできない）
 
 ## 構成
@@ -47,13 +47,15 @@
 - `Controls/`：自前描画の部品（HistoryChart、ArcGauge、FrameTimeChart、WeatherIcon、Meters.cs の BarMeter・CoreBars）
 - `settings.json`：monitor、更新間隔、alwaysBehind、しきい値、layout（classic / gauge / aurora）、auroraMotion、auroraTheme（auto / morning / day / evening / night / classic）、auroraDayBrightness、enableMedia、mediaSpotifyOnly、enableTwitch / twitchClientId / twitchLowQualityInGame / twitchLastChannel、enableYouTube / youTubeChannels / youTubeLastVideo、memWarn / memCrit（メモリ・VRAM 使用率）、newsFeeds、天気の地点（緯度経度）、FPS 除外プロセス
 - `app.ico`：アプリのアイコン（紺の角丸＋オーロラの光＋計器の弧。16〜40px は簡略版の絵）
-- 操作：右クリックメニュー（レイアウト / 次のモニター / 常に背後 / サインイン時に自動起動 / 設定… / 設定ファイルを開く / 保存フォルダを開く / 終了）、S＝設定画面、L＝レイアウト切替、M＝モニター移動、B＝常に背後（壁紙のように後ろのまま）、Ctrl+Q＝終了、ニュースはダブルクリックで記事を開く
+- 操作：右クリックメニュー（レイアウト / 次のモニター / 常に背後 / サインイン時に自動起動 / 設定… / 設定ファイルを開く / 保存フォルダを開く / 更新を確認・更新して再起動 / バージョン / 終了）、S＝設定画面、L＝レイアウト切替、M＝モニター移動、B＝常に背後（壁紙のように後ろのまま）、Ctrl+Q＝終了、ニュースはダブルクリックで記事を開く
 
 ## ファイル一覧
 
 ```
 MyDashboard.csproj      .NET 8 / WPF。publish で単一 exe
-app.manifest              管理者権限・高DPI対応
+app.manifest              高DPI対応。実行レベルは asInvoker（管理者への上げ直しは Program.cs）
+Program.cs                エントリポイント。Velopack のフック処理 → 管理者でなければ自動起動タスク（UAC なし）か UAC で起動し直す
+AppUpdater.cs             Velopack の更新（GitHub Releases を確認・ダウンロード・終了後に適用して再起動）
 App.xaml                  配色・フォント・文字スタイル
 MainWindow.xaml(.cs)      ウィンドウ本体。レイアウト切り替え、モニター配置、操作
 SettingsWindow.xaml(.cs)  設定画面（settings.json を画面で編集し、保存ですぐ反映）
@@ -90,10 +92,11 @@ Monitoring/
   Snapshot.cs             1回分の測定値の入れ物
   Collector.cs            一定間隔でまとめて取得し、画面に渡す
 build.bat                 本番ビルド（publish へ。PresentMon のダウンロードも聞く）
-make-dist.ps1             配布用の単体 exe を dist\ に作る（PresentMon を vendor\ に用意して exe に埋め込む）
+make-dist.ps1             Velopack のインストーラーと更新パッケージを disteleases に作る（PresentMon を vendor\ に用意して exe に埋め込む）
+.config/dotnet-tools.json vpk（Velopack の CLI）のバージョン。Velopack パッケージと同じ版にそろえる
 AppPaths.cs               保存場所（%APPDATA%\MyDashboard と %LOCALAPPDATA%\MyDashboard）。起動時に exe の隣の旧データを移す
-AutoStart.cs              自動起動（タスクスケジューラの「MyDashboard」）の登録・解除。右クリック「サインイン時に自動起動」
-.github/workflows/release.yml  タグの push で exe を作って GitHub Releases に公開
+AutoStart.cs              自動起動（タスクスケジューラの「MyDashboard」）の登録・解除。右クリック「サインイン時に自動起動」。通常権限で起動されたときの上げ直しとアンインストール時の削除にも使う
+.github/workflows/release.yml  タグの push でインストーラーと更新パッケージを作って GitHub Releases に公開
 mockups/                  デザインのモックアップ画像
 docs/images/              README の画面写真（tools/Screenshots で作る）
 tools/Screenshots/        README の画面写真を見本データから作るツール（本体の csproj からは DefaultItemExcludes で除外）
@@ -118,6 +121,10 @@ dotnet run -c Release --project tools/Screenshots
 - Twitch・YouTube の映像（msedgewebview2.exe）も PresentMon に描画として出るので、FpsMonitor で常に除外する（ゲームと間違えないため）
 - LibreHardwareMonitorLib 0.9.6 では VRAM が SensorType.SmallData（MB単位）。開発版とは種別や単位が違うため、容量系のセンサーは名前で探して単位をそろえる
 - CPU 温度の取得には PawnIO ドライバ（pawnio.eu）が必要。アプリは管理者権限で動く
+- exe は asInvoker で起動し、Program.cs で管理者に上げ直す（requireAdministrator だとインストーラーや更新プログラムが起動できない）。
+  自動起動タスクがこの exe を指していればタスクを動かす（UAC なし）、なければ runas（UAC）
+- Velopack のインストール先は %LOCALAPPDATA%\MyDashboardApp（packId）。%LOCALAPPDATA%\MyDashboard はアプリのデータ（webview2・PresentMon）なので packId を MyDashboard にしない。
+  利用者向けのファイル名（Setup.exe・Portable.zip）は make-dist.ps1 で MyDashboard-… に名前を変えている
 - 管理者権限のアプリから記事を開くときは explorer.exe 経由にする（ブラウザを管理者権限で起動しないため）
 - ゲームの邪魔をしない：フォーカスを奪わない（ShowActivated=False）、アニメーションは1秒20コマ程度に抑え（設定の animationFps。新しいアニメーションは必ず `Fx.Limit` を通す）、表示中のレイアウトでだけ動かす
 
@@ -143,24 +150,28 @@ dotnet run -c Release --project tools/Screenshots
 - `.gitattributes` で改行変換を止めている（.bat の Shift_JIS・CRLF を守るため）
 - クラウド（Linux）ではコンパイル確認まで（csproj の `EnableWindowsTargeting`）。起動・画面・センサーの確認はこの PC で、取り込み（git pull）→ publish → 起動
 
-### リリース（配布用の exe を公開する）
+### リリース（インストーラーと更新を公開する）
 
 1. `MyDashboard.csproj` の `<Version>` を上げて commit・push する
-2. 同じ版のタグを付けて push する（例：`git tag v1.0.1` → `git push origin v1.0.1`）
-3. GitHub Actions の「リリース」が `make-dist.ps1` で exe を作り、Releases に `MyDashboard.exe` を載せる
+2. 同じ版のタグを付けて push する（例：`git tag v1.1.1` → `git push origin v1.1.1`）
+3. GitHub Actions の「リリース」が `make-dist.ps1` で作ったファイルを Releases に載せる
+   - `MyDashboard-win-Setup.exe`（インストーラー）、`MyDashboard-win-Portable.zip`、`MyDashboardApp-x.y.z-full.nupkg`、`releases.win.json`
+   - インストール済みのアプリは最新リリースの `releases.win.json` と nupkg を読んで更新する。この2つが欠けると更新が届かない
    - タグと `<Version>` が違うと失敗する
-   - 最新版はいつも `https://github.com/Kinefuchi1942/MyDashboard/releases/latest/download/MyDashboard.exe`
+   - 最新版はいつも `https://github.com/Kinefuchi1942/MyDashboard/releases/latest/download/MyDashboard-win-Setup.exe`
 
-手元で exe だけ作るときは（動いているダッシュボードは止めなくて大丈夫です）：
+手元で作るときは（動いているダッシュボードは止めなくて大丈夫です）：
 
 ```
 powershell -NoProfile -ExecutionPolicy Bypass -File D:\MyDashboard\make-dist.ps1
 ```
 
-- できるのは `dist\MyDashboard.exe` 1つだけ。.NET と PresentMon が入っていて、設定（settings.json）は初回起動時に既定値で作られる
+- `disteleases` にできる。exe は .NET と PresentMon が入った単体の exe で、設定（settings.json）は初回起動時に既定値で作られる
 - 自分の設定・Twitch のログイン（`twitch-auth.json`）・`webview2` フォルダ・診断ファイルは入りません
 - 相手の PC に .NET を入れる必要はありません。CPU 温度を出すには相手側でも PawnIO が必要です
 - 署名のない exe なので、初回は「Windows によって PC が保護されました」→「詳細情報」→「実行」が必要です（README に記載済み）
+- 手元で更新を試すときは、環境変数 `MYDASHBOARD_UPDATE_SOURCE` に `disteleases` のフォルダを入れてアプリを起動すると、GitHub の代わりにそこを見る
+- 開発用の `publish\MyDashboard.exe` はインストール版ではないので、自動更新は動かない（メニューにバージョンだけ出る）
 
 ## 作り方（初回だけ）
 
@@ -175,4 +186,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File D:\MyDashboard\make-dist.ps1
    `publish` フォルダに `MyDashboard.exe` ができます。途中で「PresentMon をダウンロードしますか」と聞かれたら **Y** を押すと FPS 表示が使えるようになります（make-dist.ps1 で作った exe なら PresentMon は内蔵済み）。
 4. `publish` フォルダを好きな場所（例：`C:\Tools\MyDashboard`）に移して、`MyDashboard.exe` を起動します。
 
-起動時に管理者権限の確認（UAC）が出ます。CPU 温度とクロックの読み取り、FPS の計測に必要なためです。
+起動時に管理者権限の確認（UAC）が出ます（自動起動を登録した exe なら出ません）。CPU 温度とクロックの読み取り、FPS の計測に必要なためです。

@@ -15,6 +15,8 @@ public sealed class AppSettings
     public int HistorySeconds { get; set; } = 90;
     /// <summary>常に背後に表示（壁紙のように、クリックしても他のウィンドウの後ろのまま）。</summary>
     public bool AlwaysBehind { get; set; }
+    /// <summary>新しい版を自動で確認・ダウンロードする（インストール版のみ。適用は右クリックメニューから）。</summary>
+    public bool CheckForUpdates { get; set; } = true;
 
     /// <summary>画面のレイアウト："classic"（標準）/ "gauge"（計器盤）/ "aurora"（オーロラ）。</summary>
     public string Layout { get; set; } = "classic";

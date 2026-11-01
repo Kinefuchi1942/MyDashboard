@@ -25,6 +25,9 @@
             <MenuItem Header="設定ファイルを開く" Click="OnOpenSettings"/>
             <MenuItem Header="保存フォルダを開く" Click="OnOpenDataFolder"/>
             <Separator/>
+            <MenuItem x:Name="UpdateItem" Header="更新を確認" Click="OnUpdateMenu"/>
+            <MenuItem x:Name="VersionItem" IsEnabled="False"/>
+            <Separator/>
             <MenuItem Header="終了" InputGestureText="Ctrl+Q" Click="OnQuit"/>
         </ContextMenu>
     </Window.ContextMenu>

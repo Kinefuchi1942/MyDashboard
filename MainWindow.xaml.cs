@@ -51,6 +51,7 @@ public partial class MainWindow : Window
         ApplyStacking();
         SwitchLayout(_settings.Layout, save: false);
         AutoStartItem.IsChecked = AutoStart.IsRegistered();
+        StartUpdateChecks();
 
         _clock =new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clock.Tick += (_, _) => _view?.UpdateClock(DateTime.Now);
@@ -238,6 +239,69 @@ public partial class MainWindow : Window
 
     private void OnOpenSettingsWindow(object sender, RoutedEventArgs e) => OpenSettingsWindow();
 
+    // =========================================================== 更新（インストール版のみ）
+
+    private readonly AppUpdater _updater = new();
+    private readonly DispatcherTimer _updateTimer = new() { Interval = TimeSpan.FromHours(6) };
+    private Velopack.VelopackAsset? _readyUpdate;
+    private bool _checkingUpdate;
+
+    private void StartUpdateChecks()
+    {
+        VersionItem.Header = $"バージョン {AppUpdater.CurrentVersion}" + (_updater.IsInstalled ? "" : "（インストール版ではないため自動更新なし）");
+        UpdateItem.Visibility = _updater.IsInstalled ? Visibility.Visible : Visibility.Collapsed;
+        if (!_updater.IsInstalled) return;
+
+        _updateTimer.Tick += (_, _) => { if (_settings.CheckForUpdates) _ = CheckForUpdatesAsync(); };
+        _updateTimer.Start();
+        // 起動直後はセンサーや WebView2 の準備と重ならないよう少し待つ
+        Dispatcher.InvokeAsync(async () =>
+        {
+            await Task.Delay(TimeSpan.FromMinutes(1));
+            if (_settings.CheckForUpdates) await CheckForUpdatesAsync();
+        });
+    }
+
+    /// <summary>新しい版を確認してダウンロードし、メニューの項目を「更新して再起動」にする。結果を表示用の文で返す。</summary>
+    private async Task<string> CheckForUpdatesAsync()
+    {
+        if (_checkingUpdate) return "確認中です。";
+        _checkingUpdate = true;
+        try
+        {
+            var update = await _updater.CheckAndDownloadAsync();
+            if (update is null) return $"最新のバージョンです（{AppUpdater.CurrentVersion}）。";
+            _readyUpdate = update;
+            UpdateItem.Header = $"バージョン {update.Version} に更新して再起動";
+            return $"バージョン {update.Version} をダウンロードしました。";
+        }
+        catch (Exception ex) { return "更新を確認できませんでした：\n" + ex.Message; }
+        finally { _checkingUpdate = false; }
+    }
+
+    private async void OnUpdateMenu(object sender, RoutedEventArgs e)
+    {
+        if (_readyUpdate is null)
+        {
+            var message = await CheckForUpdatesAsync();
+            if (_readyUpdate is null)
+            {
+                MessageBox.Show(message, "MyDashboard", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+        }
+        if (MessageBox.Show($"バージョン {_readyUpdate.Version} に更新して、MyDashboard を起動し直しますか？", "MyDashboard",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+        try { _updater.ApplyAfterExit(_readyUpdate); }
+        catch (Exception ex)
+        {
+            MessageBox.Show("更新を開始できませんでした：\n" + ex.Message, "MyDashboard", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        Close();
+    }
+
     // =========================================================== 設定画面
 
     private SettingsWindow? _settingsWindow;
@@ -383,6 +447,7 @@ public partial class MainWindow : Window
     {
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         _clock.Stop();
+        _updateTimer.Stop();
         _collector.Dispose();
         _info.Dispose();
         _media.Dispose();

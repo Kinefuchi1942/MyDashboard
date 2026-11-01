@@ -21,9 +21,14 @@
 - C# / .NET 8 / WPF。TargetFramework は `net8.0-windows10.0.19041.0`（再生中の曲を読む WinRT API のため。ビルドエラーが出たらまずここを疑う）
 - 主なパッケージ：LibreHardwareMonitorLib 0.9.6、Microsoft.Web.WebView2 1.0.3856.49
 - ソースの正本は `D:\MyDashboard`、実行版は `D:\MyDashboard\publish\MyDashboard.exe`
-- 配布は exe 1つだけ（GitHub Releases）。`v1.2.3` のタグを push すると `.github/workflows/release.yml` が `make-dist.ps1` で作って公開する。
-  タグと csproj の `<Version>` をそろえる。説明書は同梱せず README に書く。PresentMon は exe に埋め込み、初回起動時に取り出す
-- アプリは管理者権限で動く（`app.manifest` で requireAdministrator）。CPU 温度（PawnIO）と PresentMon の FPS 計測に必要
+- 配布は Velopack のインストーラー（`MyDashboard-win-Setup.exe`、2026-11-01 から。ValoRecorder と同じ方式）。`v1.2.3` のタグを push すると
+  `.github/workflows/release.yml` が `make-dist.ps1` でインストーラー・Portable.zip・更新パッケージを作って GitHub Releases に公開する。
+  インストール版は起動の1分後と6時間ごとに新しい版を確認・ダウンロードし、右クリックメニュー「バージョン x に更新して再起動」で適用する（`AppUpdater.cs`）。
+  タグと csproj の `<Version>` をそろえる。リリース（Version を上げてタグを push）は依頼者の指示があったときだけ。説明書は同梱せず README に書く。PresentMon は exe に埋め込み、初回起動時に取り出す
+- インストール先は `%LOCALAPPDATA%\MyDashboardApp`（packId）。`%LOCALAPPDATA%\MyDashboard` はアプリのデータなので packId を MyDashboard に変えない
+- アプリは管理者権限で動く。CPU 温度（PawnIO）と PresentMon の FPS 計測に必要。
+  ただし `app.manifest` は asInvoker で、`Program.cs` が管理者でなければ起動し直す（自動起動タスクがこの exe を指していればタスク経由で UAC なし、なければ UAC）。
+  requireAdministrator に戻さない（Velopack のインストーラー・更新プログラムが起動できなくなる）
 - 自動起動はタスクスケジューラのタスク `MyDashboard`（ログオン時、最上位の特権、72 時間制限なし）
 - claude.ai のプロジェクト側にも同じソースの写しがあり、クラウドの Claude が別に作業することがある。
   同じファイルを同時に触ると古い写しで上書きされる事故が過去にあったので、作業前に D: の中身が最新かを疑う

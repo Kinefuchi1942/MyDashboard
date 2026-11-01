@@ -1,5 +1,6 @@
-# v1.2.3 のようなタグをプッシュすると、make-dist.ps1 で exe を作って GitHub Releases に公開する
-# 利用者は https://github.com/Kinefuchi1942/MyDashboard/releases/latest/download/MyDashboard.exe から常に最新版を落とせる
+# v1.2.3 のようなタグをプッシュすると、make-dist.ps1 で Velopack のインストーラーと更新パッケージを作り、GitHub Releases に公開する
+# 利用者は https://github.com/Kinefuchi1942/MyDashboard/releases/latest/download/MyDashboard-win-Setup.exe から常に最新版を入れられる
+# 入れたあとはアプリが最新リリースの releases.win.json と *.nupkg を読んで更新する
 name: リリース
 
 on:
@@ -31,13 +32,13 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
 
       # 手元で使うときと同じ Windows PowerShell で動かす（PresentMon のダウンロードと埋め込みもここで行う）
-      - name: exe を作る
+      - name: インストーラーと更新パッケージを作る
         shell: powershell
         env:
           GH_TOKEN: ${{ github.token }}
         run: ./make-dist.ps1
 
-      # exe は名前を固定して、releases/latest/download/MyDashboard.exe が常に最新版を指すようにする
+      # ファイル名は固定なので、releases/latest/download/MyDashboard-win-Setup.exe が常に最新版を指す
       - name: リリースを作る
         env:
           GH_TOKEN: ${{ github.token }}
@@ -46,9 +47,12 @@ jobs:
           $notes = @"
           ## ダウンロード
 
-          - **MyDashboard.exe** … これだけで動きます。好きなフォルダに置いてダブルクリックしてください（設定は %APPDATA%\MyDashboard に保存されます）
+          - **MyDashboard-win-Setup.exe** … インストーラーです。ダブルクリックするとインストールして起動します。以後の更新はアプリの右クリックメニューから行えます
+          - **MyDashboard-win-Portable.zip** … インストールせずに使う場合はこちら。好きなフォルダに展開して MyDashboard.exe を起動してください
 
-          使い方・設定・自動起動は [README](https://github.com/$env:GITHUB_REPOSITORY#readme) を参照してください。
+          設定は %APPDATA%\MyDashboard に保存されます。使い方・設定・自動起動は [README](https://github.com/$env:GITHUB_REPOSITORY#readme) を参照してください。
           "@
-          gh release create $env:GITHUB_REF_NAME dist/MyDashboard.exe `
+          $files = Get-ChildItem dist/releases -File | Where-Object { $_.Name -match '\.(exe|zip|nupkg)$' -or $_.Name -eq 'releases.win.json' }
+          gh release create $env:GITHUB_REF_NAME @($files.FullName) `
             --title "MyDashboard $env:VERSION" --notes $notes --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw 'リリースの作成に失敗しました。' }

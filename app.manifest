@@ -4,8 +4,9 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- CPU温度・クロックの読み取りと PresentMon(ETW) に管理者権限が必要 -->
-        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+        <!-- CPU温度・クロックの読み取りと PresentMon(ETW) に管理者権限が必要だが、exe は通常の権限で起動し、
+             Program.cs が管理者として起動し直す（インストーラーや更新プログラムから起動できるようにするため） -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>
   </trustInfo>

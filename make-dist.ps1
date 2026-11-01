@@ -1,10 +1,15 @@
-﻿# 配布用の dist\MyDashboard.exe を作る（.NET と PresentMon を内蔵した単体の exe。自分の設定やログイン情報は入れない）
-# 利用者はこの exe だけ置けば動く。説明は README.md、バージョンは MyDashboard.csproj の <Version>
+﻿# Velopack でインストーラーと更新パッケージを dist\releases に作る（vpk のバージョンは .config\dotnet-tools.json）
+#   MyDashboard-win-Setup.exe   … 利用者に渡すインストーラー（.NET と PresentMon を内蔵。自分の設定やログイン情報は入れない）
+#   MyDashboard-win-Portable.zip … インストールせずに使う版
+#   *.nupkg, releases.win.json   … アプリ内の自動更新が読む
+# 説明は README.md、バージョンは MyDashboard.csproj の <Version>
 #   powershell -NoProfile -ExecutionPolicy Bypass -File make-dist.ps1
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 
 $dist = Join-Path $PSScriptRoot 'dist'
+$app = Join-Path $dist 'app'
+$releases = Join-Path $dist 'releases'
 $work = Join-Path $PSScriptRoot 'obj\dist'
 $vendor = Join-Path $PSScriptRoot 'vendor\PresentMon.exe'
 
@@ -31,9 +36,27 @@ foreach ($d in $dist, $work) { if (Test-Path $d) { Remove-Item $d -Recurse -Forc
 dotnet publish MyDashboard.csproj -c Release -o $work -nologo
 if ($LASTEXITCODE -ne 0) { throw 'ビルドに失敗しました。' }
 
-# 配るのは exe だけ（WebView2 パッケージの説明用 xml などは要らない）
-New-Item -ItemType Directory -Force $dist | Out-Null
-Copy-Item (Join-Path $work 'MyDashboard.exe') $dist
+# 入れるのは exe だけ（WebView2 パッケージの説明用 xml などは要らない）
+New-Item -ItemType Directory -Force $app | Out-Null
+Copy-Item (Join-Path $work 'MyDashboard.exe') $app
 Remove-Item $work -Recurse -Force
 
-Write-Host "作成しました: $(Join-Path $dist 'MyDashboard.exe')"
+$version = ([xml](Get-Content 'MyDashboard.csproj' -Encoding UTF8)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+if (-not $version) { throw 'MyDashboard.csproj に <Version> がありません。' }
+
+dotnet tool restore
+if ($LASTEXITCODE -ne 0) { throw 'vpk を用意できませんでした。' }
+
+# packId はインストール先のフォルダ名（%LOCALAPPDATA%\MyDashboardApp）。
+# %LOCALAPPDATA%\MyDashboard はアプリが WebView2 のデータと PresentMon に使っているので、別の名前にする
+dotnet vpk pack --packId MyDashboardApp --packVersion $version --packTitle MyDashboard --packAuthors Kinefuchi1942 `
+    --packDir $app --mainExe MyDashboard.exe --runtime win-x64 --icon (Join-Path $PSScriptRoot 'app.ico') -o $releases
+if ($LASTEXITCODE -ne 0) { throw 'パッケージの作成に失敗しました。' }
+
+# 利用者に見せるファイル名は MyDashboard-… にそろえる（更新パッケージの名前は packId のまま）
+Get-ChildItem $releases -Filter 'MyDashboardApp-win-*' | ForEach-Object {
+    Rename-Item $_.FullName ($_.Name -replace '^MyDashboardApp-', 'MyDashboard-')
+}
+
+Write-Host "作成しました: $releases"
+Write-Host "配布用:       $(Join-Path $releases 'MyDashboard-win-Setup.exe')"

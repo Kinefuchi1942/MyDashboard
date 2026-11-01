@@ -13,7 +13,10 @@
     <RootNamespace>MyDashboard</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>app.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <!-- 更新パッケージのバージョンと exe のプロパティに出る。配布し直すたびに上げる（タグ v1.2.3 とそろえる） -->
+    <Version>1.1.0</Version>
+    <!-- Velopack の処理を WPF より先に行うため、App.xaml が生成する Main ではなく Program.Main から起動する -->
+    <StartupObject>MyDashboard.Program</StartupObject>
     <!-- Windows 以外（クラウドの Linux）でもコンパイル確認できるようにする。実行は Windows のみ -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <!-- tools\ は別のプロジェクト（README の画像づくりなど）。本体に .cs を取り込まない -->
@@ -34,6 +37,8 @@
     <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
     <!-- オーロラの Twitch 表示（Edge の WebView2。ランタイムは Windows 10/11 に入っている） -->
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3856.49" />
+    <!-- インストーラーと自動更新（GitHub Releases から） -->
+    <PackageReference Include="Velopack" Version="1.2.161" />
   </ItemGroup>
 
   <ItemGroup>
