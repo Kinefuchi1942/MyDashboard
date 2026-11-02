@@ -10,8 +10,21 @@ public partial class App : Application
 {
     private Mutex? _single;
 
+    /// <summary>
+    /// Program.Main から起動した本物のダッシュボードのときだけ true。
+    /// 画面写真のツール（tools/Screenshots）は色や文字スタイルのためだけに App を作るが、WPF は Run を呼ばなくても
+    /// OnStartup を呼ぶので、そのときに本体（二重起動の確認・ウィンドウ・更新の確認）まで動かさないようにする。
+    /// </summary>
+    public bool IsDashboard { get; init; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
+        if (!IsDashboard)
+        {
+            base.OnStartup(e);
+            return;
+        }
+
         // 二重起動を防ぐ（PresentMon セッションが衝突するため）
         _single = new Mutex(true, @"Global\MyDashboard.SingleInstance", out bool created);
         if (!created)

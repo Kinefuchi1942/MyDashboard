@@ -38,6 +38,9 @@ public sealed class ViewContext
     /// <summary>再生・曲送りボタン用。</summary>
     public MediaService? Media { get; set; }
 
+    /// <summary>画面の右端のレイアウト切替ボタンから呼ぶ（classic / gauge / aurora）。</summary>
+    public Action<string>? SwitchLayout { get; set; }
+
     public ViewContext(AppSettings settings) => Settings = settings;
 
     /// <summary>グラフに保持する点の数（historySeconds ÷ 更新間隔）。</summary>

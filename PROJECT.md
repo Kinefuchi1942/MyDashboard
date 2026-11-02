@@ -42,6 +42,7 @@
   - YouTubeService（Info/YouTubeService.cs）：キー不要。/channel/ID/videos の ytInitialData（lockupViewModel）から新着（ショートと配信は入らない）、/channel/ID/live の ytInitialPlayerResponse（videoDetails.isLive）で配信中を判定。RSS（feeds/videos.xml）はチャンネルによって 404 になるので使わない。日本語のページ（Accept-Language: ja）の「8 時間前」から投稿時刻を逆算。配信の開始時刻は取れないことが多い（そのときは経過時間を出さない）
   - TwitchService（Info/TwitchService.cs）：Helix API（streams/followed、users）。Client ID は組み込み（TwitchService.DefaultClientId、依頼者のアプリ。Implicit grant なので公開してよい値）で、設定に入れればそちらを優先。トークンは %APPDATA%\MyDashboard\twitch-auth.json（Implicit grant。ログイン画面は TwitchLoginWindow が http://localhost への移動を横取り）
   - AuroraTheme：オーロラの時間帯テーマ（朝・昼は明るい背景＋濃い文字、夕方は紫と橙、夜はほぼ黒で約1割暗く）。境目は日の出／10時／日の入り1時間前／日の入り1時間後で、前後15分で背景を混ぜ、文字色は中間で3秒かけて切り替える。オーロラの文字・カードの色は DynamicResource（AText・AT85〜AT40・AGlass・ALine など）で、コードがブラシの色を変える。明るいテーマでは CPU #0B8494、GPU #5A52D0 の濃い版を使う
+  - レイアウト切替（Controls/LayoutPicker.cs、2026-11-02 追加、モックアップ `mockups/mode-switch-B.png`）：標準・計器盤・オーロラのアイコンを縦に3つ。いまのレイアウトを枠で囲み、ほかは薄く（テーマ切替と同じ見せ方）。押すと ViewContext.SwitchLayout → MainWindow.SwitchLayout。オーロラはテーマ切替の StackPanel の中（拡張表示ではテーマ切替ごと隠れる）で、色は UseAuroraColors でテーマのブラシをコードから参照。計器盤は Canvas の右14・上318に常時、標準は空きがないので同じ位置にマウスが画面の上にあるときだけ出す
   - テーマ切替（AuroraView の ThemePicker）：メディアカードの右、画面右端に朝・昼・夕方・夜の四角を縦に並べる（中は各テーマの空の色を XAML に直書き）。クリックで settings.json の auroraTheme をそのテーマに固定して保存、固定中のものを再クリックで auto に戻す。いまの配色の四角を文字色の枠で囲む。モックアップは `mockups/aurora-theme-icons.png`
   - ViewSupport：共通の色・書式（Fmt）、ニュースの順送り（NewsRotator / NewsTicker）、演出（Fx）
 - `Controls/`：自前描画の部品（HistoryChart、ArcGauge、FrameTimeChart、WeatherIcon、Meters.cs の BarMeter・CoreBars）
@@ -101,7 +102,8 @@ AutoStart.cs              自動起動（タスクスケジューラの「MyDash
 .github/workflows/release.yml  タグの push でインストーラーと更新パッケージを作って GitHub Releases に公開
 mockups/                  デザインのモックアップ画像
 docs/images/              README の画面写真（tools/Screenshots で作る）
-tools/Screenshots/        README の画面写真を見本データから作るツール（本体の csproj からは DefaultItemExcludes で除外）
+tools/Screenshots/        README の画面写真を見本データから作るツール（本体の csproj からは DefaultItemExcludes で除外）。
+                          App を作るが IsDashboard を立てないので、WPF が勝手に呼ぶ OnStartup で本体（二重起動の確認・ウィンドウ・更新）は動かない
 ```
 
 ### README の画面写真を作り直す

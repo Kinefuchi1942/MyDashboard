@@ -1,0 +1,14 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="stylesheet" href="mode-switch.css"><style>
+.dock{position:absolute;left:1844px;top:318px;width:56px;padding:6px 0;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.dock .b{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:rgba(244,247,251,.6);background:rgba(255,255,255,.05)}
+.dock .b.on{color:#F4F7FB;background:rgba(142,156,255,.3);box-shadow:inset 0 0 0 2px rgba(244,247,251,.85)}
+.dock .b.hov{color:#F4F7FB;background:rgba(255,255,255,.14)}
+.tip{position:absolute;left:1714px;top:384px;height:36px;padding:0 14px;border-radius:8px;display:flex;align-items:center;font-size:17px}
+.lbl{position:absolute;left:1700px;top:300px;font-size:15px;color:rgba(244,247,251,.5)}
+</style></head><body>
+<div class="cap"><b>案B</b>右端のテーマボタン（朝・昼・夕・夜）の下にレイアウトの3ボタンを並べる。標準・計器盤でも同じ位置に出す</div>
+<div class="dock glass">
+ <div class="b"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 15v-3M11 15V9M15 15v-5M19 15"/></svg></div><div class="b hov"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4-5"/></svg></div><div class="b on"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M3 16c3-6 6 2 9-4s6-2 9-6"/><path d="M3 20h18"/></svg></div>
+</div>
+<div class="tip glass">計器盤</div>
+</body></html>

@@ -28,7 +28,7 @@ public static class Program
             return;
         }
 
-        var app = new App();
+        var app = new App { IsDashboard = true };
         app.InitializeComponent();
         app.Run();
     }

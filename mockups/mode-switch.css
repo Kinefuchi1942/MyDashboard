@@ -1,0 +1,7 @@
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;background:#070A12 url(../docs/images/aurora-night.png) 0 0/1920px 1080px no-repeat;font-family:"Yu Gothic UI",sans-serif;color:#F4F7FB;position:relative}
+.num{font-family:Bahnschrift,sans-serif}
+.cap{position:absolute;left:40px;top:22px;font-size:22px;color:rgba(244,247,251,.8);background:rgba(7,10,18,.75);padding:8px 16px;border-radius:10px;border:1px solid rgba(255,183,71,.5)}
+.cap b{color:#FFB547;margin-right:12px}
+.glass{background:rgba(22,24,40,.82);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px)}
+.ic{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}

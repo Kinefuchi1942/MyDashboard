@@ -45,6 +45,7 @@ public partial class GaugeView : UserControl, IDashboardView
         Threads.Crit = ViewContext.Res("Crit");
         Threads.WarnAt = ctx.Settings.LoadWarn;
         Threads.CritAt = ctx.Settings.LoadCrit;
+        LayoutPicker.Picked += name => _ctx.SwitchLayout?.Invoke(name);
     }
 
     // ニュースは表示しない（計器盤はメーターに専念する）

@@ -107,6 +107,8 @@ public partial class AuroraView : UserControl, IDashboardView
             return (e, fill);
         }).ToArray();
         InitThemePicker();
+        LayoutPicker.UseAuroraColors();
+        LayoutPicker.Picked += name => _ctx.SwitchLayout?.Invoke(name);
         UpdateTheme(DateTime.Now, force: true);
         foreach (var chart in new[] { CpuChart, GpuChart, MemChart, VramChart, NetChart })
             chart.SetCapacity(Math.Max(20, ctx.HistoryPoints / 2));

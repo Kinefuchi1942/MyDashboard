@@ -231,5 +231,8 @@
             <c:HistoryChart Grid.Column="6" x:Name="NetChart" Grid.Row="1" Margin="0,12,0,0" Stroke="{StaticResource NetColor}"
                             SecondStroke="{StaticResource NetUpColor}" Max="0" ShowGrid="False" FillOpacity="0.22" LineThickness="2"/>
         </Grid>
+
+        <!-- 右端のレイアウト切替（オーロラのテーマ切替の下と同じ位置） -->
+        <c:LayoutPicker x:Name="LayoutPicker" Current="gauge" Canvas.Right="14" Canvas.Top="318"/>
     </Canvas>
 </UserControl>

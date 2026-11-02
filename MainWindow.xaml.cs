@@ -45,7 +45,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        _ctx = new ViewContext(_settings);
+        _ctx = new ViewContext(_settings) { SwitchLayout = name => SwitchLayout(name) };
         _media = CreateMedia();
 
         ApplyStacking();
