@@ -406,6 +406,12 @@ public partial class AuroraView : UserControl, IDashboardView
         NetValue.Text = Fmt.Bits(s.Network.DownBps);
         NetSide.Text = "↑ " + Fmt.Bits(s.Network.UpBps);
         NetChart.Push(s.Network.DownBps, s.Network.UpBps);
+
+        // ---- 拡張表示の見出しの数値（バーと同じ文字と色）
+        WideCpu.Text = CpuValue.Text; WideCpu.Foreground = CpuValue.Foreground;
+        WideGpu.Text = GpuValue.Text; WideGpu.Foreground = GpuValue.Foreground;
+        WideMem.Text = MemValue.Text; WideMem.Foreground = MemValue.Foreground;
+        WideFps.Text = s.Fps.State == FpsState.Running && s.Fps.Fps != null ? Fmt.Num(s.Fps.Fps) : "—";
     }
 
     /// <summary>注意温度の10℃手前から赤みを出し始め、危険温度で最大にする（0〜1）。</summary>

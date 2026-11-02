@@ -39,6 +39,18 @@
             <Setter Property="FontSize" Value="17"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
         </Style>
+        <Style x:Key="WideStatLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Margin" Value="18,0,6,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="WideStatValue" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource NumFont}"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
+        </Style>
         <Style x:Key="HourTime" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
             <Setter Property="FontSize" Value="19"/>
@@ -511,8 +523,9 @@
 
         </Grid>
 
-        <!-- ============ Twitch・YouTube の拡張表示（時計・天気・再生中の曲の場所まで広げ、映像の右にチャットなどを出す） -->
-        <Border x:Name="TwitchWide" Style="{StaticResource Glass}" Background="{DynamicResource AGlass}" BorderBrush="{DynamicResource ALine}" Margin="96,124,96,0" Height="734"
+        <!-- ============ Twitch・YouTube の拡張表示（時計・天気・再生中の曲・下の PC バーの場所まで広げ、映像の右にチャットなどを出す）。
+             時計・気温・PC の数値は見出しに小さく出す。映像 約 1369×770、チャット幅 約 400 -->
+        <Border x:Name="TwitchWide" Style="{StaticResource Glass}" Background="{DynamicResource AGlass}" BorderBrush="{DynamicResource ALine}" Margin="48,69,48,0" Height="942"
                 VerticalAlignment="Top" Padding="28,20,28,20" Visibility="Collapsed">
             <Grid>
                 <Grid.RowDefinitions>
@@ -521,8 +534,17 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border CornerRadius="18" BorderThickness="1" BorderBrush="{DynamicResource ALine}" Padding="3" VerticalAlignment="Center">
+                        <TextBlock x:Name="WideClock" FontFamily="{StaticResource NumFont}" FontWeight="Light" FontSize="40" Foreground="{DynamicResource AText}"
+                                   VerticalAlignment="Center" Typography.NumeralAlignment="Tabular"/>
+                        <TextBlock x:Name="WideTemp" Margin="14,0,0,0" FontFamily="{StaticResource NumFont}" FontSize="22" Foreground="{DynamicResource AT70}"
+                                   VerticalAlignment="Center"/>
+                        <Border CornerRadius="18" BorderThickness="1" BorderBrush="{DynamicResource ALine}" Padding="3" VerticalAlignment="Center" Margin="22,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <Border x:Name="WideTabNews" Style="{StaticResource SegTab}" Cursor="Hand" ToolTip="ニュースに戻す">
                                     <TextBlock Style="{StaticResource SegText}" Text="ニュース" Foreground="{DynamicResource AT60}"/>
@@ -537,9 +559,7 @@
                         </Border>
                         <Ellipse x:Name="WideAvatar" Width="40" Height="40" Margin="22,0,0,0" Fill="{DynamicResource ALine}"/>
                         <TextBlock x:Name="WideName" Margin="14,0,0,0" FontFamily="{StaticResource UiFont}" FontSize="26" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AText}" VerticalAlignment="Center" MaxWidth="320" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock x:Name="WideTitle" Margin="16,0,0,0" FontFamily="{StaticResource UiFont}" FontSize="19"
-                                   Foreground="{DynamicResource AT60}" VerticalAlignment="Center" MaxWidth="500" TextTrimming="CharacterEllipsis"/>
+                                   Foreground="{DynamicResource AText}" VerticalAlignment="Center" MaxWidth="280" TextTrimming="CharacterEllipsis"/>
                         <StackPanel x:Name="WideLiveInfo" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0" Visibility="Collapsed">
                             <Border Style="{StaticResource LiveBadge}">
                                 <TextBlock Text="LIVE" FontFamily="{StaticResource NumFont}" FontWeight="SemiBold" FontSize="15" Foreground="White"/>
@@ -550,7 +570,20 @@
                                        Foreground="{DynamicResource AT50}" VerticalAlignment="Center" Typography.NumeralAlignment="Tabular"/>
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock x:Name="WideTitle" Grid.Column="1" Margin="16,0,0,0" FontFamily="{StaticResource UiFont}" FontSize="19"
+                               Foreground="{DynamicResource AT60}" VerticalAlignment="Center" MaxWidth="500" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis"/>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <!-- 拡張表示の間は下の PC バーを隠すので、主な数値だけここに出す（文字と色は Render でバーからうつす） -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,8,0">
+                            <TextBlock Text="CPU" Style="{StaticResource WideStatLabel}" Foreground="{DynamicResource AT60}"/>
+                            <TextBlock x:Name="WideCpu" Style="{StaticResource WideStatValue}" Foreground="{DynamicResource AText}" Text="--"/>
+                            <TextBlock Text="GPU" Style="{StaticResource WideStatLabel}" Foreground="{DynamicResource AT60}"/>
+                            <TextBlock x:Name="WideGpu" Style="{StaticResource WideStatValue}" Foreground="{DynamicResource AText}" Text="--"/>
+                            <TextBlock Text="メモリ" Style="{StaticResource WideStatLabel}" Foreground="{DynamicResource AT60}"/>
+                            <TextBlock x:Name="WideMem" Style="{StaticResource WideStatValue}" Foreground="{DynamicResource AText}" Text="--"/>
+                            <TextBlock Text="FPS" Style="{StaticResource WideStatLabel}" Foreground="{DynamicResource AT60}"/>
+                            <TextBlock x:Name="WideFps" Style="{StaticResource WideStatValue}" Foreground="{DynamicResource AText}" Text="—"/>
+                        </StackPanel>
                         <Border x:Name="WideUrl" Style="{StaticResource CardButton}" BorderBrush="{DynamicResource AT40}" Margin="20,0,0,0"
                                 VerticalAlignment="Center" ToolTip="コピーした YouTube の URL を再生" Visibility="Collapsed">
                             <TextBlock Style="{StaticResource SegText}" Text="＋ URL" Foreground="{DynamicResource AT85}"/>
@@ -592,17 +625,8 @@
             </Grid>
         </Border>
 
-        <!-- ============ 拡張表示の間だけ、時計と気温を画面の右上（カードの外）に出す -->
-        <StackPanel x:Name="WideClockPanel" Orientation="Horizontal" Margin="0,14,96,0" HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Visibility="Collapsed" IsHitTestVisible="False">
-            <TextBlock x:Name="WideClock" FontFamily="{StaticResource NumFont}" FontWeight="Light" FontSize="84" Foreground="{DynamicResource AText}"
-                       VerticalAlignment="Center" Typography.NumeralAlignment="Tabular"/>
-            <TextBlock x:Name="WideTemp" Margin="22,10,0,0" FontFamily="{StaticResource NumFont}" FontSize="34" Foreground="{DynamicResource AT70}"
-                       VerticalAlignment="Center"/>
-        </StackPanel>
-
         <!-- ============ PC の状態：控えめな1本のバー -->
-        <Border Style="{StaticResource Glass}" Background="{DynamicResource AGlass}" BorderBrush="{DynamicResource ALine}"
+        <Border x:Name="PcBar" Style="{StaticResource Glass}" Background="{DynamicResource AGlass}" BorderBrush="{DynamicResource ALine}"
                 Margin="96,0,96,84" Height="120" VerticalAlignment="Bottom">
             <Grid>
                 <Grid.ColumnDefinitions>

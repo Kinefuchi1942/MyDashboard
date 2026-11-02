@@ -150,8 +150,9 @@ public partial class AuroraView
 
         NewsCard.Visibility = !on && _ctx.Settings.EnableNews ? Visibility.Visible : Visibility.Collapsed;
         TwitchCard.Visibility = mode == TwitchMode.Card ? Visibility.Visible : Visibility.Collapsed;
-        TwitchWide.Visibility = WideClockPanel.Visibility = wide ? Visibility.Visible : Visibility.Collapsed;
-        DailyLayer.Visibility = MediaLayer.Visibility = wide ? Visibility.Hidden : Visibility.Visible;
+        TwitchWide.Visibility = wide ? Visibility.Visible : Visibility.Collapsed;
+        // 拡張表示は画面の左右・下まで広げるので、下の PC バーとテーマ切替も隠す（数値は見出しに出す）
+        DailyLayer.Visibility = MediaLayer.Visibility = PcBar.Visibility = ThemePicker.Visibility = wide ? Visibility.Hidden : Visibility.Visible;
         _news.Paused = false;
 
         if (!on)
