@@ -24,6 +24,7 @@ public partial class App : Application
 
         DispatcherUnhandledException += (_, args) =>
         {
+            CrashLog.Write("予期しないエラーで終了", args.Exception);
             MessageBox.Show("予期しないエラーで終了します：\n" + args.Exception.Message, "MyDashboard",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             args.Handled = true;

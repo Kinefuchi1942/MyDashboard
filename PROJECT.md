@@ -55,7 +55,8 @@
 MyDashboard.csproj      .NET 8 / WPF。publish で単一 exe
 app.manifest              高DPI対応。実行レベルは asInvoker（管理者への上げ直しは Program.cs）
 Program.cs                エントリポイント。Velopack のフック処理 → 管理者でなければ自動起動タスク（UAC なし）か UAC で起動し直す
-AppUpdater.cs             Velopack の更新（GitHub Releases を確認・ダウンロード・終了後に適用して再起動）
+AppUpdater.cs             Velopack の更新（GitHub Releases を確認・ダウンロード・終了後に適用して再起動）。用意に失敗したら落とさず「インストール版ではない」扱い
+CrashLog.cs               予期しないエラーの詳しい内容（スタックトレース）を %APPDATA%\MyDashboard\crash-log.txt に書き足す
 App.xaml                  配色・フォント・文字スタイル
 MainWindow.xaml(.cs)      ウィンドウ本体。レイアウト切り替え、モニター配置、操作
 SettingsWindow.xaml(.cs)  設定画面（settings.json を画面で編集し、保存ですぐ反映）

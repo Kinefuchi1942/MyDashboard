@@ -412,6 +412,7 @@ FPS は Intel の公式ツール **PresentMon** を裏で動かして計測し�
 | `dlss-diagnostics.txt` | DLSS の検出 |
 | `media-diagnostics.txt` | 再生中の曲 |
 | `power-diagnostics.txt` | 消費電力（見つかった構成） |
+| `crash-log.txt` | 「予期しないエラーで終了します」が出たときの詳しい内容 |
 
 ### 保存場所
 
