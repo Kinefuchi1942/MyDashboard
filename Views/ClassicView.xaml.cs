@@ -31,6 +31,14 @@ public partial class ClassicView : UserControl, IDashboardView
         Threads.WarnAt = ctx.Settings.LoadWarn;
         Threads.CritAt = ctx.Settings.LoadCrit;
         LayoutPicker.Picked += name => _ctx.SwitchLayout?.Invoke(name);
+        if (ctx.Settings.SidebarSide == "left")
+        {
+            // サイドバーを左端に（settings.json の sidebarSide）
+            LayoutPicker.HorizontalAlignment = MixerButton.HorizontalAlignment = HorizontalAlignment.Left;
+            LayoutPicker.Margin = new Thickness(14, 318, 0, 0);
+            MixerButton.Margin = new Thickness(14, 506, 0, 0);
+            MixerButton.OpenToRight = true;
+        }
         MouseEnter += (_, _) => LayoutPicker.Visibility = MixerButton.Visibility = Visibility.Visible;
         MouseLeave += (_, _) => LayoutPicker.Visibility = MixerButton.Visibility = Visibility.Hidden;
     }

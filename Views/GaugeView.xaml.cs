@@ -46,6 +46,16 @@ public partial class GaugeView : UserControl, IDashboardView
         Threads.WarnAt = ctx.Settings.LoadWarn;
         Threads.CritAt = ctx.Settings.LoadCrit;
         LayoutPicker.Picked += name => _ctx.SwitchLayout?.Invoke(name);
+        if (ctx.Settings.SidebarSide == "left")
+        {
+            // サイドバーを左端に（settings.json の sidebarSide）
+            foreach (UIElement e in new UIElement[] { LayoutPicker, MixerButton })
+            {
+                Canvas.SetRight(e, double.NaN);
+                Canvas.SetLeft(e, 14);
+            }
+            MixerButton.OpenToRight = true;
+        }
     }
 
     // ニュースは表示しない（計器盤はメーターに専念する）

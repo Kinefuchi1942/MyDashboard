@@ -20,6 +20,8 @@ public sealed class AppSettings
 
     /// <summary>画面のレイアウト："classic"（標準）/ "gauge"（計器盤）/ "aurora"（オーロラ）。</summary>
     public string Layout { get; set; } = "classic";
+    /// <summary>レイアウト切替・音量ミキサーのボタン（サイドバー）を置く側："right"（右端）/ "left"（左端）。</summary>
+    public string SidebarSide { get; set; } = "right";
 
     /// <summary>アニメーションのコマ数（1秒あたり、10〜60）。上げるとなめらかになるが GPU を使う。</summary>
     public int AnimationFps { get; set; } = 20;
@@ -173,6 +175,7 @@ public sealed class AppSettings
             .GroupBy(c => c.Id.Trim()).Select(g => new MyDashboard.Info.YouTubeChannel { Id = g.Key, Name = (g.First().Name ?? "").Trim() }).ToList();
         YouTubeLastVideo = (YouTubeLastVideo ?? "").Trim();
         Layout = string.IsNullOrWhiteSpace(Layout) ? "classic" : Layout.Trim().ToLowerInvariant();
+        SidebarSide = (SidebarSide ?? "").Trim().ToLowerInvariant() == "left" ? "left" : "right";
         AuroraTheme = string.IsNullOrWhiteSpace(AuroraTheme) ? "auto" : AuroraTheme.Trim().ToLowerInvariant();
         AuroraDayBrightness = Math.Clamp(AuroraDayBrightness, 0.5, 1.0);
         PsuWatts = Math.Clamp(PsuWatts, 200, 2000);

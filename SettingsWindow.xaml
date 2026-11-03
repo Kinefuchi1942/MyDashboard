@@ -459,6 +459,20 @@
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
                                 <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource Label}" Text="サイドバーの位置"/>
+                                    <TextBlock Style="{StaticResource Hint}" Text="レイアウト切替と音量ミキサーのボタンを置く側"/>
+                                </StackPanel>
+                                <WrapPanel Grid.Column="1" Margin="0,0,0,-10">
+                                    <RadioButton x:Name="SidebarLeft" Style="{StaticResource Chip}" GroupName="Sidebar" Content="左"/>
+                                    <RadioButton x:Name="SidebarRight" Style="{StaticResource Chip}" GroupName="Sidebar" Content="右"/>
+                                </WrapPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource RowLine}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="230"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
                                     <TextBlock Style="{StaticResource Label}" Text="更新間隔"/>
                                     <TextBlock Style="{StaticResource Hint}" Text="センサーを読み取る間隔"/>
                                 </StackPanel>

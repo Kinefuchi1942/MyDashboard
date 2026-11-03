@@ -110,6 +110,13 @@ public partial class AuroraView : UserControl, IDashboardView
         LayoutPicker.UseAuroraColors();
         MixerButton.UseAuroraColors();
         LayoutPicker.Picked += name => _ctx.SwitchLayout?.Invoke(name);
+        if (ctx.Settings.SidebarSide == "left")
+        {
+            // テーマ切替ごとサイドバーを左端に（settings.json の sidebarSide）
+            ThemePicker.HorizontalAlignment = HorizontalAlignment.Left;
+            ThemePicker.Margin = new Thickness(14, 48, 0, 0);
+            MixerButton.OpenToRight = true;
+        }
         UpdateTheme(DateTime.Now, force: true);
         foreach (var chart in new[] { CpuChart, GpuChart, MemChart, VramChart, NetChart })
             chart.SetCapacity(Math.Max(20, ctx.HistoryPoints / 2));

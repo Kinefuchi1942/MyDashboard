@@ -73,6 +73,8 @@ public partial class SettingsWindow : Window
 
         BuildMonitorChoices(s.Monitor);
         BehindBox.IsChecked = s.AlwaysBehind;
+        SidebarLeft.IsChecked = s.SidebarSide == "left";
+        SidebarRight.IsChecked = s.SidebarSide != "left";
         IntervalSlider.Value = s.UpdateIntervalMs;
         HistorySlider.Value = s.HistorySeconds;
         FpsSlider.Value = s.AnimationFps;
@@ -174,6 +176,7 @@ public partial class SettingsWindow : Window
             Layout = LayoutGauge.IsChecked == true ? "gauge" : LayoutAurora.IsChecked == true ? "aurora" : "classic",
             Monitor = MonitorPanel.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked == true)?.Tag as int? ?? -1,
             AlwaysBehind = BehindBox.IsChecked == true,
+            SidebarSide = SidebarLeft.IsChecked == true ? "left" : "right",
             UpdateIntervalMs = (int)IntervalSlider.Value,
             HistorySeconds = (int)HistorySlider.Value,
             AnimationFps = (int)FpsSlider.Value,

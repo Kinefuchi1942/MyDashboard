@@ -13,7 +13,7 @@ using MyDashboard.Info;
 namespace MyDashboard.Controls;
 
 /// <summary>
-/// 画面の右端（レイアウト切替の下）のスピーカーのボタン。押すと左に音量ミキサーのパネルを出す（モックアップ mockups/mixer-pop-*.png）。
+/// 画面の右端（レイアウト切替の下）のスピーカーのボタン。押すと左に音量ミキサーのパネルを出す（サイドバーが左端なら右に出す）（モックアップ mockups/mixer-pop-*.png）。
 /// ・パネルは Popup（別のウィンドウ）なので、オーロラの Twitch・YouTube の映像（WebView2）の上にも出せる
 /// ・ほかの場所をクリックするか、10秒さわらないと閉じる。開いている間だけ音声を読む（1秒20回）
 /// </summary>
@@ -76,6 +76,9 @@ public sealed class MixerButton : Border
         Refresh();
     }
 
+    /// <summary>サイドバーが左端にあるときは true にして、パネルをボタンの右に出す。</summary>
+    public bool OpenToRight { get; set; }
+
     /// <summary>オーロラの時間帯テーマに色を合わせる（LayoutPicker と同じ）。パネルは暗い色のまま。</summary>
     public void UseAuroraColors()
     {
@@ -119,11 +122,12 @@ public sealed class MixerButton : Border
         if (!_button.IsMouseOver) Close();
     }
 
-    /// <summary>ボタンの左に、上下の中心をそろえて置く。</summary>
+    /// <summary>ボタンの左（OpenToRight なら右）に、上下の中心をそろえて置く。</summary>
     private CustomPopupPlacement[] Place(Size popup, Size target, Point offset)
     {
         double gap = 16 * target.Width / Width;  // 1920×1080 基準で 16 の隙間（拡大率に合わせる）
-        return new[] { new CustomPopupPlacement(new Point(-popup.Width - gap, (target.Height - popup.Height) / 2), PopupPrimaryAxis.Horizontal) };
+        double x = OpenToRight ? target.Width + gap : -popup.Width - gap;
+        return new[] { new CustomPopupPlacement(new Point(x, (target.Height - popup.Height) / 2), PopupPrimaryAxis.Horizontal) };
     }
 
     private void Refresh()
