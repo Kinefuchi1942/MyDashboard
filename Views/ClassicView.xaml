@@ -4,7 +4,8 @@
              xmlns:c="clr-namespace:MyDashboard.Controls"
              xmlns:v="clr-namespace:MyDashboard.Views">
     <!-- 標準レイアウト：情報量重視のパネル型 -->
-    <Grid Width="1920" Height="1080">
+    <!-- 背景を Transparent にして、カードの間の隙間でもマウスが画面の上にあると分かるようにする（右端のボタンの出し入れ） -->
+    <Grid Width="1920" Height="1080" Background="Transparent">
         <Grid Margin="28">
             <Grid.RowDefinitions>
                 <RowDefinition Height="64"/>
