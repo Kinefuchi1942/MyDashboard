@@ -14,7 +14,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <!-- 更新パッケージのバージョンと exe のプロパティに出る。配布し直すたびに上げる（タグ v1.2.3 とそろえる） -->
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <!-- Velopack の処理を WPF より先に行うため、App.xaml が生成する Main ではなく Program.Main から起動する -->
     <StartupObject>MyDashboard.Program</StartupObject>
     <!-- Windows 以外（クラウドの Linux）でもコンパイル確認できるようにする。実行は Windows のみ -->
