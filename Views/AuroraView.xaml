@@ -866,6 +866,8 @@
             </Border>
             <!-- レイアウト切替（標準・計器盤・オーロラ）。色はコードでテーマに合わせる -->
             <c:LayoutPicker x:Name="LayoutPicker" Current="aurora" Margin="0,16,0,0"/>
+            <!-- 音量ミキサーのボタン。色はコードでテーマに合わせる -->
+            <c:MixerButton x:Name="MixerButton" Margin="0,16,0,0"/>
         </StackPanel>
 
         <!-- ============ 画面全体を暗くする幕（夜、および auroraDayBrightness を下げたときの朝・昼） -->

@@ -254,5 +254,8 @@
         <!-- 右端のレイアウト切替。空きがないので、マウスが画面の上にあるときだけ出す -->
         <c:LayoutPicker x:Name="LayoutPicker" Current="classic" HorizontalAlignment="Right" VerticalAlignment="Top"
                         Margin="0,318,14,0" Visibility="Hidden"/>
+        <!-- その下の音量ミキサーのボタン。レイアウト切替と同じく、マウスが画面の上にあるときだけ出す -->
+        <c:MixerButton x:Name="MixerButton" HorizontalAlignment="Right" VerticalAlignment="Top"
+                       Margin="0,506,14,0" Visibility="Hidden"/>
     </Grid>
 </UserControl>

@@ -1,0 +1,48 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="stylesheet" href="mode-switch.css"><link rel="stylesheet" href="mixer.css"><style>
+.shade{position:absolute;inset:0;background:rgba(5,7,14,.78)}
+.card{position:absolute;left:330px;top:150px;width:1260px;height:780px;border-radius:28px;padding:30px 40px;background:#121427;border:1px solid rgba(255,255,255,.16);
+ background-image:radial-gradient(700px 450px at 60% 25%,rgba(110,80,200,.22),transparent);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.top{display:flex;align-items:center;gap:12px;font-size:24px}
+.top .dev{font-size:17px;color:rgba(244,247,251,.45)}
+.top .x{margin-left:auto;font-size:16px;color:rgba(244,247,251,.55);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:5px 16px}
+.cols{position:absolute;left:40px;right:40px;top:100px;bottom:36px;display:flex;gap:12px}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;border-radius:20px;padding:20px 0 18px}
+.col.master{background:rgba(255,255,255,.05);margin-right:24px}
+.col .nm{font-size:20px;margin-top:12px;height:28px}
+.col .sub{font-size:14px;color:rgba(244,247,251,.45);height:20px}
+.col .v{font:34px Bahnschrift,sans-serif;margin:14px 0 10px;height:42px}
+.fd{position:relative;flex:1;display:flex;justify-content:center;gap:12px}
+.fd .tr{position:relative;width:10px;border-radius:5px;background:rgba(255,255,255,.12)}
+.fd .fi{position:absolute;left:0;right:0;bottom:0;border-radius:5px;background:linear-gradient(#8E9CFF,#5A52D0)}
+.fd .kn{position:absolute;left:-13px;width:36px;height:16px;margin-bottom:-8px;border-radius:8px;background:#F4F7FB;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.fd .lv{position:relative;width:6px;border-radius:3px;background:rgba(255,255,255,.06)}
+.fd .lv i{position:absolute;left:0;right:0;bottom:0;border-radius:3px;background:linear-gradient(#FFB547,#6FD3A8 30%)}
+.col .sp{margin-top:14px;color:rgba(244,247,251,.75)}
+</style></head><body>
+<div class="shade"></div>
+<div class="cap" style="z-index:2"><b>案B（<span class="lay"></span>）</b>右端のスピーカーで画面いっぱいのミキサー。後ろは暗くなる。10秒さわらないと戻る</div>
+<div class="card">
+ <div class="top"><svg class="ic" width="26" height="26" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/></svg>音量ミキサー<span class="dev">出力：スピーカー（Realtek Audio）</span><span class="x">閉じる</span></div>
+ <div class="cols">
+  <div class="col master"><div class="app c-all"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div><div class="nm">全体</div><div class="sub">PC 全体</div><div class="v">72</div>
+   <div class="fd"><div class="tr"><div class="fi" style="height:72%;background:linear-gradient(#F4F7FB,#9AA3B8)"></div><div class="kn" style="bottom:72%"></div></div><div class="lv"><i style="height:55%"></i></div></div>
+   <svg class="ic sp" width="30" height="30" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/></svg></div>
+  <div class="col"><div class="app c-sp">S</div><div class="nm">Spotify</div><div class="sub">再生中</div><div class="v">62</div>
+   <div class="fd"><div class="tr"><div class="fi" style="height:62%"></div><div class="kn" style="bottom:62%"></div></div><div class="lv"><i style="height:48%"></i></div></div>
+   <svg class="ic sp" width="30" height="30" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+  <div class="col"><div class="app c-dc">D</div><div class="nm">Discord</div><div class="sub">通話中</div><div class="v">85</div>
+   <div class="fd"><div class="tr"><div class="fi" style="height:85%"></div><div class="kn" style="bottom:85%"></div></div><div class="lv"><i style="height:22%"></i></div></div>
+   <svg class="ic sp" width="30" height="30" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+  <div class="col"><div class="app c-gm">G</div><div class="nm">ゲーム</div><div class="sub">Game.exe</div><div class="v">45</div>
+   <div class="fd"><div class="tr"><div class="fi" style="height:45%"></div><div class="kn" style="bottom:45%"></div></div><div class="lv"><i style="height:40%"></i></div></div>
+   <svg class="ic sp" width="30" height="30" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+  <div class="col"><div class="app c-ch dim">C</div><div class="nm dim">Chrome</div><div class="sub">&nbsp;</div><div class="v mute" style="font:24px 'Yu Gothic UI';line-height:42px">消音</div>
+   <div class="fd dim"><div class="tr"><div class="fi" style="height:40%"></div><div class="kn" style="bottom:40%"></div></div><div class="lv"></div></div>
+   <svg class="ic sp mute" width="30" height="30" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9l5 6M21 9l-5 6"/></svg></div>
+  <div class="col"><div class="app c-md">M</div><div class="nm">ダッシュボード</div><div class="sub">Twitch・YouTube</div><div class="v">50</div>
+   <div class="fd"><div class="tr"><div class="fi" style="height:50%"></div><div class="kn" style="bottom:50%"></div></div><div class="lv"><i style="height:0"></i></div></div>
+   <svg class="ic sp" width="30" height="30" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+ </div>
+</div>
+<script src="mixer-common.js"></script>
+</body></html>

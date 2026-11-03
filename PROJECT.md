@@ -43,6 +43,7 @@
   - TwitchService（Info/TwitchService.cs）：Helix API（streams/followed、users）。Client ID は組み込み（TwitchService.DefaultClientId、依頼者のアプリ。Implicit grant なので公開してよい値）で、設定に入れればそちらを優先。トークンは %APPDATA%\MyDashboard\twitch-auth.json（Implicit grant。ログイン画面は TwitchLoginWindow が http://localhost への移動を横取り）
   - AuroraTheme：オーロラの時間帯テーマ（朝・昼は明るい背景＋濃い文字、夕方は紫と橙、夜はほぼ黒で約1割暗く）。境目は日の出／10時／日の入り1時間前／日の入り1時間後で、前後15分で背景を混ぜ、文字色は中間で3秒かけて切り替える。オーロラの文字・カードの色は DynamicResource（AText・AT85〜AT40・AGlass・ALine など）で、コードがブラシの色を変える。明るいテーマでは CPU #0B8494、GPU #5A52D0 の濃い版を使う
   - レイアウト切替（Controls/LayoutPicker.cs、2026-11-02 追加、モックアップ `mockups/mode-switch-B.png`）：標準・計器盤・オーロラのアイコンを縦に3つ。いまのレイアウトを枠で囲み、ほかは薄く（テーマ切替と同じ見せ方）。押すと ViewContext.SwitchLayout → MainWindow.SwitchLayout。オーロラはテーマ切替の StackPanel の中（拡張表示ではテーマ切替ごと隠れる）で、色は UseAuroraColors でテーマのブラシをコードから参照。計器盤は Canvas の右14・上318に常時、標準は空きがないので同じ位置にマウスが画面の上にあるときだけ出す
+  - 音量ミキサー（Controls/MixerButton.cs、2026-11-03 追加、モックアップ `mockups/mixer-pop-*.png`）：レイアウト切替の下（上506、オーロラは StackPanel で 16 下）のスピーカーのボタン。押すと左に MixerPanel を Popup で出す。Popup は別のウィンドウなので WebView2（Twitch・YouTube）の上にも出せる。中身は Info/AudioMixer（既定の出力機器の IAudioEndpointVolume と、セッションをプロセス名ごとにまとめた ISimpleAudioVolume・IAudioMeterInformation。自分の子孫の msedgewebview2 は「このダッシュボード」にまとめる）。開いている間だけ 1秒20回で音の大きさ、1秒ごとに一覧を読み直す。ほかの場所のクリック（Window.PreviewMouseDown）か10秒さわらないと閉じる。パネルの色はテーマによらず暗色固定
   - テーマ切替（AuroraView の ThemePicker）：メディアカードの右、画面右端に朝・昼・夕方・夜の四角を縦に並べる（中は各テーマの空の色を XAML に直書き）。クリックで settings.json の auroraTheme をそのテーマに固定して保存、固定中のものを再クリックで auto に戻す。いまの配色の四角を文字色の枠で囲む。モックアップは `mockups/aurora-theme-icons.png`
   - ViewSupport：共通の色・書式（Fmt）、ニュースの順送り（NewsRotator / NewsTicker）、演出（Fx）
 - `Controls/`：自前描画の部品（HistoryChart、ArcGauge、FrameTimeChart、WeatherIcon、Meters.cs の BarMeter・CoreBars）
@@ -81,6 +82,8 @@ Info/
   FeedParser.cs           RSS 2.0 / RSS 1.0 / Atom の読み取り
   MediaService.cs         再生中の曲（Windows のメディア情報）
   AppVolume.cs            再生中カードの音量（音量ミキサーのアプリごとの音量）
+  AudioMixer.cs           音量ミキサーのパネルの中身（既定の出力機器の全体の音量・アプリごとの音量・今の音の大きさ）
+  CoreAudio.cs            Windows の音声（Core Audio）の COM 定義。AppVolume と AudioMixer で共用
   TwitchService.cs        Twitch のフォロー中の配信（Helix API）とログイン情報
   YouTubeService.cs       YouTube のチャンネルの新着と配信中（公開ページから読む）
 Controls/                 推移グラフ・円弧メーター・フレームタイムのグラフ・天気アイコン・棒グラフ（自前描画で軽量）
@@ -95,7 +98,8 @@ Monitoring/
   Snapshot.cs             1回分の測定値の入れ物
   Collector.cs            一定間隔でまとめて取得し、画面に渡す
 build.bat                 本番ビルド（publish へ。PresentMon のダウンロードも聞く）
-make-dist.ps1             Velopack のインストーラーと更新パッケージを disteleases に作る（PresentMon を vendor\ に用意して exe に埋め込む）
+make-dist.ps1             Velopack のインストーラーと更新パッケージを dist
+eleases に作る（PresentMon を vendor\ に用意して exe に埋め込む）
 .config/dotnet-tools.json vpk（Velopack の CLI）のバージョン。Velopack パッケージと同じ版にそろえる
 AppPaths.cs               保存場所（%APPDATA%\MyDashboard と %LOCALAPPDATA%\MyDashboard）。起動時に exe の隣の旧データを移す
 AutoStart.cs              自動起動（タスクスケジューラの「MyDashboard」）の登録・解除。右クリック「サインイン時に自動起動」。通常権限で起動されたときの上げ直しとアンインストール時の削除にも使う
@@ -170,11 +174,13 @@ dotnet run -c Release --project tools/Screenshots
 powershell -NoProfile -ExecutionPolicy Bypass -File D:\MyDashboard\make-dist.ps1
 ```
 
-- `disteleases` にできる。exe は .NET と PresentMon が入った単体の exe で、設定（settings.json）は初回起動時に既定値で作られる
+- `dist
+eleases` にできる。exe は .NET と PresentMon が入った単体の exe で、設定（settings.json）は初回起動時に既定値で作られる
 - 自分の設定・Twitch のログイン（`twitch-auth.json`）・`webview2` フォルダ・診断ファイルは入りません
 - 相手の PC に .NET を入れる必要はありません。CPU 温度を出すには相手側でも PawnIO が必要です
 - 署名のない exe なので、初回は「Windows によって PC が保護されました」→「詳細情報」→「実行」が必要です（README に記載済み）
-- 手元で更新を試すときは、環境変数 `MYDASHBOARD_UPDATE_SOURCE` に `disteleases` のフォルダを入れてアプリを起動すると、GitHub の代わりにそこを見る
+- 手元で更新を試すときは、環境変数 `MYDASHBOARD_UPDATE_SOURCE` に `dist
+eleases` のフォルダを入れてアプリを起動すると、GitHub の代わりにそこを見る
 - 開発用の `publish\MyDashboard.exe` はインストール版ではないので、自動更新は動かない（メニューにバージョンだけ出る）
 
 ## 作り方（初回だけ）

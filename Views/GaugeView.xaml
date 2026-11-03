@@ -234,5 +234,7 @@
 
         <!-- 右端のレイアウト切替（オーロラのテーマ切替の下と同じ位置） -->
         <c:LayoutPicker x:Name="LayoutPicker" Current="gauge" Canvas.Right="14" Canvas.Top="318"/>
+        <!-- その下の音量ミキサーのボタン -->
+        <c:MixerButton Canvas.Right="14" Canvas.Top="506"/>
     </Canvas>
 </UserControl>

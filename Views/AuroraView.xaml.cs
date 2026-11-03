@@ -108,6 +108,7 @@ public partial class AuroraView : UserControl, IDashboardView
         }).ToArray();
         InitThemePicker();
         LayoutPicker.UseAuroraColors();
+        MixerButton.UseAuroraColors();
         LayoutPicker.Picked += name => _ctx.SwitchLayout?.Invoke(name);
         UpdateTheme(DateTime.Now, force: true);
         foreach (var chart in new[] { CpuChart, GpuChart, MemChart, VramChart, NetChart })

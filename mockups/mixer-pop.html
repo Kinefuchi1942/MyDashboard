@@ -1,0 +1,50 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="stylesheet" href="mode-switch.css"><link rel="stylesheet" href="mixer.css"><style>
+.panel{position:absolute;left:1196px;top:318px;width:626px;padding:20px 24px 14px;border-radius:24px;background:#10121F;border:1px solid rgba(255,255,255,.16);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.panel:after{content:"";position:absolute;right:-9px;top:216px;width:16px;height:16px;background:#10121F;border-right:1px solid rgba(255,255,255,.16);border-top:1px solid rgba(255,255,255,.16);transform:rotate(45deg)}
+.hd{display:flex;align-items:center;gap:10px;font-size:20px;color:rgba(244,247,251,.8);margin-bottom:8px}
+.hd .dev{margin-left:auto;font-size:15px;color:rgba(244,247,251,.45)}
+.row{display:flex;align-items:center;gap:14px;height:56px}
+.row.master{border-bottom:1px solid rgba(255,255,255,.10);margin-bottom:6px;height:62px}
+.name{width:150px;font-size:19px;line-height:1.1;white-space:nowrap}
+.name small{display:block;font-size:13px;color:rgba(244,247,251,.45)}
+.sl{position:relative;flex:1;height:22px}
+.tr{position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:rgba(255,255,255,.14)}
+.fi{position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:#8E9CFF}
+.kn{position:absolute;top:3px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#F4F7FB}
+.lv{position:absolute;left:0;top:18px;height:3px;border-radius:2px;background:#6FD3A8;opacity:.75}
+.val{width:44px;text-align:right;font:21px Bahnschrift,sans-serif}
+.spk{width:26px;color:rgba(244,247,251,.75)}
+.foot{font-size:14px;color:rgba(244,247,251,.4);margin-top:6px;text-align:right}
+</style></head><body>
+<div class="cap"><b>案A（<span class="lay"></span>）</b>右端のスピーカーを押すと、その左に小さなパネル。3レイアウトとも同じ位置・同じ見た目</div>
+
+<div class="panel">
+ <div class="hd"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>音量ミキサー<span class="dev">出力：スピーカー（Realtek Audio）</span></div>
+
+ <div class="row master"><div class="app c-all"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div><div class="name">全体<small>PC 全体の音量</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:72%;background:#F4F7FB"></div><div class="lv" style="width:55%"></div><div class="kn" style="left:72%"></div></div><div class="val">72</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+
+ <div class="row"><div class="app c-sp">S</div><div class="name">Spotify<small>再生中</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:62%"></div><div class="lv" style="width:48%"></div><div class="kn" style="left:62%"></div></div><div class="val">62</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+
+ <div class="row"><div class="app c-dc">D</div><div class="name">Discord<small>通話中</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:85%"></div><div class="lv" style="width:20%"></div><div class="kn" style="left:85%"></div></div><div class="val">85</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+
+ <div class="row"><div class="app c-gm">G</div><div class="name">ゲーム<small>Game.exe</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:45%"></div><div class="lv" style="width:38%"></div><div class="kn" style="left:45%"></div></div><div class="val">45</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+
+ <div class="row"><div class="app c-ch dim">C</div><div class="name dim">Chrome<small>&nbsp;</small></div>
+  <div class="sl dim"><div class="tr"></div><div class="fi" style="width:40%"></div><div class="kn" style="left:40%"></div></div><div class="val mute" style="font:17px 'Yu Gothic UI'">消音</div>
+  <svg class="ic spk mute" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9l5 6M21 9l-5 6"/></svg></div>
+
+ <div class="row"><div class="app c-md">M</div><div class="name">ダッシュボード<small>Twitch・YouTube</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:50%"></div><div class="kn" style="left:50%"></div></div><div class="val">50</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+ <div class="foot">ほかの場所をクリックするか、10秒さわらないと閉じる</div>
+</div>
+<script src="mixer-common.js"></script>
+</body></html>

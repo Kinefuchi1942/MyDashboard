@@ -31,8 +31,8 @@ public partial class ClassicView : UserControl, IDashboardView
         Threads.WarnAt = ctx.Settings.LoadWarn;
         Threads.CritAt = ctx.Settings.LoadCrit;
         LayoutPicker.Picked += name => _ctx.SwitchLayout?.Invoke(name);
-        MouseEnter += (_, _) => LayoutPicker.Visibility = Visibility.Visible;
-        MouseLeave += (_, _) => LayoutPicker.Visibility = Visibility.Hidden;
+        MouseEnter += (_, _) => LayoutPicker.Visibility = MixerButton.Visibility = Visibility.Visible;
+        MouseLeave += (_, _) => LayoutPicker.Visibility = MixerButton.Visibility = Visibility.Hidden;
     }
 
     public void UpdateClock(DateTime now)

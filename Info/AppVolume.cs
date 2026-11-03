@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using static MyDashboard.Info.CoreAudio;
 
 namespace MyDashboard.Info;
 
@@ -99,7 +99,7 @@ public sealed class AppVolume
         try
         {
             var enumerator = (IMMDeviceEnumerator)new MMDeviceEnumerator();
-            enumerator.EnumAudioEndpoints(0 /* 出力 */, 1 /* 有効な機器 */, out var devices);
+            enumerator.EnumAudioEndpoints(Render, ActiveDevices, out var devices);
             devices.GetCount(out uint count);
             for (uint i = 0; i < count; i++)
             {
@@ -107,7 +107,7 @@ public sealed class AppVolume
                 {
                     devices.Item(i, out var device);
                     var iid = typeof(IAudioSessionManager2).GUID;
-                    device.Activate(ref iid, 1 /* CLSCTX_INPROC_SERVER */, IntPtr.Zero, out object o);
+                    device.Activate(ref iid, InprocServer, IntPtr.Zero, out object o);
                     var manager = (IAudioSessionManager2)o;
                     manager.GetSessionEnumerator(out var sessions);
                     sessions.GetCount(out int n);
@@ -117,7 +117,7 @@ public sealed class AppVolume
                         {
                             sessions.GetSession(j, out var control);
                             control.GetState(out int state);
-                            if (state == 2 /* 終了済み */) continue;
+                            if (state == SessionExpired) continue;
                             control.GetProcessId(out uint pid);
                             if (pid == 0) continue;
                             if (!names.TryGetValue(pid, out var name))
@@ -136,72 +136,5 @@ public sealed class AppVolume
         }
         catch { }
         return found;
-    }
-
-    // =========================================================== Core Audio の COM 定義
-
-    [ComImport, Guid("BCDE0395-E52F-467C-8E3D-C4579291692E")]
-    private class MMDeviceEnumerator { }
-
-    [ComImport, Guid("A95664D2-9614-4F35-A746-DE8DB63617E6"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    private interface IMMDeviceEnumerator
-    {
-        [PreserveSig] int EnumAudioEndpoints(int dataFlow, int stateMask, out IMMDeviceCollection devices);
-    }
-
-    [ComImport, Guid("0BD7A1BE-7A1A-44DB-8397-CC5392387B5E"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    private interface IMMDeviceCollection
-    {
-        [PreserveSig] int GetCount(out uint count);
-        [PreserveSig] int Item(uint index, out IMMDevice device);
-    }
-
-    [ComImport, Guid("D666063F-1587-4E43-81F1-B948E807363F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    private interface IMMDevice
-    {
-        [PreserveSig] int Activate(ref Guid iid, int clsCtx, IntPtr activationParams, [MarshalAs(UnmanagedType.IUnknown)] out object o);
-    }
-
-    [ComImport, Guid("77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    private interface IAudioSessionManager2
-    {
-        [PreserveSig] int GetAudioSessionControl(IntPtr sessionGuid, int flags, out IntPtr control);
-        [PreserveSig] int GetSimpleAudioVolume(IntPtr sessionGuid, int flags, out IntPtr volume);
-        [PreserveSig] int GetSessionEnumerator(out IAudioSessionEnumerator sessions);
-    }
-
-    [ComImport, Guid("E2F5BB11-0570-40CA-ACDD-3AA01277DEE8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    private interface IAudioSessionEnumerator
-    {
-        [PreserveSig] int GetCount(out int count);
-        [PreserveSig] int GetSession(int index, out IAudioSessionControl2 session);
-    }
-
-    [ComImport, Guid("BFB7FF88-7239-4FC9-8FA2-07C950BE9C6D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    private interface IAudioSessionControl2
-    {
-        // IAudioSessionControl
-        [PreserveSig] int GetState(out int state);
-        [PreserveSig] int GetDisplayName(out IntPtr name);
-        [PreserveSig] int SetDisplayName(IntPtr name, IntPtr ctx);
-        [PreserveSig] int GetIconPath(out IntPtr path);
-        [PreserveSig] int SetIconPath(IntPtr path, IntPtr ctx);
-        [PreserveSig] int GetGroupingParam(out Guid group);
-        [PreserveSig] int SetGroupingParam(IntPtr group, IntPtr ctx);
-        [PreserveSig] int RegisterAudioSessionNotification(IntPtr client);
-        [PreserveSig] int UnregisterAudioSessionNotification(IntPtr client);
-        // IAudioSessionControl2
-        [PreserveSig] int GetSessionIdentifier(out IntPtr id);
-        [PreserveSig] int GetSessionInstanceIdentifier(out IntPtr id);
-        [PreserveSig] int GetProcessId(out uint pid);
-    }
-
-    [ComImport, Guid("87CE5498-68D6-44E5-9215-6DA47EF883D8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    private interface ISimpleAudioVolume
-    {
-        [PreserveSig] int SetMasterVolume(float level, ref Guid ctx);
-        [PreserveSig] int GetMasterVolume(out float level);
-        [PreserveSig] int SetMute(int muted, ref Guid ctx);
-        [PreserveSig] int GetMute(out int muted);
     }
 }
