@@ -30,6 +30,9 @@ public sealed class MixerEntry
     internal readonly List<IAudioMeterInformation> Meters = new();
 }
 
+/// <summary>出力機器の1つ（スピーカー・ヘッドホンなど）。</summary>
+public sealed record OutputDevice(string Id, string Name, bool IsDefault);
+
 /// <summary>
 /// Windows の「音量ミキサー」と同じもの（既定の出力機器の全体の音量と、アプリごとの音量）を読み書きする。
 /// ・同じプロセス名の音声は1行にまとめる（Spotify やブラウザは複数のプロセスに分かれるため）
@@ -47,6 +50,44 @@ public sealed class AudioMixer
 
     /// <summary>既定の出力機器の名前（例：スピーカー (Realtek(R) Audio)）。</summary>
     public string DeviceName { get; private set; } = "";
+    private string _deviceId = "";
+
+    /// <summary>有効な出力機器の一覧（名前順）。</summary>
+    public IReadOnlyList<OutputDevice> Devices()
+    {
+        var list = new List<OutputDevice>();
+        try
+        {
+            var enumerator = (IMMDeviceEnumerator)new MMDeviceEnumerator();
+            if (enumerator.EnumAudioEndpoints(Render, ActiveDevices, out var devices) != 0) return list;
+            devices.GetCount(out uint n);
+            for (uint i = 0; i < n; i++)
+            {
+                try
+                {
+                    if (devices.Item(i, out var d) != 0 || d.GetId(out var id) != 0) continue;
+                    list.Add(new OutputDevice(id, FriendlyName(d) ?? id, id == _deviceId));
+                }
+                catch { }
+            }
+        }
+        catch { }
+        return list.OrderBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+    }
+
+    /// <summary>既定の出力機器を変える（Windows のサウンドの設定と同じ。音楽・通話の両方）。</summary>
+    public static bool SetDefaultDevice(string id)
+    {
+        try
+        {
+            var policy = (IPolicyConfig)new PolicyConfigClient();
+            bool ok = true;
+            for (int role = 0; role < 3; role++)  // 0＝コンソール、1＝マルチメディア、2＝通信
+                ok &= policy.SetDefaultEndpoint(id, role) == 0;
+            return ok;
+        }
+        catch { return false; }
+    }
 
     /// <summary>一覧を読み直す。先頭が全体、続いてアプリ。</summary>
     public IReadOnlyList<MixerEntry> Refresh()
@@ -57,6 +98,7 @@ public sealed class AudioMixer
             var enumerator = (IMMDeviceEnumerator)new MMDeviceEnumerator();
             if (enumerator.GetDefaultAudioEndpoint(Render, Multimedia, out var device) != 0) return _entries = list;
             DeviceName = FriendlyName(device) ?? "";
+            _deviceId = device.GetId(out var did) == 0 ? did : "";
 
             var master = new MixerEntry { Key = MasterKey, Name = "全体", Sub = "PC 全体の音量" };
             var iid = typeof(IAudioEndpointVolume).GUID;

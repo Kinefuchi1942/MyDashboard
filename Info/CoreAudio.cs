@@ -37,6 +37,30 @@ internal static class CoreAudio
     {
         [PreserveSig] int Activate(ref Guid iid, int clsCtx, IntPtr activationParams, [MarshalAs(UnmanagedType.IUnknown)] out object o);
         [PreserveSig] int OpenPropertyStore(int access, out IPropertyStore store);
+        [PreserveSig] int GetId([MarshalAs(UnmanagedType.LPWStr)] out string id);
+    }
+
+    /// <summary>
+    /// 既定の出力機器を切り替える（Windows の非公開の COM。サウンドの設定や音量ミキサーのアプリが使っているもの）。
+    /// SetDefaultEndpoint の前の 10 個は使わないが、表の位置を合わせるために並べておく。
+    /// </summary>
+    [ComImport, Guid("870AF99C-171D-4F9E-AF0D-E63DF40C2BC9")]
+    public class PolicyConfigClient { }
+
+    [ComImport, Guid("F8679F50-850A-41CF-9C72-430F290290C8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IPolicyConfig
+    {
+        [PreserveSig] int GetMixFormat(IntPtr a, IntPtr b);
+        [PreserveSig] int GetDeviceFormat(IntPtr a, int b, IntPtr c);
+        [PreserveSig] int ResetDeviceFormat(IntPtr a);
+        [PreserveSig] int SetDeviceFormat(IntPtr a, IntPtr b, IntPtr c);
+        [PreserveSig] int GetProcessingPeriod(IntPtr a, int b, IntPtr c, IntPtr d);
+        [PreserveSig] int SetProcessingPeriod(IntPtr a, IntPtr b);
+        [PreserveSig] int GetShareMode(IntPtr a, IntPtr b);
+        [PreserveSig] int SetShareMode(IntPtr a, IntPtr b);
+        [PreserveSig] int GetPropertyValue(IntPtr a, int b, IntPtr c, IntPtr d);
+        [PreserveSig] int SetPropertyValue(IntPtr a, int b, IntPtr c, IntPtr d);
+        [PreserveSig] int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId, int role);
     }
 
     [ComImport, Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
