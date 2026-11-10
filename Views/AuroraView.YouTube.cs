@@ -22,6 +22,7 @@ namespace MyDashboard.Views;
 /// ・拡張表示：配信ならライブチャット、動画なら同じチャンネルの新着を映像の右に出す（YouTubePlayer のページの中）
 /// 新着と配信中は YouTube の公開ページから読む（YouTubeService）。表示している間だけ、配信中は3分ごと・新着は15分ごとに確かめる。
 /// 動画が終わったら止めたまま（次へは進まない）。
+/// ・🔍：YouTube で動画を検索し、一覧を検索結果に入れ替える（「✕ 新着に戻る」で元に戻す）。入力欄は別の小さな窓（YouTubeSearchWindow）
 /// </summary>
 public partial class AuroraView
 {
@@ -44,11 +45,20 @@ public partial class AuroraView
     private string? _ytNote;
     private DateTime _ytNoteUntil;
     private int _ytSeq;
+    // 検索：_ytQuery が null でなければ一覧は検索結果（_ytResults が null のあいだは検索中）
+    private string? _ytQuery, _ytSearchError;
+    private List<YouTubeVideo>? _ytResults;
+    private int _ytSearchSeq;
+    private YouTubeSearchWindow? _ytSearchWindow;
 
     private void InitYouTube()
     {
         OnClick(CardUrl, PlayFromClipboard);
         OnClick(WideUrl, PlayFromClipboard);
+        OnClick(CardSearch, () => OpenYouTubeSearch(CardSearch));
+        OnClick(WideSearch, () => OpenYouTubeSearch(WideSearch));
+        OnClick(CardSearchClear, ClearYouTubeSearch);
+        OnClick(WideSearchClear, ClearYouTubeSearch);
         _ytTimer.Tick += (_, _) => _ = RefreshYouTube();
     }
 
@@ -63,6 +73,7 @@ public partial class AuroraView
     {
         _ytTimer.Stop();
         _ytSeq++; // 取りに行っている途中の結果は捨てる
+        _ytSearchWindow?.Close();
     }
 
     private bool YouTubeShown => _twitchMode != TwitchMode.Off && _source == StreamSource.YouTube;
@@ -137,8 +148,9 @@ public partial class AuroraView
         ShowYouTube();
     }
 
-    /// <summary>一覧に並べるもの：配信中（視聴者の多い順）→ 新着動画（新しい順）。</summary>
+    /// <summary>一覧に並べるもの：検索中なら検索結果。ふだんは配信中（視聴者の多い順）→ 新着動画（新しい順）。</summary>
     private List<YouTubeVideo> YouTubeItems() =>
+        _ytQuery != null ? _ytResults ?? new List<YouTubeVideo>() :
         _ytLive.Values.OrderByDescending(v => v.Viewers)
             .Concat(_ytPages.Values.SelectMany(p => p.Videos).OrderByDescending(v => v.Published).Take(YtVideosMax))
             .ToList();
@@ -180,7 +192,9 @@ public partial class AuroraView
     /// <summary>拡張表示で動画の右に出す一覧：同じチャンネルの新着（コピーした動画ならすべての新着）。</summary>
     private void UpdateYouTubeSide(YouTubePlayer player, YouTubeVideo cur)
     {
-        if (_ytPages.TryGetValue(cur.ChannelId, out var page))
+        if (_ytQuery != null && _ytResults is { Count: > 0 } results)
+            player.SetSide($"「{_ytQuery}」の検索結果", results.Where(v => v.VideoId != cur.VideoId && !v.Live));
+        else if (_ytPages.TryGetValue(cur.ChannelId, out var page))
             player.SetSide($"{page.Name} の新着", page.Videos.Where(v => v.VideoId != cur.VideoId));
         else
             player.SetSide("新着動画", _ytPages.Values.SelectMany(p => p.Videos).Where(v => v.VideoId != cur.VideoId).OrderByDescending(v => v.Published).Take(12));
@@ -213,6 +227,104 @@ public partial class AuroraView
         SelectYouTube(YouTubeItems().FirstOrDefault(v => v.VideoId == id) ?? new YouTubeVideo(id, "", "", "", "", DateTime.Now));
     }
 
+    // =========================================================== 検索
+
+    /// <summary>🔍：ボタンの下に入力欄の窓を出す（もう開いていれば閉じる）。</summary>
+    private void OpenYouTubeSearch(Border button)
+    {
+        if (_ytSearchWindow != null)
+        {
+            _ytSearchWindow.Close();
+            return;
+        }
+        // ダッシュボードの拡大率（デザインの1単位が画面の何ピクセルか）と、窓を置く位置（ピクセル）
+        var header = button.Parent as FrameworkElement ?? button;
+        Point tl, br, rowRight;
+        try
+        {
+            tl = button.PointToScreen(new Point(0, 0));
+            br = button.PointToScreen(new Point(button.ActualWidth, button.ActualHeight));
+            rowRight = header.PointToScreen(new Point(header.ActualWidth, 0));
+        }
+        catch (InvalidOperationException)
+        {
+            return; // 画面に出ていない
+        }
+        double pxPerUnit = button.ActualWidth > 0 ? (br.X - tl.X) / button.ActualWidth : 1;
+        double dpi = VisualTreeHelper.GetDpi(button).DpiScaleX;
+
+        var w = new YouTubeSearchWindow(_ytQuery ?? "", _ctx.Settings.YouTubeSearchHistory, pxPerUnit / dpi, SearchYouTube);
+        // 最初はだいたいの位置（同じモニターに出すため）。出たあとにピクセル単位で右端をそろえる
+        w.Left = (rowRight.X - 540 * pxPerUnit) / dpi;
+        w.Top = (br.Y + 10 * pxPerUnit) / dpi;
+        w.Loaded += (_, _) => w.PlaceRightAligned(rowRight.X, br.Y + 10 * pxPerUnit);
+        w.Closed += (_, _) =>
+        {
+            if (_ytSearchWindow == w) _ytSearchWindow = null;
+            SetSearchButtonOn(false);
+        };
+        _ytSearchWindow = w;
+        SetSearchButtonOn(true);
+        w.Show();
+    }
+
+    private void SetSearchButtonOn(bool on)
+    {
+        foreach (var b in new[] { CardSearch, WideSearch })
+        {
+            if (on)
+            {
+                b.Background = YtChipOnFill;
+                b.BorderBrush = YtChipOnLine;
+            }
+            else
+            {
+                b.Background = Brushes.Transparent;
+                b.SetResourceReference(Border.BorderBrushProperty, "AT40");
+            }
+        }
+    }
+
+    /// <summary>検索して、一覧を検索結果にする。見ている動画はそのまま（一覧から選ぶと切り替わる）。</summary>
+    private async void SearchYouTube(string query)
+    {
+        int seq = ++_ytSearchSeq;
+        _ytQuery = query;
+        _ytResults = null;
+        _ytSearchError = null;
+        var hist = _ctx.Settings.YouTubeSearchHistory;
+        hist.RemoveAll(q => string.Equals(q, query, StringComparison.OrdinalIgnoreCase));
+        hist.Insert(0, query);
+        if (hist.Count > 6) hist.RemoveRange(6, hist.Count - 6);
+        _ctx.Settings.Save();
+        ShowYouTube();
+        ScrollChipsToStart();
+
+        var (videos, error) = await YouTubeService.SearchAsync(query);
+        if (seq != _ytSearchSeq || _ytQuery != query) return;
+        _ytResults = videos?.ToList() ?? new List<YouTubeVideo>();
+        _ytSearchError = error;
+        ShowYouTube();
+        ScrollChipsToStart();
+    }
+
+    /// <summary>「✕ 新着に戻る」</summary>
+    private void ClearYouTubeSearch()
+    {
+        _ytSearchSeq++;
+        _ytQuery = null;
+        _ytResults = null;
+        _ytSearchError = null;
+        ShowYouTube();
+        ScrollChipsToStart();
+    }
+
+    private void ScrollChipsToStart()
+    {
+        TwitchChipsScroll.ScrollToHorizontalOffset(0);
+        WideChipsScroll.ScrollToHorizontalOffset(0);
+    }
+
     private void ShowYouTubeNote(string text)
     {
         _ytNote = text;
@@ -229,10 +341,20 @@ public partial class AuroraView
         else
         {
             _ytNote = null;
-            bool any = _ytLive.Count > 0 || _ytPages.Values.Any(p => p.Videos.Count > 0);
-            label = !any ? "" : _ytLive.Count > 0 ? $"配信中（{_ytLive.Count}）・新着動画" : "新着動画";
+            if (_ytQuery != null)
+                label = _ytResults == null ? $"「{_ytQuery}」を検索しています…"
+                    : _ytSearchError != null ? $"「{_ytQuery}」を検索できませんでした（{_ytSearchError}）"
+                    : _ytResults.Count == 0 ? $"「{_ytQuery}」の動画は見つかりませんでした"
+                    : $"「{_ytQuery}」の検索結果（{_ytResults.Count}）";
+            else
+            {
+                bool any = _ytLive.Count > 0 || _ytPages.Values.Any(p => p.Videos.Count > 0);
+                label = !any ? "" : _ytLive.Count > 0 ? $"配信中（{_ytLive.Count}）・新着動画" : "新着動画";
+            }
         }
         if (TwitchListLabel.Text != label) TwitchListLabel.Text = WideListLabel.Text = label;
+        var clear = _ytQuery != null ? Visibility.Visible : Visibility.Collapsed;
+        if (CardSearchClear.Visibility != clear) CardSearchClear.Visibility = WideSearchClear.Visibility = clear;
     }
 
     private void ShowYouTubeInfo(YouTubeVideo? v)

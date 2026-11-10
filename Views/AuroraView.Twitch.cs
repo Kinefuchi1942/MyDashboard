@@ -81,7 +81,7 @@ public partial class AuroraView
     private bool IsSelectedTab(Border b) =>
         _source == StreamSource.Twitch ? b == CardTabTwitch || b == WideTabTwitch : b == CardTabYouTube || b == WideTabYouTube;
 
-    /// <summary>カード上の「Twitch｜YouTube」のうち、いま見ている方に色を付ける。「＋ URL」は YouTube のときだけ。</summary>
+    /// <summary>カード上の「Twitch｜YouTube」のうち、いま見ている方に色を付ける。「＋ URL」と 🔍 は YouTube のときだけ。</summary>
     private void UpdateSourceTabs()
     {
         bool yt = _source == StreamSource.YouTube;
@@ -92,7 +92,8 @@ public partial class AuroraView
             b.Cursor = on ? null : Cursors.Hand;
             ((TextBlock)b.Child).Foreground = on ? _text : _t60;
         }
-        CardUrl.Visibility = WideUrl.Visibility = yt ? Visibility.Visible : Visibility.Collapsed;
+        CardUrl.Visibility = WideUrl.Visibility = CardSearch.Visibility = WideSearch.Visibility = yt ? Visibility.Visible : Visibility.Collapsed;
+        if (!yt) CardSearchClear.Visibility = WideSearchClear.Visibility = Visibility.Collapsed;
         TwitchExpand.ToolTip = yt ? "拡張表示（配信ならチャット、動画なら新着の一覧付き）" : "拡張表示（チャット付き）";
     }
 

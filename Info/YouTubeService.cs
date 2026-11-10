@@ -230,6 +230,73 @@ public static class YouTubeService
         }
     }
 
+    // =========================================================== 検索
+
+    /// <summary>
+    /// YouTube で動画を検索する（検索結果のページを読む。絞り込みは「動画」だけなので、ショートとチャンネルは入らない）。
+    /// 配信中のものは Live。見つからなければ空の一覧。
+    /// </summary>
+    public static async Task<(IReadOnlyList<YouTubeVideo>? Videos, string? Error)> SearchAsync(string query, int max = 30)
+    {
+        query = (query ?? "").Trim();
+        if (query.Length == 0) return (Array.Empty<YouTubeVideo>(), null);
+        try
+        {
+            // sp=EgIQAQ== は「種類：動画」の絞り込み
+            var html = await Http.GetStringAsync("https://www.youtube.com/results?search_query=" + Uri.EscapeDataString(query) + "&sp=EgIQAQ%253D%253D");
+            using var data = ExtractJson(html, "ytInitialData");
+            if (data == null) return (null, "YouTube の検索結果を読めませんでした");
+
+            var now = DateTime.Now;
+            var list = new List<YouTubeVideo>();
+            foreach (var r in FindAll(data.RootElement, "videoRenderer"))
+            {
+                if (list.Count >= max) break;
+                var id = Str(r, "videoId");
+                if (!VideoIdRx.IsMatch(id) || list.Any(v => v.VideoId == id)) continue;
+                string title = r.TryGetProperty("title", out var t) ? Runs(t) : "";
+                string channel = "", channelId = "";
+                if (r.TryGetProperty("ownerText", out var o))
+                {
+                    channel = Runs(o);
+                    channelId = FindAll(o, "browseEndpoint").Select(b => Str(b, "browseId")).FirstOrDefault(s => ChannelIdRx.IsMatch(s)) ?? "";
+                }
+                string duration = r.TryGetProperty("lengthText", out var lt) ? Str(lt, "simpleText") : "";
+                string age = r.TryGetProperty("publishedTimeText", out var pt) ? Str(pt, "simpleText") : "";
+                bool live = r.TryGetProperty("badges", out var bs) && FindAll(bs, "metadataBadgeRenderer").Any(b => Str(b, "style") == "BADGE_STYLE_TYPE_LIVE_NOW");
+                int viewers = 0;
+                if (live && r.TryGetProperty("viewCountText", out var vc))
+                {
+                    var m = Regex.Match((Runs(vc) + Str(vc, "simpleText")).Replace(",", ""), @"\d+");
+                    if (m.Success) int.TryParse(m.Value, out viewers);
+                }
+                string? avatar = null;
+                if (r.TryGetProperty("channelThumbnailSupportedRenderers", out var ct))
+                    avatar = FindAll(ct, "thumbnails").Where(a => a.ValueKind == JsonValueKind.Array && a.GetArrayLength() > 0)
+                        .Select(a => Str(a[0], "url")).FirstOrDefault(s => s.Length > 0);
+                list.Add(new YouTubeVideo(id, channelId, channel, title, duration, now - ParseAge(age))
+                {
+                    Live = live,
+                    Viewers = viewers,
+                    Avatar = avatar,
+                });
+            }
+            return (list, null);
+        }
+        catch (Exception ex)
+        {
+            return (null, "YouTube に接続できませんでした（" + ex.Message + "）");
+        }
+    }
+
+    /// <summary>{"runs":[{"text":…},…]} または {"simpleText":…} の文字をつなげる。</summary>
+    private static string Runs(JsonElement e)
+    {
+        if (Str(e, "simpleText") is { Length: > 0 } s) return s;
+        if (e.ValueKind != JsonValueKind.Object || !e.TryGetProperty("runs", out var runs) || runs.ValueKind != JsonValueKind.Array) return "";
+        return string.Concat(runs.EnumerateArray().Select(x => Str(x, "text")));
+    }
+
     /// <summary>「8 時間前」「2 週間前」などをおおよその時間にする（読めなければ0）。</summary>
     private static TimeSpan ParseAge(string text)
     {

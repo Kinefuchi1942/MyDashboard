@@ -86,6 +86,8 @@ public sealed class AppSettings
     public List<MyDashboard.Info.YouTubeChannel> YouTubeChannels { get; set; } = new();
     /// <summary>最後に見ていた動画（一覧にあれば次もこれから表示する）。</summary>
     public string YouTubeLastVideo { get; set; } = "";
+    /// <summary>最近の検索（新しい順・最大6件。検索の入力欄の下に出す）。</summary>
+    public List<string> YouTubeSearchHistory { get; set; } = new();
 
     // ---- 消費電力（推定。標準・計器盤に表示）
     /// <summary>モニターの消費電力を合計に含める。</summary>
@@ -174,6 +176,7 @@ public sealed class AppSettings
         YouTubeChannels = (YouTubeChannels ?? new()).Where(c => c != null && !string.IsNullOrWhiteSpace(c.Id))
             .GroupBy(c => c.Id.Trim()).Select(g => new MyDashboard.Info.YouTubeChannel { Id = g.Key, Name = (g.First().Name ?? "").Trim() }).ToList();
         YouTubeLastVideo = (YouTubeLastVideo ?? "").Trim();
+        YouTubeSearchHistory = (YouTubeSearchHistory ?? new()).Where(q => !string.IsNullOrWhiteSpace(q)).Select(q => q.Trim()).Distinct().Take(6).ToList();
         Layout = string.IsNullOrWhiteSpace(Layout) ? "classic" : Layout.Trim().ToLowerInvariant();
         SidebarSide = (SidebarSide ?? "").Trim().ToLowerInvariant() == "left" ? "left" : "right";
         AuroraTheme = string.IsNullOrWhiteSpace(AuroraTheme) ? "auto" : AuroraTheme.Trim().ToLowerInvariant();

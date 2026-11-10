@@ -37,9 +37,10 @@
     - 「ニュース｜Twitch」で Twitch に手動で切り替え（AuroraView.Twitch.cs。起動時はニュース）。通常表示＝同じ位置・寸法のカードに映像 760×428（TwitchSlot）＋配信者名・視聴者数・経過時間・タイトル＋フォロー中で配信中の全員を丸いチップで並べる（入りきらない分は矢印／ホイールで横送り）。「拡張」で x24・y40・幅1872・高さ1000 に広げ（2026-11-02 拡大。モックアップ mockups/media-wide-B.png から余白を詰めた）、映像（16:9・高さいっぱい、約 1493×840）の右にチャット（幅 約335）。拡張中は見出しに時計・気温と CPU・GPU・メモリ・FPS（WideCpu など、Render でバーからうつす）を出し、時計・天気・再生中カード・下の PC バー・テーマ切替は DailyLayer / MediaLayer / PcBar / ThemePicker ごと隠す
   - TwitchPlayer（Views/TwitchPlayer.cs）：WebView2 で Twitch 公式の埋め込みプレーヤーとチャットを出す。親ページは仮ドメイン https://mydashboard.local/（SetVirtualHostNameToFolderMapping。Twitch の parent 指定に必要）。WebView2 は HWND なので WPF の上に重ねられない・Viewbox の拡大は ZoomFactor で合わせる（1秒ごとにも確認）。映像は消音で始まる。チャットは拡張表示のときだけ iframe で読み込む。ゲーム中の低画質（設定でオン、360p 以上）は、ゲームが30秒続いてから下げ、終わって1分たってから戻す。WebView2 のデータ（ログインの Cookie）は %LOCALAPPDATA%\MyDashboard\webview2。ニュースに戻すと Dispose
   - YouTube（AuroraView.YouTube.cs、2026-10-28 追加）：Twitch と同じカード・同じ拡張表示・同じ要素（TwitchSlot、TwitchName、TwitchChips など）を使い、AuroraView.Twitch.cs の _source（Twitch / YouTube）で見分ける。カードの「ニュース｜Twitch｜YouTube」のタブは選んでいる方にコードで色を付ける（Twitch 紫・YouTube 赤）。一覧は登録チャンネルの配信中（丸いチップ＋LIVE、視聴者の多い順）→新着動画（サムネイル付きの角丸チップ、新しい順に最大30本）。「＋ URL」はクリップボードの動画 URL を再生（文字入力欄を出さないため。WebView2 の上に入力欄を重ねられない）。表示中だけ1分ごとのタイマーで、配信中は3分・新着は15分たったものを取り直す（同時に4件まで）。動画が終わったら止める。埋め込み禁止（エラー 101/150）はメッセージを出し、選び直すまで再生し直さない。ゲーム中の低画質はなし（IFrame API で画質を変えられない）
+  - YouTube の検索（2026-11-10 追加）：カードの 🔍（CardSearch / WideSearch）で YouTubeSearchWindow（別の小さな窓。Topmost・枠なし）を出す。ダッシュボードはフォーカスを取らず常に背後ではキーも届かないので、入力欄だけ別窓にする（別窓なので WebView2 の上にも出せる）。窓はボタンの下に右端をそろえて置き、Viewbox の拡大率に合わせて LayoutTransform で拡大。Enter で検索、Esc・Deactivated で閉じる。結果は _ytQuery / _ytResults に持ち、YouTubeItems() が検索中は結果を返す（一覧・拡張表示の右側・pick: すべてこれ）。「✕ 新着に戻る」（CardSearchClear / WideSearchClear）で解除。最近の検索は settings の YouTubeSearchHistory（6件）
   - WebPlayer（Views/WebPlayer.cs）：TwitchPlayer と YouTubePlayer の共通部分（WebView2 の初期化、仮ドメイン、ページへの命令の順番待ち、拡張表示の幅）。どちらのページも TwitchWeb.PageFolder が %LOCALAPPDATA%\MyDashboard\webview2\page に書き出す
   - YouTubePlayer（Views/YouTubePlayer.cs）：YouTube IFrame Player API（youtube.html）。動画 ID 指定なら仮ドメインで再生できる（2026-10-28 に試作で確認）。チャンネル指定の配信（listType=live）はエラー 150 になるので使わない。拡張表示の右は、配信なら live_chat?v=…&embed_domain=mydashboard.local&dark_theme=1、動画ならページ内に新着の一覧（押すと pick:ID を送る）
-  - YouTubeService（Info/YouTubeService.cs）：キー不要。/channel/ID/videos の ytInitialData（lockupViewModel）から新着（ショートと配信は入らない）、/channel/ID/live の ytInitialPlayerResponse（videoDetails.isLive）で配信中を判定。RSS（feeds/videos.xml）はチャンネルによって 404 になるので使わない。日本語のページ（Accept-Language: ja）の「8 時間前」から投稿時刻を逆算。配信の開始時刻は取れないことが多い（そのときは経過時間を出さない）
+  - YouTubeService（Info/YouTubeService.cs）：キー不要。/channel/ID/videos の ytInitialData（lockupViewModel）から新着（ショートと配信は入らない）、/channel/ID/live の ytInitialPlayerResponse（videoDetails.isLive）で配信中を判定。RSS（feeds/videos.xml）はチャンネルによって 404 になるので使わない。日本語のページ（Accept-Language: ja）の「8 時間前」から投稿時刻を逆算。配信の開始時刻は取れないことが多い（そのときは経過時間を出さない）。検索は /results?search_query=…&sp=EgIQAQ%253D%253D（種類：動画）の ytInitialData の videoRenderer を読む（絞り込みなしだとショートばかりになる）。配信中は badges の BADGE_STYLE_TYPE_LIVE_NOW
   - TwitchService（Info/TwitchService.cs）：Helix API（streams/followed、users）。Client ID は組み込み（TwitchService.DefaultClientId、依頼者のアプリ。Implicit grant なので公開してよい値）で、設定に入れればそちらを優先。トークンは %APPDATA%\MyDashboard\twitch-auth.json（Implicit grant。ログイン画面は TwitchLoginWindow が http://localhost への移動を横取り）
   - AuroraTheme：オーロラの時間帯テーマ（朝・昼は明るい背景＋濃い文字、夕方は紫と橙、夜はほぼ黒で約1割暗く）。境目は日の出／10時／日の入り1時間前／日の入り1時間後で、前後15分で背景を混ぜ、文字色は中間で3秒かけて切り替える。オーロラの文字・カードの色は DynamicResource（AText・AT85〜AT40・AGlass・ALine など）で、コードがブラシの色を変える。明るいテーマでは CPU #0B8494、GPU #5A52D0 の濃い版を使う
   - レイアウト切替（Controls/LayoutPicker.cs、2026-11-02 追加、モックアップ `mockups/mode-switch-B.png`）：標準・計器盤・オーロラのアイコンを縦に3つ。いまのレイアウトを枠で囲み、ほかは薄く（テーマ切替と同じ見せ方）。押すと ViewContext.SwitchLayout → MainWindow.SwitchLayout。オーロラはテーマ切替の StackPanel の中（拡張表示ではテーマ切替ごと隠れる）で、色は UseAuroraColors でテーマのブラシをコードから参照。計器盤は Canvas の右14・上318に常時、標準は空きがないので同じ位置にマウスが画面の上にあるときだけ出す
@@ -72,7 +73,8 @@ Views/
   GaugeView               計器盤レイアウト
   AuroraView              オーロラレイアウト
   AuroraView.Twitch.cs    オーロラの Twitch 表示（通常／拡張、フォロー中の一覧、低画質の切り替え）
-  AuroraView.YouTube.cs   オーロラの YouTube 表示（配信中・新着の一覧、＋URL、拡張表示の右側）
+  AuroraView.YouTube.cs   オーロラの YouTube 表示（配信中・新着の一覧、＋URL、検索、拡張表示の右側）
+  YouTubeSearchWindow.cs  YouTube の検索の入力欄（🔍 の下に出る小さな窓）
   WebPlayer.cs            Twitch・YouTube 共通の映像の部品（WebView2）
   TwitchPlayer.cs         Twitch の映像とチャット（WebView2）
   YouTubePlayer.cs        YouTube の映像とライブチャット・新着の一覧（WebView2）
@@ -86,7 +88,7 @@ Info/
   AudioMixer.cs           音量ミキサーのパネルの中身（既定の出力機器の全体の音量・アプリごとの音量・今の音の大きさ）
   CoreAudio.cs            Windows の音声（Core Audio）の COM 定義。AppVolume と AudioMixer で共用
   TwitchService.cs        Twitch のフォロー中の配信（Helix API）とログイン情報
-  YouTubeService.cs       YouTube のチャンネルの新着と配信中（公開ページから読む）
+  YouTubeService.cs       YouTube のチャンネルの新着と配信中、動画の検索（公開ページから読む）
 Controls/                 推移グラフ・円弧メーター・フレームタイムのグラフ・天気アイコン・棒グラフ（自前描画で軽量）
 Monitoring/
   HardwareMonitor.cs      LibreHardwareMonitor で CPU / GPU / ディスクを取得
