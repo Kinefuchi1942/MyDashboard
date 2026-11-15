@@ -159,7 +159,7 @@
             </StackPanel>
         </Grid>
 
-        <!-- ============ フレームタイム（FPS メーターの下の開いた部分） -->
+        <!-- ============ FPS の推移（FPS メーターの下の開いた部分。元はフレームタイムのグラフ） -->
         <Grid x:Name="FrameTimePanel" Canvas.Left="690" Canvas.Top="660" Width="540" Opacity="0.45">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -167,14 +167,14 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock FontFamily="{StaticResource UiFont}" FontSize="20" Foreground="#7F8DA3" VerticalAlignment="Bottom">
-                <Run Text="フレームタイム "/><Run x:Name="FtValue" Text="--" FontFamily="{StaticResource NumFont}" FontSize="26" FontWeight="SemiBold" Foreground="#EEF2F8"/><Run Text=" ms" FontFamily="{StaticResource NumFont}" FontSize="18"/>
+                <Run Text="平均 "/><Run x:Name="FtValue" Text="--" FontFamily="{StaticResource NumFont}" FontSize="26" FontWeight="SemiBold" Foreground="#EEF2F8"/><Run Text=" fps" FontFamily="{StaticResource NumFont}" FontSize="18"/>
             </TextBlock>
             <TextBlock FontFamily="{StaticResource UiFont}" FontSize="20" Foreground="#7F8DA3" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Run Text="1% Low "/><Run x:Name="LowValue" Text="--" FontFamily="{StaticResource NumFont}" FontSize="26" FontWeight="SemiBold" Foreground="#EEF2F8"/><Run Text=" fps" FontFamily="{StaticResource NumFont}" FontSize="18"/>
             </TextBlock>
             <c:FrameTimeChart x:Name="FrameChart" Grid.Row="1" Margin="0,6,0,0"/>
             <TextBlock x:Name="FtCaption" Grid.Row="2" FontFamily="{StaticResource UiFont}" FontSize="15" Foreground="#5A6578" Margin="0,4,0,0"
-                       Text="直近10秒"/>
+                       Text="直近10秒の FPS"/>
         </Grid>
 
         <!-- ============ DLSS（GPU メーターの下）。ゲームが読み込んだ DLL から判定する -->

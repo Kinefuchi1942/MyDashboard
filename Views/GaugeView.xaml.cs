@@ -36,7 +36,7 @@ public partial class GaugeView : UserControl, IDashboardView
         InitializeComponent();
         foreach (var chart in new[] { MemChart, VramChart, DiskChart, NetChart })
             chart.SetCapacity(Math.Max(20, ctx.HistoryPoints * 2 / 3));
-        FtCaption.Text = $"直近10秒 · 点線＝{_refreshRate:0}Hz";
+        SetFtCaption(null);
 
         Threads.Normal = _cpu;
         Threads.ECore = BarMeter.Freeze(new SolidColorBrush(Color.FromArgb(0x8C, 0x5C, 0xC8, 0xD7)));  // CPU 色を淡く
@@ -107,11 +107,12 @@ public partial class GaugeView : UserControl, IDashboardView
             Status.Text = "";
 
             FrameTimePanel.Opacity = 1;
-            FtValue.Text = f.FrameTimeMs is { } ms ? ms.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) : "--";
+            FtValue.Text = Fmt.Num(fps);
             LowValue.Text = Fmt.Num(f.Low1Percent);
             // 1% Low が平均の7割を切ったら琥珀色（カクつきが目立つ状態）
             LowValue.Foreground = f.Low1Percent is { } low && low < fps * 0.7 ? ViewContext.Res("Warn") : _value;
-            FrameChart.SetData(f.FrameTimes, 1000.0 / _refreshRate);
+            FrameChart.SetData(f.FrameTimes, _refreshRate);
+            SetFtCaption(FrameChart.StutterCount);
             ShowDlss(f.Dlss);
             ShowPresentMode(f.PresentMode);
         }
@@ -121,7 +122,8 @@ public partial class GaugeView : UserControl, IDashboardView
             FtValue.Text = "--";
             LowValue.Text = "--";
             LowValue.Foreground = _value;
-            FrameChart.SetData(null, 1000.0 / _refreshRate);
+            FrameChart.SetData(null, _refreshRate);
+            SetFtCaption(null);
             ShowDlss(null);
             ShowPresentMode(null);
 
@@ -260,6 +262,18 @@ public partial class GaugeView : UserControl, IDashboardView
         string F(double v) => (v / div).ToString(v / div >= 100 || div == 1024 ? "0" : "0.0",
                                                   System.Globalization.CultureInfo.InvariantCulture);
         return $"読 {F(read)} · 書 {F(write)} {unit}";
+    }
+
+    /// <summary>グラフの下の説明。カクつきの回数（計測中だけ）を赤い点と一緒に出す。</summary>
+    private void SetFtCaption(int? stutters)
+    {
+        FtCaption.Inlines.Clear();
+        FtCaption.Inlines.Add(new System.Windows.Documents.Run($"直近10秒の FPS · 点線＝{_refreshRate:0}Hz"));
+        if (stutters is not { } n) return;
+        if (n == 0) { FtCaption.Inlines.Add(new System.Windows.Documents.Run(" · カクつきなし")); return; }
+        FtCaption.Inlines.Add(new System.Windows.Documents.Run(" · "));
+        FtCaption.Inlines.Add(new System.Windows.Documents.Run("●") { Foreground = ViewContext.Res("Crit") });
+        FtCaption.Inlines.Add(new System.Windows.Documents.Run($" カクつき {n} 回"));
     }
 }
 

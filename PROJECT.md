@@ -30,7 +30,7 @@
 - `Views/`：差し替え可能なレイアウト（IDashboardView：Render / UpdateClock / SetNotice / ShowNews / ShowWeather / ShowMedia）
   - ClassicView「標準」：情報量重視のパネル型（スレッド別負荷、ディスクごとの速度まで表示）。見出しの時計の左に消費電力
   - PowerSummary：消費電力（推定）の表示。合計 W・内訳の帯（CPU／GPU／その他／モニター）・今日と今月の kWh と電気代。標準と計器盤の時計の左に置く（2026-10-30 追加、モックアップ `mockups/power-classic.png`・`power-gauge.png`・`power-settings.png`）
-  - GaugeView「計器盤」：CPU・FPS・GPU の円弧メーター3連。外側＝使用率、内側＝温度。FPS の満点はメインモニターのリフレッシュレート。CPU メーターの下にスレッド別負荷（CoreBars、P/E コア別・スレッド数と最大スレッドの %。2026-10-28 追加、モックアップ `mockups/gauge-threads.png`）。FPS メーターの下に直近10秒のフレームタイムのグラフ（FrameTimeChart）と 1% Low、左上に Present Mode のチップ（Hardware＝緑、Composed＝琥珀で「DWM 合成あり」）、右下に DLSS のチップ（SR / FG / RR。DlssDetector が読み込み済み DLL から推定。保護されたゲームは「unavailable」）。最下段にメモリ・VRAM・ディスク・ネットの細い帯。ニュースは表示しない（2026-10-26 に帯を削除）。Present Mode と DLSS は計器盤だけの表示（標準・オーロラには出ない）
+  - GaugeView「計器盤」：CPU・FPS・GPU の円弧メーター3連。外側＝使用率、内側＝温度。FPS の満点はメインモニターのリフレッシュレート。CPU メーターの下にスレッド別負荷（CoreBars、P/E コア別・スレッド数と最大スレッドの %。2026-10-28 追加、モックアップ `mockups/gauge-threads.png`）。FPS メーターの下に直近10秒の FPS の推移（FrameTimeChart。フレームタイムを0.25秒ごとの FPS にして描く。目盛り 60/120＋リフレッシュレートの点線、33ms 超かつ中央値の2.5倍超のフレームを「カクつき」として下端に赤い点・下に回数。2026-11-15 に1フレームごとの描画から変更、モックアップ `mockups/frametime.png` の案 A）と平均 FPS・1% Low、左上に Present Mode のチップ（Hardware＝緑、Composed＝琥珀で「DWM 合成あり」）、右下に DLSS のチップ（SR / FG / RR。DlssDetector が読み込み済み DLL から推定。保護されたゲームは「unavailable」）。最下段にメモリ・VRAM・ディスク・ネットの細い帯。ニュースは表示しない（2026-10-26 に帯を削除）。Present Mode と DLSS は計器盤だけの表示（標準・オーロラには出ない）
   - AuroraView「オーロラ」：日常使い向け。大きな時計・天気（現在＋3時間ごと6コマ）・ニュースカードが主役。FPS は表示しない（2026-10-27 に左上のバッジを削除。ゲーム中の判定は Twitch の低画質切り替え用に残す）。PC 状態は下段の細いバー（x96・下端から84px・高さ120、CPU / GPU / メモリ / VRAM / ネットの5区画と推移グラフ）。背景の光が負荷に連動（CPU 青緑・GPU 紫・高温で赤）。
     - 左列（1920×1080 基準）：時計（y150・文字300）、日付（y470）、天気カード（x96・y556・幅860・高さ200）。曲の再生中は天気の下に再生中カード（x96・y726〜852・幅860・高さ126）を出し、そのあいだ時計・日付・天気を 50px 上げる（MediaLift）。背景にジャケット色の光。再生なし／一時停止5分でカードを隠す
     - 右列：メディアカード（ニュース⇄Twitch⇄YouTube）。右端から96px・上端 y48・幅844×高さ804で、天気・再生中カードの右24px、下段バーの手前まで。ニュースは見出し（46px）＋要約（空き高さに合わせて最大5行）＋次の記事4件、前へ／次へのボタンと件数表示。ダブルクリックで記事を開く
@@ -89,7 +89,7 @@ Info/
   CoreAudio.cs            Windows の音声（Core Audio）の COM 定義。AppVolume と AudioMixer で共用
   TwitchService.cs        Twitch のフォロー中の配信（Helix API）とログイン情報
   YouTubeService.cs       YouTube のチャンネルの新着と配信中、動画の検索（公開ページから読む）
-Controls/                 推移グラフ・円弧メーター・フレームタイムのグラフ・天気アイコン・棒グラフ（自前描画で軽量）
+Controls/                 推移グラフ・円弧メーター・FPS の推移のグラフ・天気アイコン・棒グラフ（自前描画で軽量）
 Monitoring/
   HardwareMonitor.cs      LibreHardwareMonitor で CPU / GPU / ディスクを取得
   NetworkMonitor.cs       送受信速度

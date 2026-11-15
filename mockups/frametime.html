@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;font-family:"Yu Gothic UI",sans-serif;color:#EEF2F8;
+ background:radial-gradient(ellipse 70% 80% at 50% 45%,#16202C,#0A0E14);padding:40px 60px}
+.num{font-family:Bahnschrift,sans-serif;font-variant-numeric:tabular-nums}
+h1{font-size:30px;font-weight:600;margin-bottom:6px}
+.sub{color:#7F8DA3;font-size:19px;margin-bottom:26px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:34px 70px}
+.card{position:relative}
+.tag{font-size:24px;font-weight:700;margin-bottom:4px}
+.tag b{display:inline-block;width:38px;height:38px;border-radius:19px;background:#FFB547;color:#0A0E14;text-align:center;line-height:38px;margin-right:10px;font-family:Bahnschrift}
+.tag.now b{background:#5A6578;color:#EEF2F8}
+.desc{color:#9AA6B8;font-size:17px;margin-bottom:12px;height:46px}
+.panel{width:810px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;color:#7F8DA3;font-size:30px}
+.head .v{font-family:Bahnschrift;font-size:39px;font-weight:600;color:#EEF2F8}
+.head .u{font-family:Bahnschrift;font-size:27px}
+.cap{color:#5A6578;font-size:22px;margin-top:6px}
+svg text{font-family:Bahnschrift}
+</style></head><body>
+<h1>計器盤：フレームタイムのグラフの案</h1>
+<div class="sub">いまの表示（左上）と3つの案。データは同じ（witcher3 で 77 fps・1% Low 25 fps・ときどきカクつく想定）。パネルは実寸の1.5倍で表示</div>
+<div class="grid">
+ <div class="card"><div class="tag now"><b>今</b>いまの表示</div>
+  <div class="desc">1フレームごとの時間。速い・遅いフレームが交互に来ると、平均の1.6倍を超えた縦線だらけで赤く塗りつぶされ、何を見ればいいか分からない</div>
+  <div class="panel" id="p0"></div></div>
+ <div class="card"><div class="tag"><b>A</b>FPS の推移（おすすめ）</div>
+  <div class="desc">上の大きな fps と同じ単位で、0.25秒ごとの FPS を線で描く。高いほど良い。目盛り（60 / 120 / 160）を付け、ガクッと落ちた所にだけ赤い点</div>
+  <div class="panel" id="pA"></div></div>
+ <div class="card"><div class="tag"><b>B</b>フレームタイム（整理版）</div>
+  <div class="desc">フレームタイムのまま、ばらつきを薄い帯にまとめて平均を線で描く。目盛りに「60fps / 30fps」を添え、本当のカクつき（33ms 超かつ普段の2.5倍）だけ赤</div>
+  <div class="panel" id="pB"></div></div>
+ <div class="card"><div class="tag"><b>C</b>なめらかさの内訳</div>
+  <div class="desc">グラフをやめ、直近10秒のフレームが「どの速さだったか」の割合を1本の帯で見せる。カクつきの回数も数字で出す</div>
+  <div class="panel" id="pC"></div></div>
+</div>
+<script>
+// 疑似データ：10秒・約770フレーム。速い/遅いが交互＋ときどき大きなカクつき
+let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+const ft=[];let t=0;
+while(t<10000){let base=12.5+Math.sin(t/1400)*1.6;let v=(ft.length%2?base*1.45:base*0.6)+ (r()-.5)*1.5;
+ if(r()<0.006)v=38+r()*14; ft.push(v);t+=v;}
+const W=810,H=120,ref=1000/160;
+const head=(l,v,u,rl,rv,ru)=>`<div class="head"><span>${l} <span class="v">${v}</span><span class="u"> ${u}</span></span><span>${rl} <span class="v" style="color:${rl.includes('1%')?'#FFB547':'#EEF2F8'}">${rv}</span><span class="u"> ${ru}</span></span></div>`;
+const box=`<rect x="0" y="0" width="${W}" height="${H}" rx="6" fill="rgba(255,255,255,.025)"/>`;
+// 今
+(()=>{const avg=ft.reduce((a,b)=>a+b)/ft.length,top=Math.max(avg*2.2,ref*1.3);const Y=v=>H-H*Math.min(v,top)/top;
+ const n=Math.floor(W/1.5),mx=new Array(n).fill(0);ft.forEach((v,i)=>{const b=Math.floor(i*n/ft.length);if(v>mx[b])mx[b]=v});
+ let line='',bars='';mx.forEach((v,b)=>{const x=W*b/(n-1);line+=(b?'L':'M')+x.toFixed(1)+','+Y(v).toFixed(1);
+  if(v>avg*1.6)bars+=`<line x1="${x}" y1="${H}" x2="${x}" y2="${Y(v)}" stroke="${v>avg*2.2?'#FF5D5D':'#FFB547'}" stroke-opacity=".9" stroke-width="3"/>`});
+ document.getElementById('p0').innerHTML=head('フレームタイム','13.0','ms','1% Low','25','fps')+
+ `<svg width="${W}" height="${H+9}" style="margin-top:9px">${box}<line x1="0" x2="${W}" y1="${Y(ref)}" y2="${Y(ref)}" stroke="#7F8DA3" stroke-dasharray="7 9"/><path d="${line}" fill="none" stroke="#F2F5FA" stroke-width="2.4"/>${bars}</svg><div class="cap">直近10秒 · 点線＝160Hz</div>`;})();
+// A
+(()=>{const step=250,pts=[];let acc=0,cnt=0,edge=step,dips=[];let mn=1e9;
+ ft.forEach(v=>{acc+=v;cnt++;if(v>mn)0; if(v>30)dips.push(acc);});
+ let tt=0,a=0,c=0;ft.forEach(v=>{tt+=v;a+=v;c++;if(tt>=edge){pts.push(1000*c/a);a=0;c=0;edge+=step;}});
+ const top=180,L=56,PW=W-L,Y=v=>H-H*Math.min(v,top)/top;let d='',area='';
+ pts.forEach((v,i)=>{const x=L+PW*i/(pts.length-1);d+=(i?'L':'M')+x.toFixed(1)+','+Y(v).toFixed(1)});
+ area=d+`L${W},${H}L${L},${H}Z`;
+ let grid='';[60,120,160].forEach(g=>{grid+=`<line x1="${L}" x2="${W}" y1="${Y(g)}" y2="${Y(g)}" stroke="rgba(255,255,255,${g==160?.22:.1})" ${g==160?'stroke-dasharray="7 9"':''}/><text x="${L-10}" y="${Y(g)+7}" text-anchor="end" font-size="20" fill="#5A6578">${g}</text>`});
+ let dots='';dips.forEach(tm=>{const x=L+PW*tm/10000;dots+=`<circle cx="${x}" cy="${H-10}" r="6" fill="#FF5D5D"/>`});
+ document.getElementById('pA').innerHTML=head('平均','77','fps','1% Low','25','fps')+
+ `<svg width="${W}" height="${H+9}" style="margin-top:9px"><rect x="${L}" y="0" width="${PW}" height="${H}" rx="6" fill="rgba(255,255,255,.025)"/>${grid}
+ <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2F5FA" stop-opacity=".22"/><stop offset="1" stop-color="#F2F5FA" stop-opacity=".02"/></linearGradient></defs>
+ <path d="${area}" fill="url(#ga)"/><path d="${d}" fill="none" stroke="#F2F5FA" stroke-width="3" stroke-linejoin="round"/>${dots}</svg>
+ <div class="cap">直近10秒の FPS · 点線＝160Hz · <span style="color:#FF5D5D">●</span> カクつき ${dips.length} 回</div>`;})();
+// B
+(()=>{const top=50,L=56,PW=W-L,Y=v=>H-H*Math.min(v,top)/top;const n=80;const lo=new Array(n).fill(1e9),hi=new Array(n).fill(0),sm=new Array(n).fill(0),ct=new Array(n).fill(0);
+ const sorted=[...ft].sort((a,b)=>a-b),med=sorted[Math.floor(ft.length/2)];const st=[];
+ ft.forEach((v,i)=>{const b=Math.floor(i*n/ft.length);lo[b]=Math.min(lo[b],v);hi[b]=Math.max(hi[b],v>30?hi[b]:v);sm[b]+=v;ct[b]++;if(v>33.3&&v>med*2.5)st.push(i)});
+ let band='',back='',d='';for(let b=0;b<n;b++){const x=L+PW*b/(n-1);band+=(b?'L':'M')+x+','+Y(hi[b]);d+=(b?'L':'M')+x+','+Y(sm[b]/ct[b]);}
+ for(let b=n-1;b>=0;b--){band+='L'+(L+PW*b/(n-1))+','+Y(lo[b]);}band+='Z';
+ let grid='';[[16.7,'60fps'],[33.3,'30fps']].forEach(([g,l])=>{grid+=`<line x1="${L}" x2="${W}" y1="${Y(g)}" y2="${Y(g)}" stroke="rgba(255,255,255,.1)"/><text x="${L-10}" y="${Y(g)+7}" text-anchor="end" font-size="17" fill="#5A6578">${l}</text>`});
+ let sp='';st.forEach(i=>{const x=L+PW*i/ft.length;sp+=`<line x1="${x}" x2="${x}" y1="${H}" y2="${Y(ft[i])}" stroke="#FF5D5D" stroke-width="3.5" stroke-linecap="round"/>`});
+ document.getElementById('pB').innerHTML=head('フレームタイム','13.0','ms','1% Low','25','fps')+
+ `<svg width="${W}" height="${H+9}" style="margin-top:9px"><rect x="${L}" y="0" width="${PW}" height="${H}" rx="6" fill="rgba(255,255,255,.025)"/>${grid}<path d="${band}" fill="rgba(242,245,250,.14)"/><path d="${d}" fill="none" stroke="#F2F5FA" stroke-width="3"/>${sp}</svg>
+ <div class="cap">直近10秒 · 低いほど良い · 帯＝ばらつき · <span style="color:#FF5D5D">|</span> カクつき ${st.length} 回</div>`;})();
+// C
+(()=>{const bins=[[8.3,'120fps 以上','#6FD3A8'],[16.7,'60〜120','#5CC8D7'],[33.3,'30〜60','#FFB547'],[1e9,'30 未満','#FF5D5D']];const c=[0,0,0,0];
+ ft.forEach(v=>{for(let k=0;k<4;k++)if(v<bins[k][0]){c[k]++;break;}});const tot=ft.length;let x=0,seg='',leg='';
+ c.forEach((n,k)=>{const w=W*n/tot;seg+=`<rect x="${x}" y="0" width="${Math.max(w-3,0)}" height="44" rx="5" fill="${bins[k][2]}" fill-opacity=".85"/>`;x+=w;
+  leg+=`<div style="display:flex;align-items:center;gap:8px"><i style="width:14px;height:14px;border-radius:3px;background:${bins[k][2]}"></i><span style="color:#9AA6B8;font-size:20px">${bins[k][1]}</span><span class="num" style="font-size:24px;font-weight:600">${Math.round(100*n/tot)}%</span></div>`});
+ document.getElementById('pC').innerHTML=head('フレームタイム','13.0','ms','1% Low','25','fps')+
+ `<svg width="${W}" height="56" style="margin-top:14px">${seg}</svg><div style="display:flex;justify-content:space-between;margin-top:8px">${leg}</div>
+ <div class="cap" style="margin-top:10px">直近10秒のフレームの内訳 · カクつき（30fps 未満）<span class="num" style="color:#FF5D5D;font-size:24px"> ${c[3]} </span>回</div>`;})();
+</script></body></html>
