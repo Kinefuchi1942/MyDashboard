@@ -93,7 +93,7 @@ Controls/                 推移グラフ・円弧メーター・FPS の推移�
 Monitoring/
   HardwareMonitor.cs      LibreHardwareMonitor で CPU / GPU / ディスクを取得
   NetworkMonitor.cs       送受信速度
-  FpsMonitor.cs           PresentMon の出力から FPS・1% Low を計算
+  FpsMonitor.cs           PresentMon の出力から FPS・1% Low を計算（1% Low は FG などの規則的な交互の並びを検出すると k=2〜4 フレームずつまとめて計算。診断ファイルに「1% Low:」行。2026-11-15）
   CpuTopology.cs          P コア／E コアの判別
   DlssDetector.cs         DLSS（SR／FG／RR）の検出
   SystemScanner.cs        PC の構成（マザーボード・メモリ・ドライブ・ファン・モニター）を調べる

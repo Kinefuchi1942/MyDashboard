@@ -36,6 +36,7 @@ public sealed class FpsMonitor : IDisposable
     private DateTime _startedAt;
     private readonly DlssDetector _dlss = new();
     private string? _lastMode;
+    private string _lowNote = "（なし）";   // 1% Low の計算のまとめ方（診断用）
 
     private readonly record struct Frame(double Time, int Pid, string App, double Ms, string? Mode);
 
@@ -212,6 +213,7 @@ public sealed class FpsMonitor : IDisposable
             sb.AppendLine($"ヘッダー: {_headerLine}");
             sb.AppendLine($"データ例: {_sampleLine}");
             sb.AppendLine($"Present Mode: {_lastMode ?? "（なし）"}");
+            sb.AppendLine($"1% Low: {_lowNote}");
             sb.AppendLine("アプリ別フレーム数:");
             lock (_appCounts)
                 foreach (var kv in _appCounts.OrderByDescending(k => k.Value).Take(15))
@@ -263,17 +265,9 @@ public sealed class FpsMonitor : IDisposable
                   ?? groups.OrderByDescending(g => g.Count()).First();
 
         double avgMs = target.Average(f => f.Ms);
-        var longWindow = recent.Where(f => f.Pid == target.Key && f.Time >= now - 10).Select(f => f.Ms).OrderBy(x => x).ToArray();
-        double? low1 = null;
-        if (longWindow.Length >= 30)
-        {
-            // 1% low = フレーム時間の99パーセンタイルをFPSに換算
-            int idx = (int)Math.Ceiling(longWindow.Length * 0.99) - 1;
-            low1 = 1000.0 / longWindow[Math.Clamp(idx, 0, longWindow.Length - 1)];
-        }
-
-        // フレームタイムのグラフ用（直近10秒、古い順）
+        // フレームタイムのグラフ・1% Low 用（直近10秒、古い順）
         var frameTimes = recent.Where(f => f.Pid == target.Key && f.Time >= now - 10).Select(f => f.Ms).ToArray();
+        double? low1 = Low1Percent(frameTimes, out _lowNote);
 
         // 表示方式（全画面・ウィンドウの切り替えで変わるので、いちばん新しいフレームのものを使う）
         var mode = target.Last().Mode;
@@ -284,6 +278,53 @@ public sealed class FpsMonitor : IDisposable
         if (app.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) app = app[..^4];
         return new FpsInfo(FpsState.Running, app, 1000.0 / avgMs, low1, avgMs, null, frameTimes, _dlss.Check(target.Key),
                            string.IsNullOrEmpty(mode) ? null : mode);
+    }
+
+    /// <summary>
+    /// 1% Low（遅い方から1%のフレームの FPS）。
+    /// フレーム生成（DLSS FG）などで速い・遅いフレームが規則的に交互に来ると、1フレームずつ見ると
+    /// 遅い側ばかりが拾われて体感よりずっと低く出る。そこで、連続する k フレーム（k=1〜4）をまとめた時間の
+    /// ばらつきがいちばん小さくなる k を選び、k フレームずつの FPS（ずらしながら）の下位1%を使う。
+    /// 交互の並びがなければ k=1 になり、従来どおり1フレームずつの計算になる。
+    /// </summary>
+    private static double? Low1Percent(double[] ms, out string note)
+    {
+        note = "フレーム不足";
+        if (ms.Length < 30) return null;
+
+        // k フレームの合計のばらつき（上位10%と下位10%の差 ÷ 中央値）
+        static double Spread(double[] ms, int k, out double[] sums)
+        {
+            sums = new double[ms.Length - k + 1];
+            double acc = 0;
+            for (int i = 0; i < ms.Length; i++)
+            {
+                acc += ms[i];
+                if (i >= k) acc -= ms[i - k];
+                if (i >= k - 1) sums[i - k + 1] = acc;
+            }
+            var sorted = (double[])sums.Clone();
+            Array.Sort(sorted);
+            double med = sorted[sorted.Length / 2];
+            return med <= 0 ? double.MaxValue : (sorted[(int)(sorted.Length * 0.9)] - sorted[(int)(sorted.Length * 0.1)]) / med;
+        }
+
+        int best = 1;
+        double bestSpread = Spread(ms, 1, out var bestSums);
+        double spread1 = bestSpread;
+        for (int k = 2; k <= 4; k++)
+        {
+            double sp = Spread(ms, k, out var sums);
+            // 大きく整う（1フレームずつの35%未満。ただの不規則な揺れなら4フレームでも半分程度にしかならない）最初の k でまとめる
+            if (sp < spread1 * 0.35) { best = k; bestSpread = sp; bestSums = sums; break; }
+        }
+
+        Array.Sort(bestSums);
+        int idx = Math.Clamp((int)Math.Ceiling(bestSums.Length * 0.99) - 1, 0, bestSums.Length - 1);
+        note = best == 1
+            ? $"1フレームずつ（ばらつき {spread1:0.00}）"
+            : $"{best}フレームずつまとめて計算（交互の並びあり。ばらつき {spread1:0.00} → {bestSpread:0.00}）";
+        return 1000.0 * best / bestSums[idx];
     }
 
     private static int ForegroundPid()
