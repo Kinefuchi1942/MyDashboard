@@ -44,17 +44,32 @@ public sealed class FrameTimeChart : FrameworkElement
         InvalidateVisual();
     }
 
-    /// <summary>カクつき＝33ms（30fps）を超え、かつ普段（中央値）の2.5倍を超えて遅れたフレーム。</summary>
+    /// <summary>
+    /// カクつき＝33ms（30fps）を超え、かつ直前1秒のフレームの「遅い側」（上位10%）の2.5倍を超えて遅れたフレーム。
+    /// フレーム生成（DLSS FG）などで速い・遅いフレームが規則的に交互に来るときは、遅い側も普段の並びなので数えない。
+    /// 体感で引っかかる「いつもの並びから飛び出した遅れ」だけを拾う。
+    /// </summary>
     private static int CountStutters(double[] ms, out bool[] flags)
     {
         flags = new bool[ms.Length];
-        if (ms.Length < 2) return 0;
-        var sorted = (double[])ms.Clone();
-        Array.Sort(sorted);
-        double median = sorted[sorted.Length / 2];
-        int n = 0;
+        if (ms.Length < 10) return 0;
+        int n = 0, start = 0;
+        double windowMs = 0;
+        var buf = new List<double>(256);
         for (int i = 0; i < ms.Length; i++)
-            if (ms[i] > 33.3 && ms[i] > median * 2.5) { flags[i] = true; n++; }
+        {
+            // 直前1秒（i より前）のフレーム
+            while (windowMs > 1000 && start < i) { windowMs -= ms[start]; start++; }
+            if (i - start >= 8 && ms[i] > 33.3)
+            {
+                buf.Clear();
+                for (int k = start; k < i; k++) buf.Add(ms[k]);
+                buf.Sort();
+                double p90 = buf[(int)(buf.Count * 0.9)];
+                if (ms[i] > p90 * 2.5) { flags[i] = true; n++; }
+            }
+            windowMs += ms[i];
+        }
         return n;
     }
 
