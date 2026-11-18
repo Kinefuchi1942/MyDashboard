@@ -10,6 +10,7 @@ namespace MyDashboard.Info;
 internal static class CoreAudio
 {
     public const int Render = 0;          // 出力（スピーカー・ヘッドホン）
+    public const int Capture = 1;         // 入力（ライン入力・マイク）
     public const int Multimedia = 1;      // 既定の機器の種類（音楽・動画）
     public const int ActiveDevices = 1;   // 有効な機器
     public const int InprocServer = 1;    // CLSCTX_INPROC_SERVER
@@ -58,8 +59,10 @@ internal static class CoreAudio
         [PreserveSig] int SetProcessingPeriod(IntPtr a, IntPtr b);
         [PreserveSig] int GetShareMode(IntPtr a, IntPtr b);
         [PreserveSig] int SetShareMode(IntPtr a, IntPtr b);
-        [PreserveSig] int GetPropertyValue(IntPtr a, int b, IntPtr c, IntPtr d);
-        [PreserveSig] int SetPropertyValue(IntPtr a, int b, IntPtr c, IntPtr d);
+        /// <summary>機器の設定値を読む（fxStore＝0 で機器のふつうの設定）。</summary>
+        [PreserveSig] int GetPropertyValue([MarshalAs(UnmanagedType.LPWStr)] string deviceId, int fxStore, ref PropertyKey key, out PropVariant value);
+        /// <summary>機器の設定値を書く。プロパティストアに直接書くのと違い、音声エンジンにすぐ伝わる（「このデバイスを聴く」の切り替えに使う）。</summary>
+        [PreserveSig] int SetPropertyValue([MarshalAs(UnmanagedType.LPWStr)] string deviceId, int fxStore, ref PropertyKey key, ref PropVariant value);
         [PreserveSig] int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId, int role);
     }
 
@@ -164,6 +167,24 @@ internal static class CoreAudio
         [PreserveSig] int GetChannelVolumeLevelScalar(uint channel, out float level);
         [PreserveSig] int SetMute(int muted, ref Guid ctx);
         [PreserveSig] int GetMute(out int muted);
+    }
+
+    /// <summary>
+    /// 録音の流れを開く（入力の音の大きさを読むためだけに使う。入力機器の音量メーターは、だれかが録音していないと 0 のままなので）。
+    /// </summary>
+    [ComImport, Guid("1CB9AD4C-DBFA-4C32-B178-C2F568A703B2"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IAudioClient
+    {
+        [PreserveSig] int Initialize(int shareMode, uint streamFlags, long bufferDuration, long periodicity, IntPtr format, IntPtr sessionGuid);
+        [PreserveSig] int GetBufferSize(out uint frames);
+        [PreserveSig] int GetStreamLatency(out long latency);
+        [PreserveSig] int GetCurrentPadding(out uint frames);
+        [PreserveSig] int IsFormatSupported(int shareMode, IntPtr format, out IntPtr closest);
+        [PreserveSig] int GetMixFormat(out IntPtr format);
+        [PreserveSig] int GetDevicePeriod(out long defaultPeriod, out long minimumPeriod);
+        [PreserveSig] int Start();
+        [PreserveSig] int Stop();
+        [PreserveSig] int Reset();
     }
 
     [ComImport, Guid("C02216F6-8C67-4B5B-9D00-D008E73E0064"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]

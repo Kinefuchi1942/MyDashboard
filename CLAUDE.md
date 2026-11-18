@@ -81,7 +81,7 @@
   - ViewSupport：共通の色・書式・ニュース送り・演出
 - `Controls/`：自前描画の部品（ArcGauge、HistoryChart、FrameTimeChart、WeatherIcon、Meters）
 - 操作：右クリック、S＝設定、L＝レイアウト、M＝モニター移動、B＝常に背後、Ctrl+Q＝終了
-- 診断ファイル（`%APPDATA%\MyDashboard`）：`fps-diagnostics.txt`、`dlss-diagnostics.txt`、`media-diagnostics.txt`、`power-diagnostics.txt`
+- 診断ファイル（`%APPDATA%\MyDashboard`）：`fps-diagnostics.txt`、`dlss-diagnostics.txt`、`media-diagnostics.txt`、`power-diagnostics.txt`、`audio-diagnostics.txt`（入力を聴く）
 - 消費電力（標準・計器盤）：`Monitoring/PowerMeter.cs`（推定と積算）、`SystemScanner.cs`（構成の自動調査）、`Views/PowerSummary`（表示）
 
 ## 再発させない注意点

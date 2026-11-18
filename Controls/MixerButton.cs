@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -112,6 +112,7 @@ public sealed class MixerButton : Border
         if (!_popup.IsOpen) return;
         _popup.IsOpen = false;
         _timer.Stop();
+        _panel.Unload();
         if (_window != null) _window.PreviewMouseDown -= OnWindowMouseDown;
         _window = null;
         Refresh();
@@ -139,7 +140,7 @@ public sealed class MixerButton : Border
     }
 }
 
-/// <summary>音量ミキサーのパネル本体（全体＋アプリごとの行）。色は暗い色で固定。</summary>
+/// <summary>音量ミキサーのパネル本体（全体＋アプリごとの行＋下に「入力を聴く」）。色は暗い色で固定（モックアップ mockups/mixer-listen-*.png）。</summary>
 internal sealed class MixerPanel : Border
 {
     private static readonly Brush TextBrush = Frozen(0xF4, 0xF7, 0xFB);
@@ -167,11 +168,15 @@ internal sealed class MixerPanel : Border
     private readonly StackPanel _deviceList = new() { Visibility = Visibility.Collapsed, Margin = new Thickness(0, 4, 0, 8) };
     private readonly StackPanel _rows = new();
     private readonly List<MixerRow> _rowList = new();
+    private readonly AudioInputs _inputs = new();
+    private readonly StackPanel _inputSection = new() { Visibility = Visibility.Collapsed };
+    private readonly StackPanel _inputRows = new();
+    private readonly List<InputRow> _inputList = new();
     private int _ticks;
 
     /// <summary>パネルがさわられた（閉じるまでの10秒を数え直す）。</summary>
     public event Action? Touched;
-    public bool Dragging => _rowList.Any(r => r.Slider.Dragging);
+    public bool Dragging => _rowList.Any(r => r.Slider.Dragging) || _inputList.Any(r => r.Slider.Dragging);
 
     public MixerPanel()
     {
@@ -226,6 +231,7 @@ internal sealed class MixerPanel : Border
         stack.Children.Add(header);
         stack.Children.Add(_deviceList);
         stack.Children.Add(_rows);
+        stack.Children.Add(BuildInputSection());
         stack.Children.Add(foot);
         Child = stack;
 
@@ -240,7 +246,16 @@ internal sealed class MixerPanel : Border
         _ticks = 0;
         _deviceList.Visibility = Visibility.Collapsed;
         Rebuild(_mixer.Refresh());
+        RebuildInputs(_inputs.Refresh());
         Tick();
+    }
+
+    /// <summary>閉じたとき。入力の音の大きさを読むために開いた録音の流れを閉じる。</summary>
+    public void Unload()
+    {
+        _inputs.Stop();
+        _inputRows.Children.Clear();
+        _inputList.Clear();
     }
 
     /// <summary>1秒20回。音の大きさを動かし、1秒ごとに一覧と音量を読み直す。</summary>
@@ -252,9 +267,53 @@ internal sealed class MixerPanel : Border
             ShowDeviceName();
             if (!entries.Select(e => e.Key).SequenceEqual(_rowList.Select(r => r.Entry.Key))) Rebuild(entries);
             else for (int i = 0; i < entries.Count; i++) _rowList[i].Entry = entries[i];
+
+            var inputs = _inputs.Refresh();
+            if (!inputs.Select(e => e.Id).SequenceEqual(_inputList.Select(r => r.Entry.Id))) RebuildInputs(inputs);
         }
         _mixer.ReadPeaks();
+        _inputs.ReadPeaks();
         foreach (var row in _rowList) row.Update();
+        foreach (var row in _inputList) row.Update();
+    }
+
+    // =========================================================== 入力を聴く
+
+    private FrameworkElement BuildInputSection()
+    {
+        var head = new Grid { Margin = new Thickness(0, 10, 0, 2) };
+        var left = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+        left.Children.Add(new Path
+        {
+            Width = 20, Height = 20, Stretch = Stretch.None, Stroke = SubBrush, StrokeThickness = 1.8, Margin = new Thickness(0, 0, 8, 0),
+            StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round, StrokeLineJoin = PenLineJoin.Round,
+            Data = Geometry.Parse("M2,10 L6,10 L8.5,4 L11.5,16 L14,10 L18,10"), VerticalAlignment = VerticalAlignment.Center,
+        });
+        left.Children.Add(new TextBlock { Text = "入力を聴く", FontSize = 15, Foreground = Frozen(0xF4, 0xF7, 0xFB, 0x8C), VerticalAlignment = VerticalAlignment.Center });
+        head.Children.Add(left);
+        head.Children.Add(new TextBlock
+        {
+            Text = "Windows の「このデバイスを聴く」と同じ", FontSize = 13, Foreground = Frozen(0xF4, 0xF7, 0xFB, 0x59),
+            HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center,
+        });
+        _inputSection.Children.Add(new Rectangle { Height = 1, Fill = LineBrush, Margin = new Thickness(0, 6, 0, 0) });
+        _inputSection.Children.Add(head);
+        _inputSection.Children.Add(_inputRows);
+        return _inputSection;
+    }
+
+    private void RebuildInputs(IReadOnlyList<InputEntry> inputs)
+    {
+        _inputRows.Children.Clear();
+        _inputList.Clear();
+        foreach (var e in inputs)
+        {
+            var row = new InputRow(this, e);
+            _inputList.Add(row);
+            _inputRows.Children.Add(row.Root);
+            _inputRows.Children.Add(row.Targets);
+        }
+        _inputSection.Visibility = inputs.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Rebuild(IReadOnlyList<MixerEntry> entries)
@@ -297,12 +356,20 @@ internal sealed class MixerPanel : Border
     }
 
     /// <summary>出力機器の一覧の1行。今の機器には緑のチェック。</summary>
-    private FrameworkElement DeviceRow(OutputDevice d)
+    private FrameworkElement DeviceRow(OutputDevice d) =>
+        ChoiceRow(d.Name, d.IsDefault, () =>
+        {
+            if (!d.IsDefault) AudioMixer.SetDefaultDevice(d.Id);
+            Load();  // 機器が変わるとアプリの音声も変わるので、一覧を読み直す（一覧は閉じる）
+        });
+
+    /// <summary>選ぶ一覧の1行（出力機器・聴く音の鳴らす先）。今のものには緑のチェック。</summary>
+    private static FrameworkElement ChoiceRow(string text, bool current, Action choose)
     {
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) });
         grid.ColumnDefinitions.Add(new ColumnDefinition());
-        if (d.IsDefault)
+        if (current)
             grid.Children.Add(new Path
             {
                 Width = 18, Height = 18, Stretch = Stretch.None, Stroke = CheckBrush, StrokeThickness = 2.2, VerticalAlignment = VerticalAlignment.Center,
@@ -311,8 +378,8 @@ internal sealed class MixerPanel : Border
             });
         var name = new TextBlock
         {
-            Text = d.Name, FontSize = 17, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center,
-            Foreground = d.IsDefault ? TextBrush : Frozen(0xF4, 0xF7, 0xFB, 0xC0),
+            Text = text, FontSize = 17, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center,
+            Foreground = current ? TextBrush : Frozen(0xF4, 0xF7, 0xFB, 0xC0),
         };
         Grid.SetColumn(name, 1);
         grid.Children.Add(name);
@@ -320,7 +387,7 @@ internal sealed class MixerPanel : Border
         var row = new Border
         {
             Child = grid, Height = 40, CornerRadius = new CornerRadius(10), Padding = new Thickness(10, 0, 10, 0),
-            Background = Brushes.Transparent, Cursor = d.IsDefault ? Cursors.Arrow : Cursors.Hand,
+            Background = Brushes.Transparent, Cursor = current ? Cursors.Arrow : Cursors.Hand,
         };
         row.MouseEnter += (_, _) => row.Background = HoverBrush;
         row.MouseLeave += (_, _) => row.Background = Brushes.Transparent;
@@ -328,8 +395,7 @@ internal sealed class MixerPanel : Border
         row.MouseLeftButtonUp += (_, e) =>
         {
             e.Handled = true;
-            if (!d.IsDefault) AudioMixer.SetDefaultDevice(d.Id);
-            Load();  // 機器が変わるとアプリの音声も変わるので、一覧を読み直す（一覧は閉じる）
+            choose();
         };
         return row;
     }
@@ -453,6 +519,167 @@ internal sealed class MixerPanel : Border
                 };
             }
             return box;
+        }
+    }
+
+    /// <summary>
+    /// 「入力を聴く」の1行：アイコン・名前（下に鳴らす先 ▾）・音量のつまみ・数字・聴くのスイッチ。
+    /// 鳴らす先を押すと、行の下に出力機器の一覧（Targets）を出す。
+    /// </summary>
+    private sealed class InputRow
+    {
+        private static readonly Brush InputIconBrush = Freeze(new LinearGradientBrush(Color.FromRgb(0x6F, 0xD3, 0xA8), Color.FromRgb(0x2E, 0x8F, 0x79), 45));
+        private static readonly Brush SwitchOn = Frozen(0x6F, 0xD3, 0xA8);
+        private static readonly Brush SwitchOff = Frozen(0xFF, 0xFF, 0xFF, 0x29);
+
+        private static Brush Freeze(Brush b)
+        {
+            b.Freeze();
+            return b;
+        }
+
+        private readonly MixerPanel _panel;
+        private readonly TextBlock _value, _sub, _target;
+        private readonly Border _targetChip, _switch;
+        private readonly Ellipse _switchKnob;
+        private string? _shownTarget;
+        private readonly FrameworkElement _icon, _nameText;
+        public readonly Grid Root;
+        public readonly StackPanel Targets = new() { Visibility = Visibility.Collapsed, Margin = new Thickness(54, 0, 0, 6) };
+        public readonly VolumeSlider Slider;
+        public readonly InputEntry Entry;
+
+        public InputRow(MixerPanel panel, InputEntry entry)
+        {
+            _panel = panel;
+            Entry = entry;
+            Root = new Grid { Height = 60 };
+            foreach (var w in new[] { 40, 14, 170, 14, -1, 14, 52, 14, 50 })
+                Root.ColumnDefinitions.Add(new ColumnDefinition { Width = w < 0 ? new GridLength(1, GridUnitType.Star) : new GridLength(w) });
+
+            _icon = new Border
+            {
+                Width = 40, Height = 40, CornerRadius = new CornerRadius(10), VerticalAlignment = VerticalAlignment.Center, Background = InputIconBrush,
+                Child = new Path
+                {
+                    Width = 28, Height = 28, Stretch = Stretch.None, Stroke = TextBrush, StrokeThickness = 2,
+                    StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round, StrokeLineJoin = PenLineJoin.Round,
+                    Data = Geometry.Parse("M6,14 L13,14 M19,14 L22,14 M6,9.5 L6,18.5 M16,11 A3,3 0 1 1 16,17 A3,3 0 1 1 16,11"),
+                },
+            };
+            Add(_icon, 0);
+
+            // 名前の下：オフのときはつながっている先（Realtek など）、オンのときは鳴らす先「→ スピーカー ▾」
+            var name = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+            var nameText = new TextBlock { Text = entry.Name, FontSize = 19, TextTrimming = TextTrimming.CharacterEllipsis };
+            _nameText = nameText;
+            name.Children.Add(nameText);
+            _sub = new TextBlock { Text = entry.Sub, FontSize = 13, Foreground = SubBrush, TextTrimming = TextTrimming.CharacterEllipsis };
+            name.Children.Add(_sub);
+            _target = new TextBlock { FontSize = 13, Foreground = Frozen(0xF4, 0xF7, 0xFB, 0xC0), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 130 };
+            var chip = new StackPanel { Orientation = Orientation.Horizontal };
+            chip.Children.Add(new TextBlock { Text = "→ ", FontSize = 13, Foreground = SubBrush });
+            chip.Children.Add(_target);
+            chip.Children.Add(new Path
+            {
+                Width = 10, Height = 10, Stretch = Stretch.None, Stroke = SubBrush, StrokeThickness = 1.4, Margin = new Thickness(6, 1, 0, 0),
+                StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round, StrokeLineJoin = PenLineJoin.Round,
+                Data = Geometry.Parse("M2,3.5 L5,6.5 L8,3.5"), VerticalAlignment = VerticalAlignment.Center,
+            });
+            _targetChip = new Border
+            {
+                Child = chip, CornerRadius = new CornerRadius(7), Padding = new Thickness(6, 1, 6, 2), Margin = new Thickness(-6, 2, 0, 0),
+                Background = ChipBrush, Cursor = Cursors.Hand, ToolTip = "聴く音を鳴らす出力機器を変える", HorizontalAlignment = HorizontalAlignment.Left,
+            };
+            _targetChip.MouseEnter += (_, _) => _targetChip.Background = HoverBrush;
+            _targetChip.MouseLeave += (_, _) => _targetChip.Background = ChipBrush;
+            _targetChip.MouseLeftButtonDown += (_, e) => e.Handled = true;
+            _targetChip.MouseLeftButtonUp += (_, e) => { e.Handled = true; ToggleTargets(); };
+            name.Children.Add(_targetChip);
+            Add(name, 2);
+
+            Slider = new VolumeSlider { Fill = AppFill };
+            Slider.Changed += level => _panel._inputs.SetLevel(Entry, level);
+            Add(Slider, 4);
+
+            _value = new TextBlock { FontSize = 21, FontFamily = NumFont, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center };
+            Add(_value, 6);
+
+            _switchKnob = new Ellipse { Width = 22, Height = 22, Fill = TextBrush, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Center };
+            _switch = new Border
+            {
+                Width = 50, Height = 28, CornerRadius = new CornerRadius(14), Padding = new Thickness(3), Cursor = Cursors.Hand,
+                VerticalAlignment = VerticalAlignment.Center, Child = _switchKnob, ToolTip = "このデバイスを聴く（オン／オフ）",
+            };
+            _switch.MouseLeftButtonDown += (_, e) => e.Handled = true;
+            _switch.MouseLeftButtonUp += (_, e) =>
+            {
+                e.Handled = true;
+                _panel._inputs.SetListening(Entry, !Entry.Listening);
+                if (!Entry.Listening) Targets.Visibility = Visibility.Collapsed;
+                Update();
+            };
+            Add(_switch, 8);
+            Update();
+        }
+
+        public void Update()
+        {
+            bool on = Entry.Listening;
+            if (!Slider.Dragging) Slider.Value = Entry.Level;
+            Slider.Peak = Entry.Peak;
+            _value.Text = Math.Round(Entry.Level * 100).ToString("0");
+            _switch.Background = on ? SwitchOn : SwitchOff;
+            _switchKnob.Margin = new Thickness(on ? 22 : 0, 0, 0, 0);
+            _switchKnob.Opacity = on ? 1 : 0.7;
+            _sub.Visibility = on ? Visibility.Collapsed : Visibility.Visible;
+            _targetChip.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            if (on && _shownTarget != Entry.Target)
+            {
+                _shownTarget = Entry.Target;  // 機器の一覧を読むのは鳴らす先が変わったときだけ（Update は1秒20回）
+                _target.Text = TargetName();
+            }
+            double dim = on ? 1 : 0.55;
+            _icon.Opacity = dim;
+            _nameText.Opacity = dim;
+        }
+
+        /// <summary>鳴らす先の短い名前（「スピーカー (Realtek(R) Audio)」なら「スピーカー」）。</summary>
+        private string TargetName()
+        {
+            if (Entry.Target.Length == 0) return "既定の再生デバイス";
+            var d = _panel._mixer.Devices().FirstOrDefault(x => string.Equals(x.Id, Entry.Target, StringComparison.OrdinalIgnoreCase));
+            return d != null ? AudioInputs.Split(d.Name).Name : "（見つからない機器）";
+        }
+
+        private void ToggleTargets()
+        {
+            if (Targets.Visibility == Visibility.Visible)
+            {
+                Targets.Visibility = Visibility.Collapsed;
+                return;
+            }
+            Targets.Children.Clear();
+            Targets.Children.Add(ChoiceRow("既定の再生デバイス", Entry.Target.Length == 0, () => Choose("")));
+            foreach (var d in _panel._mixer.Devices())
+            {
+                string id = d.Id;
+                Targets.Children.Add(ChoiceRow(d.Name, string.Equals(id, Entry.Target, StringComparison.OrdinalIgnoreCase), () => Choose(id)));
+            }
+            Targets.Visibility = Visibility.Visible;
+        }
+
+        private void Choose(string id)
+        {
+            if (!string.Equals(id, Entry.Target, StringComparison.OrdinalIgnoreCase)) _panel._inputs.SetTarget(Entry, id);
+            Targets.Visibility = Visibility.Collapsed;
+            Update();
+        }
+
+        private void Add(UIElement e, int column)
+        {
+            Grid.SetColumn(e, column);
+            Root.Children.Add(e);
         }
     }
 }

@@ -23,13 +23,14 @@
 .meter{position:relative;flex:1;height:22px}
 .meter .tr{top:10px;height:3px;background:rgba(255,255,255,.10)}
 .meter .lv{top:10px;opacity:.9}
-.dest{display:flex;align-items:center;gap:6px;height:34px;padding:0 10px;border-radius:9px;background:rgba(255,255,255,.06);font-size:15px;color:rgba(244,247,251,.75);white-space:nowrap}
+.dest{display:table;margin:3px 0 0 -6px;padding:1px 6px 2px;border-radius:7px;background:rgba(255,255,255,.06);font-size:13px;color:rgba(244,247,251,.75)}
+#in:not(.off) .subdev{display:none}
+.off .dest{display:none}
 .dest .ar{color:rgba(244,247,251,.45)}
 .sw{position:relative;width:50px;height:28px;border-radius:14px;background:rgba(255,255,255,.16);flex:none}
 .sw:after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#F4F7FB;opacity:.7}
 .sw.on{background:#6FD3A8}
 .sw.on:after{left:25px;opacity:1}
-.off .dest{visibility:hidden}
 .off .app,.off .name{opacity:.55}
 .note{position:absolute;left:96px;top:120px;width:860px;padding:22px 28px;border-radius:20px;background:rgba(16,18,31,.92);border:1px solid rgba(255,255,255,.14);color:#F4F7FB;font:18px/1.7 'Yu Gothic UI',sans-serif}
 .note b{color:#6FD3A8}
@@ -57,10 +58,9 @@
   <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
 
  <div class="sec"><svg class="ic" width="18" height="18" viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>入力を聴く<small>Windows の「このデバイスを聴く」と同じ</small></div>
- <div class="row" id="in"><div class="app c-in"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M5 12h6"/><circle cx="14" cy="12" r="3"/><path d="M17 12h2"/><path d="M5 8v8"/></svg></div>
-  <div class="name">ライン入力<small>Realtek Audio</small></div>
-  <div class="meter"><div class="tr"></div><div class="lv" style="width:58%"></div></div>
-  <div class="dest"><span class="ar">→</span>スピーカー<span class="ar">▾</span></div>
+ <div class="row" id="in" style="height:60px"><div class="app c-in"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M5 12h6"/><circle cx="14" cy="12" r="3"/><path d="M17 12h2"/><path d="M5 8v8"/></svg></div>
+  <div class="name" style="width:170px">ライン入力<small class="subdev">Realtek Audio</small><span class="dest">→ スピーカー ▾</span></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:80%"></div><div class="lv" style="width:58%"></div><div class="kn" style="left:80%"></div></div><div class="val">80</div>
   <div class="sw on" id="sw"></div></div>
 
  <div class="foot">ほかの場所をクリックするか、10秒さわらないと閉じる</div>
@@ -70,8 +70,9 @@
  <b>追加するもの</b>（パネルの一番下）
  <ul style="margin:6px 0 0;padding-left:1.2em">
   <li>右のスイッチで「このデバイスを聴く」をオン／オフ（緑＝オン）</li>
-  <li>「→ スピーカー ▾」で鳴らす先の出力機器を選べる（オフのときは隠す）</li>
-  <li>緑の線は今入ってきている音の大きさ。オフでも動くので、信号が来ているか分かる</li>
+  <li>名前の下の「→ スピーカー ▾」で鳴らす先の出力機器を選べる（オフのときは機器名を出す）</li>
+  <li>つまみで入力の音量（Windows の録音機器の音量と同じ）</li>
+  <li>つまみの下の緑の線は今入ってきている音の大きさ。オフでも動く</li>
   <li>録音機器（有効なもの）を並べる。今はライン入力の1行だけ</li>
  </ul>
 </div>

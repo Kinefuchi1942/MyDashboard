@@ -45,6 +45,7 @@
   - AuroraTheme：オーロラの時間帯テーマ（朝・昼は明るい背景＋濃い文字、夕方は紫と橙、夜はほぼ黒で約1割暗く）。境目は日の出／10時／日の入り1時間前／日の入り1時間後で、前後15分で背景を混ぜ、文字色は中間で3秒かけて切り替える。オーロラの文字・カードの色は DynamicResource（AText・AT85〜AT40・AGlass・ALine など）で、コードがブラシの色を変える。明るいテーマでは CPU #0B8494、GPU #5A52D0 の濃い版を使う
   - レイアウト切替（Controls/LayoutPicker.cs、2026-11-02 追加、モックアップ `mockups/mode-switch-B.png`）：標準・計器盤・オーロラのアイコンを縦に3つ。いまのレイアウトを枠で囲み、ほかは薄く（テーマ切替と同じ見せ方）。押すと ViewContext.SwitchLayout → MainWindow.SwitchLayout。オーロラはテーマ切替の StackPanel の中（拡張表示ではテーマ切替ごと隠れる）で、色は UseAuroraColors でテーマのブラシをコードから参照。計器盤は Canvas の右14・上318に常時、標準は空きがないので同じ位置にマウスが画面の上にあるときだけ出す
   - 音量ミキサー（Controls/MixerButton.cs、2026-11-03 追加、モックアップ `mockups/mixer-pop-*.png`）：レイアウト切替の下（上506、オーロラは StackPanel で 16 下）のスピーカーのボタン。押すと左に MixerPanel を Popup で出す。Popup は別のウィンドウなので WebView2（Twitch・YouTube）の上にも出せる。中身は Info/AudioMixer（既定の出力機器の IAudioEndpointVolume と、セッションをプロセス名ごとにまとめた ISimpleAudioVolume・IAudioMeterInformation。自分の子孫の msedgewebview2 は「このダッシュボード」にまとめる）。開いている間だけ 1秒20回で音の大きさ、1秒ごとに一覧を読み直す。ほかの場所のクリック（Window.PreviewMouseDown）か10秒さわらないと閉じる。パネルの色はテーマによらず暗色固定。右上の「出力：機器名 ▾」で出力機器の一覧（EnumAudioEndpoints）を開き、選ぶと AudioMixer.SetDefaultDevice が非公開の IPolicyConfig.SetDefaultEndpoint で3つの役割（コンソール・マルチメディア・通信）すべての既定を切り替える
+  - 入力を聴く（2026-11-18 追加、モックアップ `mockups/mixer-listen-*.png`）：パネルの一番下に有効な録音機器を4つまで並べる（Info/AudioInputs、行は MixerPanel.InputRow）。Windows の「このデバイスを聴く」は録音機器の設定値 `{24DBB0FC-9311-4B3D-9CF0-18FF155639D4},1`（VT_BOOL）と `,0`（鳴らす先の出力機器の ID、空なら既定）。読むのはプロパティストア、書くのは IPolicyConfig.SetPropertyValue（直接書くと音声エンジンに伝わらない。管理者権限が要る）。鳴らす先を変えたときはオンなら切って入れ直す。入力機器の音量メーターはだれかが録音していないと 0 なので、パネルを開いている間だけ IAudioClient で共有モードの録音を開始しておく（中身は読まない。閉じると Stop・解放）。操作の結果は audio-diagnostics.txt。実機未確認（2026-11-18 時点）
   - サイドバーの左右（settings.json の sidebarSide、2026-11-03 追加）：left なら各レイアウトのコンストラクタでレイアウト切替・音量ミキサーを左14に移し（オーロラはテーマ切替の StackPanel ごと）、MixerButton.OpenToRight でパネルをボタンの右に出す。設定変更時はレイアウトを作り直すので再起動は不要。標準はルートの Grid の Background=Transparent で、カードの間の隙間でもマウスを拾う
   - テーマ切替（AuroraView の ThemePicker）：メディアカードの右、画面右端に朝・昼・夕方・夜の四角を縦に並べる（中は各テーマの空の色を XAML に直書き）。クリックで settings.json の auroraTheme をそのテーマに固定して保存、固定中のものを再クリックで auto に戻す。いまの配色の四角を文字色の枠で囲む。モックアップは `mockups/aurora-theme-icons.png`
   - ViewSupport：共通の色・書式（Fmt）、ニュースの順送り（NewsRotator / NewsTicker）、演出（Fx）
@@ -86,6 +87,7 @@ Info/
   MediaService.cs         再生中の曲（Windows のメディア情報）
   AppVolume.cs            再生中カードの音量（音量ミキサーのアプリごとの音量）
   AudioMixer.cs           音量ミキサーのパネルの中身（既定の出力機器の全体の音量・アプリごとの音量・今の音の大きさ）
+  AudioInputs.cs          音量ミキサーの「入力を聴く」（入力機器の音量・今の音の大きさ・「このデバイスを聴く」のオン／オフと鳴らす先）
   CoreAudio.cs            Windows の音声（Core Audio）の COM 定義。AppVolume と AudioMixer で共用
   TwitchService.cs        Twitch のフォロー中の配信（Helix API）とログイン情報
   YouTubeService.cs       YouTube のチャンネルの新着と配信中、動画の検索（公開ページから読む）
