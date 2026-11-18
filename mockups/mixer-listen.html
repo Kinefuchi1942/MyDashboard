@@ -1,0 +1,85 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="stylesheet" href="mode-switch.css"><link rel="stylesheet" href="mixer.css"><style>
+/* 音量ミキサーに「入力を聴く」（Windows の「このデバイスを聴く」）の段を足す案。?bg= で背景、?off=1 でオフの状態 */
+.panel{position:absolute;left:1196px;width:626px;padding:20px 24px 14px;border-radius:24px;background:#10121F;border:1px solid rgba(255,255,255,.16);box-shadow:0 20px 60px rgba(0,0,0,.6);color:#F4F7FB;font-family:'Yu Gothic UI',sans-serif}
+.panel .arrow{position:absolute;right:-9px;width:16px;height:16px;background:#10121F;border-right:1px solid rgba(255,255,255,.16);border-top:1px solid rgba(255,255,255,.16);transform:rotate(45deg)}
+.hd{display:flex;align-items:center;gap:10px;font-size:20px;color:rgba(244,247,251,.8);margin-bottom:8px}
+.hd .dev{margin-left:auto;font-size:15px;color:rgba(244,247,251,.45)}
+.row{display:flex;align-items:center;gap:14px;height:56px}
+.row.master{border-bottom:1px solid rgba(255,255,255,.10);margin-bottom:6px;height:62px}
+.name{width:150px;font-size:19px;line-height:1.1;white-space:nowrap}
+.name small{display:block;font-size:13px;color:rgba(244,247,251,.45)}
+.sl{position:relative;flex:1;height:22px}
+.tr{position:absolute;left:0;right:0;top:9px;height:4px;border-radius:2px;background:rgba(255,255,255,.14)}
+.fi{position:absolute;left:0;top:9px;height:4px;border-radius:2px;background:#8E9CFF}
+.kn{position:absolute;top:3px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#F4F7FB}
+.lv{position:absolute;left:0;top:18px;height:3px;border-radius:2px;background:#6FD3A8;opacity:.75}
+.val{width:44px;text-align:right;font:21px Bahnschrift,sans-serif}
+.spk{width:26px;color:rgba(244,247,251,.75)}
+.foot{font-size:14px;color:rgba(244,247,251,.4);margin-top:6px;text-align:right}
+/* 新しい段 */
+.sec{display:flex;align-items:center;gap:10px;margin:10px 0 2px;padding-top:12px;border-top:1px solid rgba(255,255,255,.10);font-size:15px;color:rgba(244,247,251,.55)}
+.sec small{margin-left:auto;font-size:13px;color:rgba(244,247,251,.35)}
+.c-in{background:linear-gradient(135deg,#6FD3A8,#2E8F79)}
+.meter{position:relative;flex:1;height:22px}
+.meter .tr{top:10px;height:3px;background:rgba(255,255,255,.10)}
+.meter .lv{top:10px;opacity:.9}
+.dest{display:flex;align-items:center;gap:6px;height:34px;padding:0 10px;border-radius:9px;background:rgba(255,255,255,.06);font-size:15px;color:rgba(244,247,251,.75);white-space:nowrap}
+.dest .ar{color:rgba(244,247,251,.45)}
+.sw{position:relative;width:50px;height:28px;border-radius:14px;background:rgba(255,255,255,.16);flex:none}
+.sw:after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#F4F7FB;opacity:.7}
+.sw.on{background:#6FD3A8}
+.sw.on:after{left:25px;opacity:1}
+.off .dest{visibility:hidden}
+.off .app,.off .name{opacity:.55}
+.note{position:absolute;left:96px;top:120px;width:860px;padding:22px 28px;border-radius:20px;background:rgba(16,18,31,.92);border:1px solid rgba(255,255,255,.14);color:#F4F7FB;font:18px/1.7 'Yu Gothic UI',sans-serif}
+.note b{color:#6FD3A8}
+.note li{margin:2px 0}
+</style></head><body>
+<div class="cap"><b>入力を聴く（<span class="lay"></span>）</b>音量ミキサーの下に「入力を聴く」の段を追加</div>
+
+<div class="panel" id="p"><div class="arrow" id="ar"></div>
+ <div class="hd"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>音量ミキサー<span class="dev">出力：スピーカー（Realtek Audio） ▾</span></div>
+
+ <div class="row master"><div class="app c-all"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div><div class="name">全体<small>PC 全体の音量</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:72%;background:#F4F7FB"></div><div class="lv" style="width:55%"></div><div class="kn" style="left:72%"></div></div><div class="val">72</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+
+ <div class="row"><div class="app c-sp">S</div><div class="name">Spotify<small>再生中</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:62%"></div><div class="lv" style="width:48%"></div><div class="kn" style="left:62%"></div></div><div class="val">62</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+
+ <div class="row"><div class="app c-dc">D</div><div class="name">Discord<small>通話中</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:85%"></div><div class="lv" style="width:20%"></div><div class="kn" style="left:85%"></div></div><div class="val">85</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+
+ <div class="row"><div class="app c-md">M</div><div class="name">ダッシュボード<small>Twitch・YouTube</small></div>
+  <div class="sl"><div class="tr"></div><div class="fi" style="width:50%"></div><div class="kn" style="left:50%"></div></div><div class="val">50</div>
+  <svg class="ic spk" width="24" height="24" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></div>
+
+ <div class="sec"><svg class="ic" width="18" height="18" viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>入力を聴く<small>Windows の「このデバイスを聴く」と同じ</small></div>
+ <div class="row" id="in"><div class="app c-in"><svg class="ic" width="22" height="22" viewBox="0 0 24 24"><path d="M5 12h6"/><circle cx="14" cy="12" r="3"/><path d="M17 12h2"/><path d="M5 8v8"/></svg></div>
+  <div class="name">ライン入力<small>Realtek Audio</small></div>
+  <div class="meter"><div class="tr"></div><div class="lv" style="width:58%"></div></div>
+  <div class="dest"><span class="ar">→</span>スピーカー<span class="ar">▾</span></div>
+  <div class="sw on" id="sw"></div></div>
+
+ <div class="foot">ほかの場所をクリックするか、10秒さわらないと閉じる</div>
+</div>
+
+<div class="note">
+ <b>追加するもの</b>（パネルの一番下）
+ <ul style="margin:6px 0 0;padding-left:1.2em">
+  <li>右のスイッチで「このデバイスを聴く」をオン／オフ（緑＝オン）</li>
+  <li>「→ スピーカー ▾」で鳴らす先の出力機器を選べる（オフのときは隠す）</li>
+  <li>緑の線は今入ってきている音の大きさ。オフでも動くので、信号が来ているか分かる</li>
+  <li>録音機器（有効なもの）を並べる。今はライン入力の1行だけ</li>
+ </ul>
+</div>
+<script src="mixer-common.js"></script>
+<script>
+if (new URLSearchParams(location.search).get('off')) { document.getElementById('in').classList.add('off'); document.getElementById('sw').classList.remove('on'); }
+const p = document.getElementById('p'), h = p.offsetHeight;
+p.style.top = (540 - h / 2) + 'px';             // スピーカーのボタン（中心 y540）に合わせる
+document.getElementById('ar').style.top = (h / 2 - 9) + 'px';
+</script>
+</body></html>
